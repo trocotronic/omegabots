@@ -1,0 +1,398 @@
+[modulo]
+version=1.0.5
+[fin]
+
+on 1:start: {
+  if (!$_conf(interface,ask)) dialog -m interface interface 
+  else carga
+}
+on 1:exit:if ($window(@is)) { window -c @is } | dll -u system\dlls\moo.dll | .timers off
+alias titlebar { dll system\dlls\mircustom.dll Titlebar -m $1- }
+alias carga {
+  ;if (S_OK * !iswm $dll(system\dlls\kmb.dll,KillMenuBar,.)) { var %p = $input(Archivos corruptos. Reinstale el producto.,oh,Error) | exit | halt }
+  ;if ($version != 6.03 || $lof($mircexe) != 1796096) { var %p = $input(Archivos corruptos. Reinstale el producto.,oh,Error) | .timerEXIT 1 3 exit | halt }
+  var %i = 1 | while ($hget(+bots,%i).data) { k $ifmatch $_.tok(QUIT) :Descargando servicios... | inc %i } | sockclose ircd
+  titlebar OmEGa BoTs v $+ $_.ver - Desarrollados por STeaL.  Basados en Omega Bots de Trocotronic | dll system\dlls\mircustom.dll SetIcon -m system\icons\omega.ico
+  if (!$isdir(nicks\)) mkdir nicks\ | if (!$isdir(aways\)) mkdir aways\ | if (!$isdir(canales\)) mkdir canales\ | if (!$isdir(creg\)) mkdir creg\ | if (!$isdir(tmp\)) mkdir tmp\
+  dll system\dlls\mircustom.dll Titlebar -w $window(status window).hwnd Ventana principal | dll system\dlls\mircustom.dll SetIcon -w $window(status window).hwnd system\icons\shutdown.ico
+  tfree nicks | tfree chans | hfree +modulos +roots _* +popups +residentes | hmake +ips | hdel +stats ircops
+  var %i = $ini(conf\main.conf,roots,0),%g = $round($calc(100/%i),0), %h = 1
+  p Volcando roots...
+  while (%i) { hadd -m +roots $ini(conf\main.conf,roots,%i) $_conf(roots,$ini(conf\main.conf,roots,%i)) | dec %i | inc %h %g | p %h }
+  if (m !isincs $1) {
+    var %i = $ini(conf\main.conf,modulos,0), %g = $round($calc(100/%i),0), %h = 1
+    p %h Cargando módulos...
+    while (%i) { 
+      m.cm $_conf(modulos,$ini(conf\main.conf,modulos,%i)) NOT_STOP
+      dec %i | inc %h %g | p %h
+  } }
+  var %i = 1, %g = $round($calc(100/$lines(popups.ogp)),0), %h = 1
+  p %h Cargando menús... | hfree +popups | hfree +pop_cords
+  while (%i <= $lines(popups.ogp)) {
+    hadd -m +popups $+(%i,_,$replace($gettok($gettok($gettok($read(popups.ogp,%i),1-,46),1,58),$iif($chr(123) isin $read(popups.ogp,%i),2,1),125),$chr(32),$chr(160))) $gettok($read(popups.ogp,%i),2,58)
+    inc %i
+  }
+  var %i = $findfile(nicks\,*,0), %g = $round($calc(100/%i),0), %h = 1
+  p %h Volcando nicks...
+  while (%i) { 
+    var %n = $nopath($findfile(nicks\,*,%i))
+    hmake $_.32(%n).uncod | hload -b $_.32(%n).uncod $findfile(nicks\,*,%i) 
+    dec %i | inc %h %g | p %h 
+  }
+  var %i = $findfile(creg\,#*,0), %g = $round($calc(100/%i),0), %h = 1
+  p %h Volcando pre-canales...
+  while (%i) { hmake + $+ $_.32($nopath($findfile(creg\,#*,%i))).uncod | hload -b + $+ $_.32($nopath($findfile(creg\,#*,%i))).uncod $findfile(creg\,#*,%i) | dec %i | inc %h %g | p %h }
+  var %i = $findfile(canales\,#*,0), %g = $round($calc(100/%i),0), %h = 1
+  p %h Volcando canales...
+  while (%i) { hmake $_.32($nopath($findfile(canales\,#*,%i))).uncod | hload -b $_.32($nopath($findfile(canales\,#*,%i))).uncod $findfile(canales\,#*,%i) | dec %i | inc %h %g | p %h }
+  p 100 | p STOP Finalizado.
+  hmake +stats | hload -b +stats conf\stats.db
+  hmake +bdds | hload -b +bdds conf\bdd.db
+  if ($_conf(misc,cpanel)) { p.cw.main }
+  if ($_conf(misc,cis)) { p.cw.is }
+  if ($_reg(ID)) { stats | .timerSTATS 0 600 stats }
+  if ($_conf(mirrors,auto)) { p.cw.main | p.fw.main 10 1 }
+  if ($_conf(sock,auto)) { sockopen ircd $_conf(conex,ip) $_conf(conex,port) }
+  if ($_conf(misc,motd)) { motd }
+  if ($_conf(misc,minimizar)) { .showmirc -t }
+}
+alias _id {
+  var %g = $1 | goto %g
+  :boxscan | return $iif($_interface == dgui,107,926) 
+  :butscanoff | return $iif($_interface == dgui,109,938)
+  :butscanon | return $iif($_interface == dgui,108,937)
+  :boxact | return $iif($_interface == dgui,110,1004)
+  :progress | return $iif($_interface == dgui,120,1006)
+  :butact | return $iif($_interface == dgui,111,1005)
+  :listbots | return $iif($_interface == dgui,61,402)
+  :listbotsext | return $iif($_interface == dgui,84,603)
+  :%g | return
+}
+alias _interface return $iif($_conf(interface,interface) == dgui,dgui,dlg)
+alias scan { 
+  if (%w.main.scan) { did -r principal $_id(boxscan) | p 0 Scaneando máquina %w.main.host | did -a pb 1 0 0 $calc(%W.main.to - %w.main.from) | unset %w.main.scan }
+  inc %w.main.from | did -a pb 1 Delta 1 | .timerscan $+ %w.main.from -m 1 1 scan | sockopen scan $+ %w.main.from %w.main.host %w.main.from 
+}
+alias ruta return $readini(tmp/rutas,rutas,$1)
+on 1:sockopen:scan*: {
+  if ($sock($sockname).port == %w.main.to) { 
+    sockclose $sockname | p STOP Scan finalizado. | .timerscan* off 
+    did -a principal $_id(boxscan) ::Scan finalizado:: | did -b principal $_id(butscanoff) | did -e principal $_id(butscanon) | return 
+  }
+  if ($sockerr) { sockclose $sockname }
+  else { did -a principal $_id(boxscan) ::Puerto abierto: $sock($sockname).port $+ :: $crlf }
+
+}
+alias s.upd { 
+  if ($sock(upd)) { sockclose upd } 
+  tokenize 35 $_conf(mirrors,$_conf(mirrors,def))
+  sock upd $1 $2 $1- | i.upd 1 Estableciendo conexión...
+}
+on 1:sockopen:upd: {
+  did -r principal $_id(boxact) | did -b principal $_id(butact)
+  if ($sockerr) { i.upd 3 No es posible conectar. Pruebe con otro mirror. | return }
+  tokenize 9 $sock($sockname).mark
+  sockwrite -nt $sockname GET /omega/omega.txt HTTP/1.1
+  sockwrite -nt $sockname Accept: *.*, */*
+  sockwrite -nt $sockname User-Agent: OmEGa BoTs
+  sockwrite -nt $sockname Host: $1
+  sockwrite -nt $sockname Pragma: no-cache
+  sockwrite -nt $sockname Cache-Control: no-cache
+  sockwrite -nt $sockname Connection: close
+  sockwrite -nt $sockname $crlf
+  i.upd 1 Conectado. Esperando respuesta...
+}
+on 1:sockread:upd: {
+  var %s.upd | sockread %s.upd
+  ;if (%s.upd) echo -s 4UPD.RECIBE1 %s.upd
+  if ($dialog(debug)) { did -a debug 2 text +m %s.upd $+ $lf }
+  if ($left(%s.upd,1) != $chr(35)) { return }
+  tokenize 35 %s.upd
+  if ($readini($9 $+ $8,modulo,version) != $3) { did -a principal $_id(boxact) $+($1,$chr(9),$2,$chr(9),0 0 0 $3,$chr(9),$4,$chr(9),0 0 0 $5,$chr(9),$asctime($6),$chr(9),$7,$chr(9),$8) }
+  else %w.main.without = 1
+  writeini tmp/rutas rutas $8 $9
+  i.upd 1 Respuesta recibida. Procesando datos...
+}
+on 1:sockclose:upd: { did -a principal $_id(progress) 100 | i.upd 1 Lista completa. | if (%w.main.without) { i.upd 1 No hay actualizaciones. | unset %w.main.without } }
+alias s.upd.f { 
+  if ($sock(updf)) { sockclose updf } 
+  tokenize 35 $_conf(mirrors,$_conf(mirrors,def))
+  if (!%w.upd.f) { 
+    var %t = 2 | while ($did(principal,$_id(boxact),%t)) { if ($gettok($ifmatch,5,32) == 2) { inc %w.upd.t } | inc %t }
+    var %t = $findfile(tmp\,*.bak,0) | while (%t) { .remove $findfile(tmp\,*.bak,%t) | dec %t }
+    set %w.upd.f 2 | did -a principal $_id(progress) 0 0 %w.upd.t
+  } 
+  while (%w.upd.f <= $did(principal,$_id(boxact)).lines) {
+    if ($gettok($did(principal,$_id(boxact),%w.upd.f),5,32) == 2) {
+      sock updf $1 $2 $1- $gettok($did(principal,$_id(boxact),%w.upd.f),-1,32) | i.upd 1 Estableciendo conexión... | break
+    }
+    else { inc %w.upd.f }
+  } 
+  if (%w.upd.f > $did(principal,$_id(boxact)).lines) { 
+
+    did -a principal $_id(progress) delta 1 | i.upd 1 Descarga completada.
+    var %i = $findfile(tmp\,*.bak,0) | while (%i) {
+      var %f = $gettok($nopath($findfile(tmp\,*.bak,%i)),1- $+ $calc($numtok($nopath($findfile(tmp\,*.bak,%i)),46)-1),46)
+      i.upd 1 Actualizando fichero %f $+ ...
+      .unload -rs %f | if ($findfile($mircdir,%f,1)) { .remove $ifmatch } | .rename $findfile(tmp\,*.bak,%i) $ruta(%f) $+ %f 
+      if ($ruta(%f)) { .load -rs $ruta(%f) $+ %f }
+      did -d principal $_id(boxact) $didwm(principal,$_id(boxact),* $+ %f,1) 
+      dec %i
+    }
+    i.upd 1 Actualización de archivos realizada con éxito. | unset %w.upd* 
+    did -e principal $_id(butact) | s.upd
+} }
+on 1:sockopen:updf: {
+  did -b principal $_id(butact)
+  if ($sockerr) { i.upd 3 No es posible conectar. Pruebe con otro mirror. | unset %w.upd* | did -e principal $_id(butact) | return }
+  i.upd 1 Conectado. Esperando respuesta... 
+  tokenize 9 $sock($sockname).mark
+  if (!%s.updf.loc) { sockwrite -nt $sockname GET $+($3,/descargas.php?action=omega&file=,$4) HTTP/1.1 }
+  else { unset %s.updf.loc | sockwrite -nt $sockname GET $+($3,$5) HTTP/1.1 }
+  sockwrite -nt $sockname Accept: *.* , */*
+  sockwrite -nt $sockname User-Agent: OmEGa BoTs
+  sockwrite -nt $sockname Range: bytes=0-
+  sockwrite -nt $sockname Host: $1
+  sockwrite -nt $sockname Pragma: no-cache
+  sockwrite -nt $sockname Cache-Control: no-cache
+  sockwrite -nt $sockname Connection: close
+  sockwrite -nt $sockname $crlf
+}
+on 1:sockread:updf: {
+  tokenize 9 $sock($sockname).mark
+  i.upd 1 Descargando archivo...
+  if (!$6) {
+    var %s.updf | sockread %s.updf
+   ; if (%s.updf) echo -s 4RECIBE.UPDF1 $ifmatch
+    if ($dialog(debug)) { did -a debug 2 text +m %s.updf $+ $lf }
+    if (!%s.updf) { sockmark $sockname $sock($sockname).mark $+ 1 }
+    if (Location:* iswm %s.updf) { sockclose $sockname | set %s.updf.loc 1 | .timer -m 1 1 sock updf $1 $2 $1- $gettok(%s.updf,2,32) }
+  }
+  else {
+    sockread &updf
+    while ($sockbr) {
+      bwrite $+(tmp\,$nopath($5),.bak) -1 -1 &updf
+      sockread &updf
+} } }
+on 1:sockclose:updf: { 
+  did -a principal $_id(progress) delta 1 | inc %w.upd.f 
+  .timer 1 1 s.upd.f 
+}
+alias _.path {
+  goto $1
+  :modulo | return modulos\ $+ $2
+}
+alias i.upd { 
+  if ($_interface == dlg) { d.e $1- | return }
+  drawrect -fr %w.main.name 4729385 1 213 220 400 40 
+  goto $1
+  :1 | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) $2- | return
+  :2 | drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) $2- | return
+  :3 | drawtext -or %w.main.name 255 "Verdana" 13 213 220 $chr(149) $2-
+}
+alias sock { sockopen $1 $2 $3 | sockmark $1 $_.tab($4-) }
+alias _.tab {
+  tokenize 32 $1-
+  var %i = 1, %t | while ($ [ $+ [ %i ] ]) { %t = %t $+ $ [ $+ [ %i ] ] $+ $chr(9) | inc %i } 
+  return %t
+}
+alias mail { 
+  k.debug Iniciando servicio de emails.
+  if ($_conf(smtp,web)) { sock mail www.rallados.net 80 $1 $2- }
+  else { sock mail $_conf(smtp,server) 25 $1 $2- }
+}
+on 1:sockopen:mail: { 
+  if ($sockerr) { k.debug El envío de emails no responde. | return } 
+  tokenize 9 $sock($sockname).mark
+  if ($_conf(smtp,web)) {
+    var %mail = $+(from=,$_conf(smtp,mail),&to=,$1,&datafrom=,$_conf(conex,red),&subject=,$iif($numtok($2-,1) > 1,$gettok($2-,1,1)),&data=,$gettok($2-,2,1),&html=0)
+    sockwrite -nt $sockname POST /mail.php HTTP/1.0
+    sockwrite -nt $sockname Accept: application/vnd.ms-excel, application/vnd.ms-powerpoint, image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/msword, */*
+    sockwrite -nt $sockname Referer: http://www.rallados.net/mail.php
+    sockwrite -nt $sockname Accept-Language: es
+    sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+    sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; mjb)
+    sockwrite -nt $sockname Host: www.rallados.net
+    sockwrite -nt $sockname Content-Length: $len(%mail)
+    sockwrite -nt $sockname $crlf
+    sockwrite -nt $sockname %mail
+    sockwrite -nt $sockname $crlf
+} }
+on 1:sockread:mail: {
+  if ($_conf(smtp,web)) return
+  tokenize 9 $sock($sockname).mark
+  var %s.mail | sockread %s.mail
+  if ($dialog(debug)) { did -a debug 3 text +m %s.mail $+ $lf }
+  if (220* iswm %s.mail) { sockwrite -nt $sockname $iif($_conf(smtp,login),EHLO,HELO) OmEGa }
+  if (250 AUTH* iswm %s.mail) { sockwrite -nt $sockname AUTH LOGIN }
+  if (334* iswm %s.mail && user* iswm $decode($gettok(%s.mail,2,32),m)) { sockwrite -nt $sockname $encode($_conf(smtp,login),m) }
+  if (334* iswm %s.mail && pass* iswm $decode($gettok(%s.mail,2,32),m)) { sockwrite -nt $sockname $encode($_conf(smtp,pass),m) }
+  if (235* iswm %s.mail) {
+    sockwrite -nt $sockname MAIL FROM: $+(<,$_conf(smtp,mail),>) 
+    sockwrite -nt $sockname RCPT TO: $+(<,$1,>)
+    sockwrite -nt $sockname DATA
+    sockwrite -nt $sockname From: $+(",$_conf(conex,red)," <,$_conf(smtp,mail),>)
+    sockwrite -nt $sockname To: $+(<,$1,>)
+    sockwrite -nt $sockname Subject: $iif($numtok($2-,1) > 1,$gettok($2-,1,1))
+    sockwrite -nt $sockname Date: $asctime
+    sockwrite -nt $sockname $gettok($2-,2,1)
+    sockwrite -nt $sockname .
+    sockwrite -nt $sockname QUIT
+
+} }
+alias sms { k.debug Iniciando servicio de sms. | unset %sms | sock sms 62.81.235.8 80 $1 $2- }
+on 1:sockopen:sms: { 
+  tokenize 9 $sock($sockname).mark
+  if ($sockerr) { k $hget(+bots,smsserv) $_.tok(PRIVMSG) $2 :El servidor no responde. Pruebe en otro momento. | hdel +sms $1 | unset %sms* | ms.snd | return } 
+  if (!%sms.paso) {
+    sockwrite -nt $sockname POST http://www.amena.com/sms_login HTTP/1.0
+    sockwrite -nt $sockname Accept: application/vnd.ms-excel, application/vnd.ms-powerpoint, image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/msword, */*
+    sockwrite -nt $sockname Referer: http://www.amena.com/login_y_password/sms_login1.html
+    sockwrite -nt $sockname Accept-Language: es,es-mx;q=0.5
+    sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+    sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; mjb)
+    sockwrite -nt $sockname Host: www.amena.com
+    sockwrite -nt $sockname Content-Length: 68
+    sockwrite -nt $sockname Cookie: SESSION_GO=/sms_amena/refer.html; ref_cookie=ingles.amena.com:8881,ingles.amena.com,integracion.amena.com,eresmas.amena.com,am10.mad.eresmas.com,www.amena.com,deve.amena.com,tsamena.amena.com,amenaok.eresmas.com,mail.amenate.com,sms.amenate.com,www.amenapolis.com,amenapolisbs.com,beatles.cselt.it,finedelcookie; SESSION_USER_ID=651527874; ss=11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+    sockwrite -nt $sockname $crlf
+    sockwrite -nt $sockname usu=651527874&clave=202020&url=%2Flogin_y_password%2Fsms_login2.html
+    sockwrite -nt $sockname $crlf
+  }
+  else if (%sms.paso == 1) {
+    sockwrite -nt $sockname GET http://www.amena.com/smspremium/index.html?user=651527874 HTTP/1.0
+    sockwrite -nt $sockname Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+    sockwrite -nt $sockname Accept-Language: es
+    sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+    sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)
+    sockwrite -nt $sockname Connection: Keep-Alive
+    sockwrite -nt $sockname Pragma: no-cache
+    sockwrite -nt $sockname Host: www.amena.com
+    sockwrite -nt $sockname Cookie: SESSION_GO=/sms_amena/refer.html; ref_cookie=ingles.amena.com,integracion.amena.com,eresmas.amena.com,am10.mad.eresmas.com,www.amena.com,deve.amena.com,tsamena.amena.com,amenaok.eresmas.com,mail.amenate.com,sms.amenate.com,www.amenapolis.com,amenapolisbs.com,beatles.cselt.it,finedelcookie; SESSION_USER_ID=651527874; %sms.cookie
+    sockwrite -nt $sockname $crlf
+  }
+  else if (%sms.paso == 2) {
+    sockwrite -nt $sockname GET http://www.amena.com/smspremium/page.html?user=651527874 HTTP/1.0
+    sockwrite -nt $sockname Referer: http://www.amena.com/smspremium/index.html?user=651527874
+    sockwrite -nt $sockname Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+    sockwrite -nt $sockname Accept-Language: es
+    sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+    sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)
+    sockwrite -nt $sockname Connection: Keep-Alive
+    sockwrite -nt $sockname Pragma: no-cache
+    sockwrite -nt $sockname Host: www.amena.com
+    sockwrite -nt $sockname Cookie: %sms.netscape SESSION_GO=/sms_amena/refer.html; ref_cookie=ingles.amena.com,integracion.amena.com,eresmas.amena.com,am10.mad.eresmas.com,www.amena.com,deve.amena.com,tsamena.amena.com,amenaok.eresmas.com,mail.amenate.com,sms.amenate.com,www.amenapolis.com,amenapolisbs.com,beatles.cselt.it,finedelcookie; SESSION_USER_ID=651527874; %sms.cookie
+    sockwrite -nt $sockname $crlf
+  }
+  else if (%sms.paso == 3) { 
+    var %sms.cont = $+(from=651527874&cook=true&senddate=&smspremiumcount=15&smspremiumdata=12062&remindercount=20&reminderdata=12062&maxmessaggexday=20&input_numero=&numero=,$1,&msg=,$4-,+,$chr(40),$3,$chr(41),&largemessage=on&combocategoria=&comboabreviatura=ABREVIATURAS)
+    sockwrite -nt $sockname POST http://www.amena.com/smspremium/sendsms.html HTTP/1.0
+    sockwrite -nt $sockname Referer: http://www.amena.com/smspremium/page.html?user=651527874
+    sockwrite -nt $sockname Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+    sockwrite -nt $sockname Accept-Language: es
+    sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+    sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)
+    sockwrite -nt $sockname Connection: Keep-Alive
+    sockwrite -nt $sockname Pragma: no-cache
+    sockwrite -nt $sockname Host: www.amena.com
+    sockwrite -nt $sockname Content-Length: $len(%sms.cont)
+    sockwrite -nt $sockname Cookie: %sms.netscape SITESERVER=ID=d07a107ca3e0434245e8ae7ed7b21610; SESSION_GO=/opinion/privado/i2r/amena_opinion/enviar_sms; ref_cookie=ingles.amena.com,integracion.amena.com,eresmas.amena.com,am10.mad.eresmas.com,www.amena.com,deve.amena.com,tsamena.amena.com,amenaok.eresmas.com,mail.amenate.com,sms.amenate.com,www.amenapolis.com,amenapolisbs.com,beatles.cselt.it,finedelcookie; SESSION_USER_ID=651527874; %sms.cookie
+    sockwrite -nt $sockname $crlf
+    sockwrite -nt $sockname %sms.cont
+    sockwrite -nt $sockname $crlf
+  }
+}
+on 1:sockread:sms: {
+  tokenize 9 $sock($sockname).mark
+  var %sms, %sms.ip = $sock($sockname).ip, %sms.mark = $sock($sockname).mark | sockread %sms
+  if (%sms && $dialog(debug)) { did -a debug 4 text +m $left(%sms,900) $+ $lf }
+  if (!%sms.paso) {
+    if (Set-Cookie* iswm %sms) { set %sms.cookie $left($gettok(%sms,2,32),-1) }
+    if (Content* iswm %sms || Age* iswm %sms) { sockclose sms | inc %sms.paso | .timer -m 1 1 sock sms %sms.ip 80 %sms.mark | return }
+  }
+  if (%sms.paso == 1) {
+    if (Set-Cookie* iswm %sms) { set %sms.netscape $gettok(%sms,2,32) }
+    if (Content-len* iswm %sms || Age* iswm %sms) { sockclose sms | inc %sms.paso | .timer -m 1 1 sock sms %sms.ip 80 %sms.mark | return }
+    if (HTTP*50* iswm %sms) { sms.e $sockname %sms.mark }
+  }
+  if (%sms.paso == 2) {
+    if (Content-len* iswm %sms || Age* iswm %sms) { sockclose sms | inc %sms.paso | .timer -m 1 1 sock sms %sms.ip 80 %sms.mark | return }
+    if (HTTP*50* iswm %sms) { sms.e $sockname %sms.mark }
+  }
+  if (%sms.paso == 3) { 
+    if (<body bgcolor=white>* iswm %sms) { k $hget(+bots,smsserv) $_.tok(PRIVMSG) $3 :Mensaje mandado con éxito al teléfono $iif($2 isnum,12 $2,de12 $2)  | sockclose sms | unset %sms* | hdel +sms $1 | .timer 1 1 ms.snd }
+    if (HTTP*50* iswm %sms) { sms.e $sockname %sms.mark }
+  }
+}
+on 1:sockclose:sms: sms.e $sockname
+alias sms.e sockclose $$1 | tokenize 9 $2 | k $hget(+bots,smsserv) $_.tok(PRIVMSG) $3 :El servidor está saturado. Posiblemente no se haya mandado el sms. | hdel +sms $1 | unset %sms* | .timer 1 1 ms.snd
+alias stats { k $hget(+bots,operserv) STATS b | k.debug Iniciando servicio de estadísticas. | sock stats www.rallados.net 80 $1- }
+on 1:sockopen:stats: {
+  if ($sockerr) { k.debug El sistema de estadísticas no responde. | return }
+  var %stats = $+(login=,$_conf(login,login),&pass=,$_conf(login,pass),&nicks_actual=,$hget(+nicks,0).item,&nicks_max=,$hget(+stats,nicksmax),&nicks_migrados=,$hget(+stats,nicksdb),&nicks_reg=,$findfile(nicks\,*,0),&chans_actual=,$tget(chans,0),&chans_max=,$hget(+stats,chansmax),&chans_reg=,$findfile(canales\,#*,0),&chans_migrados=,$hget(+stats,chansdb),&ircops=,$numtok($hget(+stats,ircops),32),&inicio=,$sock(ircd).to,&estado=,$iif($sock(ircd),1,0),&refresco=10&refresh=,$ctime,&lastnick=,$hget(+stats,lastnick),&lastchan=,$hget(+stats,lastchan))
+  sockwrite -nt $sockname POST /descargas.php?action=update HTTP/1.0
+  sockwrite -nt $sockname Accept: application/vnd.ms-excel, application/vnd.ms-powerpoint, image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/msword, */*
+  sockwrite -nt $sockname Referer: http://www.rallados.net/descargas.php
+  sockwrite -nt $sockname Accept-Language: es
+  sockwrite -nt $sockname Content-Type: application/x-www-form-urlencoded
+  sockwrite -nt $sockname User-Agent: Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; mjb)
+  sockwrite -nt $sockname Host: www.rallados.net
+  sockwrite -nt $sockname Content-Length: $len(%stats)
+  sockwrite -nt $sockname $crlf
+  sockwrite -nt $sockname %stats
+  sockwrite -nt $sockname $crlf
+}
+alias motd { if ($dialog(motd)) { window -c @motd | dialog -k motd } | k.debug Iniciando servicio MOTD. | sock motd www.rallados.net 80 $1- }
+on 1:sockopen:motd: {
+  if ($sockerr) { k.debug El sistema MOTD no responde. | return }
+  sockwrite -nt $sockname GET /omega/motd.txt HTTP/1.1
+  sockwrite -nt $sockname Accept: *.*, */*
+  sockwrite -nt $sockname User-Agent: OmEGa BoTs
+  sockwrite -nt $sockname Host: www.rallados.net 
+  sockwrite -nt $sockname Range: bytes=0- 
+  sockwrite -nt $sockname Pragma: no-cache
+  sockwrite -nt $sockname Cache-Control: no-cache
+  sockwrite -nt $sockname Connection: close
+  sockwrite -nt $sockname $crlf
+}
+on 1:sockread:motd: {
+  var %motd | sockread %motd
+  if (%motd && $dialog(debug)) { did -a debug 2 text +m $left(%motd,900) $+ $lf }
+  if ($numtok(%motd,9) > 1) hadd -m +motd $gettok(%motd,1,9) $gettok(%motd,2,9)
+}
+on 1:sockclose:motd: {
+  if ($_IsBadOs) return
+  if ($hget(+motd)) {
+    p.cw.motd
+    var %i = $hget(+motd,0).item | while (%i) { did -a motd 1 $asctime($hget(+motd,%i).item) | dec %i }
+    did -c motd 1 $did(motd,1,0).lines | did -ra motd 2 $eval($hget(+motd,$ctime($did(motd,1,$did(motd,1,0)))),2)
+} }
+dialog interface {
+  title "Seleccionar interface"
+  option dbu
+  size -1 -1 90 43
+  button "",999,999 999 999 999,ok
+  box "Selecciona el estilo de interface",1,1 1 88 30
+  radio "DGui v2.1",2,5 10 50 10,group
+  radio "DLG v1.1",3,5 20 50 10
+  check "No preguntar más",4,5 32 55 10
+  button "ok",5,70 32 20 10
+}
+on 1:dialog:interface:*:*: {
+  if ($devent == init) {
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname icon $mircdirsystem\icons\logo.ico
+    _.mdx SetFont $dname 1,2,3,4,5 12 0 Verdana
+    did -c $dname 3
+    if ($_IsBadOs) did -b $dname 2
+  }
+  if ($devent == sclick) {
+    if ($did == 4) writeini conf\main.conf interface ask $did($dname,4).state
+    if ($did == 5) {
+      if ($did($dname,2).state) writeini conf\main.conf interface interface dgui
+      else if ($did($dname,3).state) writeini conf\main.conf interface interface dlg
+      var %i = $findfile(system\source\,*.gui,0) | while (%i) { .unload -rs $findfile(system\source\,*.gui,%i) | dec %i }
+      var %i = $findfile(system\source\,*.dlg,0) | while (%i) { .unload -rs $findfile(system\source\,*.dlg,%i) | dec %i }
+      var %i = $findfile(system\source\,$iif($_interface == dgui,*.gui,*.dlg),0) | while (%i) { .load -rs $findfile(system\source\,$iif($_interface == dgui,*.gui,*.dlg),%i) | dec %i }
+      dialog -k $dname | carga
+} } }

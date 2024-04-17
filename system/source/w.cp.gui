@@ -1,0 +1,1754 @@
+alias p.cw.main {
+  if ($_IsBadOs) return
+  if ($dialog(principal)) { return }
+  writeini conf\main.conf interface interface dgui
+  %w.main.name = @main
+  %w.main.w = 750
+  %w.main.h = 550
+  %w.main.x = $round($calc($window(-1).w / 2 - %w.main.w / 2),0)
+  %w.main.y = $round($calc($window(-1).h / 2 - %w.main.h / 2),0)
+  %w.main.font = Tahoma
+  %w.main.size = 11
+  %w.main.pic.pos = $round($calc(%w.main.w / 4 + 25),0)
+  %w.main.pic.pos2 = $round($calc(%w.main.w / 3 * 2 + 25),0)
+  %w.main.pic.pos3 = $round($calc(%w.main.w / 4 + 60),0)
+  %w.main.pic.pos4 = $round($calc(%w.main.w / 3 * 2 + 10),0)
+  %w.main.text.pos = $calc(75+%w.main.pic.pos)
+  %w.main.text.pos2 = $calc(75+%w.main.pic.pos2)
+  %w.main.text.pos3 = $calc(50+%w.main.pic.pos3)
+  %w.main.text.pos4 = $calc(40+%w.main.pic.pos4)
+  hadd -m %w.main.name main_1 Control de root | hadd -m %w.main.name main_2 Opciones de servidor | hadd -m %w.main.name main_3 Gestión de usuarios/canales
+  hadd -m %w.main.name main_4 Configuración de módulos | hadd -m %w.main.name main_5 Sistema de red | hadd -m %w.main.name main_6 Identidad de los bots
+  hadd -m %w.main.name main_7 Control de permisos | hadd -m %w.main.name main_8 Mantenimiento | hadd -m %w.main.name main_9 Configuración interna | hadd -m %w.main.name main_10 Actualización
+  hadd -m %w.main.name main_11 Configuración de los bots | hadd -m %w.main.name main_-1 Ayuda y soporte técnico
+  hadd -m %w.main.name 1_1 Añadir nuevo root | hadd -m %w.main.name 1_2 Borrar root | hadd -m %w.main.name 1_3 Cambiar opciones de root
+  hadd -m %w.main.name 2_1 Opciones de conexión | hadd -m %w.main.name 2_2 Canales de debug | hadd -m %w.main.name 2_3 Control de clones
+  hadd -m %w.main.name 2_4 Host, información y contraseñas | hadd -m %w.main.name 2_5 Configuración de proxies | hadd -m %w.main.name 2_6 Servidor de aways
+  hadd -m %w.main.name 3_1 Asignar permisos a usuarios | hadd -m %w.main.name 3_2 Modos de usuario al conectar | hadd -m %w.main.name 3_3 Modos no permitidos
+  hadd -m %w.main.name 3_4 Dropeo de nicks | hadd -m %w.main.name 3_5 Dropeo de canales
+  hadd -m %w.main.name 4_1 Cargar módulo | hadd -m %w.main.name 4_2 Descargar módulo
+  hadd -m %w.main.name 5_1 Configurar anti-flood | hadd -m %w.main.name 5_2 Blocks | hadd -m %w.main.name 5_3 Automatismos
+  hadd -m %w.main.name 6_1 Identidad de los bots
+  hadd -m %w.main.name 7_1 Añadir/Quitar permiso | hadd -m %w.main.name 7_2 Modificar permisos
+  hadd -m %w.main.name 8_1 Refrescar | hadd -m %w.main.name 8_2 Copias de seguridad | hadd -m %w.main.name 8_3 Restaurar copias de seguridad
+  hadd -m %w.main.name 9_1 Configuración ventanas | hadd -m %w.main.name 9_2 Configuración SMTP | hadd -m %w.main.name 9_3 Scan de puertos | hadd -m %w.main.name 9_4 Registrar producto
+  hadd -m %w.main.name 10_1 Buscar actualizaciones | hadd -m %w.main.name 10_2 Configurar
+  hadd -m %w.main.name 11_1 General
+  hadd -m %w.main.name -1_1 Contenido e índice | hadd -m %w.main.name -1_2 Notificación de errores | hadd -m %w.main.name -1_3 Acerca de...
+
+  window -Bfhkpz +d %w.main.name $calc(%w.main.x - 175) $calc(%w.main.y - 175) %w.main.w %w.main.h %w.main.name %w.main.font %w.main.size
+  dll system\dlls\ontop.dll Attach $window(%w.main.name).hwnd | dll system\dlls\ontop.dll PutOnTop $window(%w.main.name).hwnd true
+  dialog -m principal principal
+  dll system\dlls\hide.dll WinPar $window(%w.main.name).hwnd $dialog(principal).hwnd
+  ;fondo derecho
+  drawpic -s %w.main.name 0 0 188 %w.main.h 0 0 1 187 $_.png(base)
+  ;linea derecha
+  drawpic -s %w.main.name 188 0 1 %w.main.h 136 0 1 187 $_.png(base)
+  ;controles X
+  drawpic %w.main.name $calc(%w.main.w - 115) 0 19 2 115 25 $_.png(base)
+  ;barra medio superior
+  drawpic -s %w.main.name 0 0 $calc(%w.main.w - 115) 25 4 2 14 25 $_.png(base)
+  ;a-a-h
+  drawpic %w.main.name 0 25 140 0 143 42 $_.png(base)
+  ;relleno a-a-h
+  drawpic -s %w.main.name 143 25 $round($calc(%w.main.w / 4 - 143),0) 43 7 100 30 43 $_.png(base)
+  ;picv
+  drawpic -st %w.main.name 65280 10 85 167 23 5 29 98 23 $_.png(base)
+  drawtext -nor %w.main.name 12999969 "Ms Sans Serif" 12 20 90 Vea también
+  ;relleno picv
+  drawrect -fnr %w.main.name 16244694 1 12 108 163 70
+  drawpic -mst %w.main.name 65280 20 115 20 20 $_.png(h_main)
+  drawpic -mst %w.main.name 65280 20 145 20 20 $_.png(home)
+  drawtext -nr %w.main.name 12999969 "Ms Sans Serif" 9 50 120 Ayuda y soporte técnico
+  drawtext -nr %w.main.name 12999969 "Ms Sans Serif" 9 50 150 Rallados Co. online
+  drawpic -mst %w.main.name 65280 5 5 20 20 $_.png(cpanel)
+  drawtext -nor %w.main.name 16777215 "Tebruchet MS" 13 30 5 Panel de control
+  ;ver
+  drawtext -nr %w.main.name 4729385 "Verdana" 9 10 $calc(%w.main.h - 40) DGui v2.1
+  p.fw.main main
+  drawdot %w.main.name | window -a %w.main.name | set %w.main.tab main
+}
+alias p.fw.main {
+  _.wrs %w.main.name
+  drawrect -fnr %w.main.name 4729385 1 189 25 752 $calc(%w.main.h - 25)
+  drawpic -ns %w.main.name $calc(%w.main.w - 150) $calc(%w.main.h - 140) 150 140 6 53 50 41 $_.png(base)
+  var %i = 129 | while (%i) { if (%i isnum 2-3) { dec %i | continue } | did -h principal %i | dec %i } | did -e principal 4 | did -u principal 4,9 | did -c principal 5
+  did -b principal 6,8,63 | did -r principal 1,10,11
+  set %w.main.tab $1
+  if ($1 == main) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 Elija una categoría
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 90 $_.png(star)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 160 $_.png(secure)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 230 $_.png(users)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 300 $_.png(hardware)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 370 $_.png(net)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos 440 $_.png(board)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos2 90 $_.png(access)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos2 160 $_.png(schedule)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos2 230 $_.png(rueda)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos2 300 $_.png(addremove)
+    drawpic -mnt %w.main.name 65280 %w.main.pic.pos2 370 $_.png(panel)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 110 $hget(%w.main.name,main_1)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 180 $hget(%w.main.name,main_2)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 250 $hget(%w.main.name,main_3)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 320 $hget(%w.main.name,main_4)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 390 $hget(%w.main.name,main_5)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 460 $hget(%w.main.name,main_6)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos2 110 $hget(%w.main.name,main_7)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos2 180 $hget(%w.main.name,main_8)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos2 250 $hget(%w.main.name,main_9)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos2 320 $hget(%w.main.name,main_10)
+    drawtext -nor %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos2 390 $hget(%w.main.name,main_11)
+  }
+  if ($1 == 1) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_1)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    ;drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,1_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,1_2)
+    ;drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,1_3)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 270 Nick:
+      ; drawtext -nr %w.main.name 16777215 "Verdana" 12 403 270 Pass:
+      ; drawtext -nr %w.main.name 16777215 "Verdana" 12 593 270 Confirmar pass:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 373 Limitar permiso:
+      drawtext -nr %w.main.name 16777215 "Verdana" 11 253 413 Administrador
+      drawtext -nr %w.main.name 16777215 "Verdana" 11 453 413 Ajeno
+      drawrect -dnr %w.main.name 12687234 1 213 350 400 100 10 10
+      _.wrd 213 290 120 20,403 290 120 20,593 290 120 20,233 410 20 20,433 410 20 20,213 465 150 40 
+      did -v principal 1,4,5,6 
+      if ($hfind(+roots,Administrador,1).data) { did -b principal 4 | did -u principal 4 | drawtext -nr %w.main.name 15251067 "Verdana" 11 252 412 Administrador }
+    }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 270 Roots reconocidos:
+      _.wrd 213 290 310 170,213 470 150 30
+      did -v principal 7,8
+    }
+    if ($2 == 3) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 270 Lista de roots:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 403 270 Pass:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 593 270 Confirmar pass:
+      _.wrd 213 290 100 200,403 290 120 20,593 290 120 20
+      did -v principal 9,10,11
+  } }
+  if ($1 == 2) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_2)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 140 20 20 $_.png(flecha)
+    ; drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 180 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,2_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,2_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,2_3)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,2_4)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 144 $hget(%w.main.name,2_5)
+    ;drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 184 $hget(%w.main.name,2_6)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 293 Conexión automática al inicio
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 323 Reconexión en desconexión involuntaria
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 353 Loguear socket
+      if ($did(principal,13).state) {
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 558 323 intentos cada 
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 678 323 segundos
+      }
+      _.wrd 213 290 20 20,213 320 20 20,213 350 20 20,533 320 20 20,653 320 20 20
+      did -v principal 12,13,14 | if ($did(principal,13).state == 1) { did -v principal 15,16 }
+    }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 270 Debug del IRC:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 340 Debug de control de bots:
+      _.wrd 213 290 120 20,213 360 120 20
+      did -v principal 17,18
+    }
+    if ($2 == 3) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 293 Activo 
+      _.wrd 213 290 20 20,313 290 20 20,213 350 120 20
+      did -v principal 19
+      if ($did(principal,19).state) { 
+        did -v principal 20,27 | drawtext -nr %w.main.name 16777215 "Verdana" 12 338 293 clones. 
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 320 Mensaje kill:
+    } }
+    if ($2 == 4) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Host del servidor:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 320 Información adicional:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 403 320 Nombre de la red:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 380 Contraseña de acceso local:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 403 380 Contraseña de acceso remoto:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 440 Ip a conectar por defecto:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 403 440 Puerto a conectar por defecto:
+      _.wrd 213 290 120 20,213 350 120 20,403 350 120 20,213 410 120 20,403 410 120 20,213 470 120 20,403 470 40 20
+      did -v principal 21,22,23,24,25,26,100
+    }
+    if ($2 == 5) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 272 Activo | _.wrd 213 270 20 20 | did -v principal 28
+      if ($_conf(sock,prox_state)) {
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 310 Prohibir ips/hosts
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 403 310 Prohibir puertos
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 593 310 Permitir ips/hosts
+        _.wrd 213 330 150 120,403 330 150 120,593 330 150 120,213 440 150 20,403 440 150 20,593 440 150 20,213 480 150 20,403 480 150 20,593 480 150 20, $&
+          213 500 150 20,403 500 150 20,593 500 150 20,193 500 20 20
+        did -v principal 29,30,31,32,33,34,35,36,37,38,39,40,41
+    } }
+    if ($2 == 6) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Host del servidor:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 320 Información adicional:
+      _.wrd 213 290 120 20,213 350 120 20 | did -v principal 42,43
+  } }
+  if ($1 == 3) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_3)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 140 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,3_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,3_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,3_3)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,3_4)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 144 $hget(%w.main.name,3_5)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Nicks registrados:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 353 260 Nivel:
+      _.wrd 213 290 100 200,353 290 170 150 | did -v principal 48,49 | did -u principal 48,49
+    }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Modos de usuario al conectar:
+      _.wrd 213 290 120 20 | did -v principal 50
+    } 
+    if ($2 == 3) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Modos no permitidos en usuarios (incl. ircops):
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 320 Modos no permitidos en canales:
+      _.wrd 213 290 120 20,213 350 120 20 | did -v principal 51,52
+    }
+    if ($2 == 4) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Dropeo de nicks:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 450 Drop automático:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 443 450 Días de vigencia:
+      _.wrd 213 290 426 150,213 448 20 20,413 448 20 20,213 480 150 40 | did -v principal 53,54,55,56
+      d.main.dp nicks $calc($_conf(drop,n_time)/86400)
+    }
+    if ($2 == 5) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Dropeo de canales:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 233 450 Drop automático:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 443 450 Días de vigencia:
+      _.wrd 213 290 426 150,213 448 20 20,413 448 20 20,213 480 150 40 | did -v principal 57,58,59,60
+      d.main.dp canales $calc($_conf(drop,c_time)/86400)
+  } }
+  if ($1 == 4) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_4)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,4_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,4_2)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Módulos cargados:
+      _.wrd 213 290 100 200,333 290 150 40,333 340 150 40 | did -v principal 61,62
+    }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Módulos cargados:
+      _.wrd 213 290 100 200,333 290 150 40 | did -v principal 61,63 | did -u principal 61
+  } } 
+  if ($1 == 5) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_5)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,5_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,5_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,5_3)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 237 262 Activa
+      did -v principal 64 | _.wrd 213 260 20 20
+      if ($_conf(flood,activo)) {
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 243 302 privmsg/notice en menos de
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 460 302 segundos.
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 350 Nivel de castigos
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 300 382 ignore durante
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 300 402 kill
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 300 422 block durante
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 460 382 segundos
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 460 422 segundos
+        drawrect -dnr %w.main.name 12687234 1 270 370 270 80 10 10
+        _.wrd 213 300 20 20,430 300 20 20,213 370 40 100,213 470 20 20,233 470 20 20,280 380 20 20,280 400 20 20,280 420 20 20,400 380 50 20,400 420 50 20 
+        did -v principal 65,66,67,68,69,70,71,72,73,74
+    } }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 262 Mensaje en block por spam:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 340 282 durante
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 460 282 segundos
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 310 Mensaje en block por bline:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 360 Mensaje en kill por protección de nick (en el caso de estar configurado así):
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 410 Mensaje en block por proxy abierto:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 340 432 durante
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 460 432 segundos
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 460 Mensaje en kill por ataques:
+      _.wrd 213 280 120 20,400 280 50 20,213 330 120 20,213 380 120 20,213 430 120 20,400 430 50 20,213 480 120 20 | did -v principal 75,76,77,78,79,80,81
+    }
+    if ($2 == 3) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Autojoin en usuarios:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 340 Autojoin en opers:
+      _.wrd 213 280 120 20,213 360 120 20 | did -v principal 82,83
+  } } 
+  if ($1 == 6) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_6)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,6_1)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Bots cargados:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 550 260 Nick:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 550 310 Ident:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 550 360 Host:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 550 410 Realname:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 550 460 Modos:
+      _.wrd 213 280 300 200,550 280 120 20,550 330 120 20,550 380 120 20,550 430 120 20,550 480 120 20 | did -v principal 84,85,86,87,88,89
+  } } 
+  if ($1 == 7) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%W.main.name,main_7)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,7_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,7_2)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Lista de niveles actuales:
+      _.wrd 213 290 40 170 | did -v principal 44,45,46
+    }
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Permisos correspondientes a los niveles:
+      _.wrd 213 290 310 200 | did -v principal 47
+  } } 
+  if ($1 == 8) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_8)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,8_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,8_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,8_3)
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 240 Hacer copia de seguridad de:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 282 Nicks
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 322 Canales registrados
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 362 Canales en fase de registro
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 402 Aways
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 442 Configuración
+      _.wrd 213 280 20 20,213 320 20 20,213 360 20 20,213 400 20 20,213 440 20 20,213 480 150 30 | did -v principal 90,91,92,93,94,95
+  } } 
+  if ($1 == 9) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_9)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos4 100 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,9_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,9_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,9_3)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,9_4)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 282 Abrir Panel de Configuración al iniciar
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 312 Abrir ventana de Información de Sistema al iniciar
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 342 Minimizar al iniciar
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 372 Solicitar MOTD al iniciar
+      _.wrd 213 280 20 20,213 310 20 20,213 340 20 20,213 370 20 20 | did -v principal 96,97,98,99
+    }
+    if ($2 == 2) {
+      if (!$_conf(smtp,web)) {
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 250 Login del server
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 403 250 Pass del server
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 350 Servidor SMTP
+      }
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 403 350 Tu e-mail
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 235 422 SMTP vía web
+      _.wrd 403 380 120 20,213 420 20 20 | did -v principal 114,129
+      if (!$_conf(smtp,web)) { _.wrd 213 280 120 20,403 280 120 20,213 380 120 20 | did -v principal 101,102,103 }
+    }
+    if ($2 == 3) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 250 Dirección de la máquina
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 433 250 Rango de puertos
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 510 282 -
+      _.wrd 213 280 120 20,433 280 70 20,523 280 70 20,213 320 200 100,213 440 120 40,353 440 120 40 | did -v principal 104,105,106,107,108,109
+    }
+    if ($2 == 4) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 262 ID-Bots:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 302 Login:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 342 Pass:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 382 Introducir clave:
+      if ($_reg(ID)) { if ($_encrypt($_reg(ComputerName),$_reg(ID)) == $+($_conf(login,login),-,$_conf(login,pass),-,$_reg(ComputerName))) { drawrect -fer %w.main.name 37632 1 580 385 10 10 | did -b principal 119 } }
+      _.wrd 400 260 160 20,400 300 160 20,400 340 160 20,400 380 160 140,213 460 160 40 | did -v principal 115,116,117,118
+  } } 
+  if ($1 == 10) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_10)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,10_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,10_2)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 260 Actualizaciones disponibles:
+      _.wrd 213 290 426 150,213 460 120 30,350 475 150 15 | did -v principal 110,111,120 | s.upd
+    } 
+    if ($2 == 2) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 282 Buscar actualizaciones al iniciar
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 213 320 Mirror por defecto:
+      _.wrd 213 280 20 20,213 340 150 70 | did -v principal 112,113
+  } }
+  if ($1 == 11) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_11)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,11_1)
+    if ($2 == 1) {
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 282 Dar @ a los ircops
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 312 Darse @ al entrar
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 342 Anti de@p
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 372 Reconectar en kill
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 402 Evitar mass glines
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 243 432 Evitar bans
+      drawrect -dnr %w.main.name 12687234 1 430 280 300 70 10 10
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 450 290 Respuestas por:
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 470 312 Privado
+      drawtext -nr %w.main.name 16777215 "Verdana" 12 570 312 Notice
+      _.wrd 213 280 20 20,213 310 20 20,213 340 20 20,213 370 20 20,213 400 20 20,213 430 20 20,450 310 20 20,550 310 20 20 | did -v principal 121,122,123,124,125,126,127,128
+    }
+  } 
+  if ($1 == -1) {
+    drawtext -nor %w.main.name 16113622 "Verdana" 25 %w.main.pic.pos 30 $hget(%w.main.name,main_-1)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 100 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 140 20 20 $_.png(flecha)
+    drawpic -mnst %w.main.name 65280 %w.main.pic.pos3 180 20 20 $_.png(flecha)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,-1_1)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,-1_2)
+    drawtext -nr %w.main.name 16777215 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,-1_3)
+  }
+  drawdot %w.main.name
+}
+menu @main {
+  mouse: {
+    if (%w.main.tab == main) {
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,110,$width($hget(%w.main.name,main_1),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,90,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 110  $+ $hget(%w.main.name,main_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 110 $hget(%w.main.name,main_1)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,180,$width($hget(%w.main.name,main_2),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,160,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 2
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 180  $+ $hget(%w.main.name,main_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 180 $hget(%w.main.name,main_2)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,250,$width($hget(%w.main.name,main_3),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,230,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 250  $+ $hget(%w.main.name,main_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 250 $hget(%w.main.name,main_3)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,320,$width($hget(%w.main.name,main_4),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,300,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 4)  { return }
+        set %w.main.zona 4
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 320  $+ $hget(%w.main.name,main_4)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 4) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 320 $hget(%w.main.name,main_4)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }  
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,390,$width($hget(%w.main.name,main_5),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,370,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 5)  { return }
+        set %w.main.zona 5
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 390  $+ $hget(%w.main.name,main_5)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 5) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 390 $hget(%w.main.name,main_5)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,460,$width($hget(%w.main.name,main_6),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,440,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 6)  { return }
+        set %w.main.zona 6
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 460  $+ $hget(%w.main.name,main_6)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 6) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 460 $hget(%w.main.name,main_6)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,110,$width($hget(%w.main.name,main_7),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,90,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 7)  { return }
+        set %w.main.zona 7
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 110  $+ $hget(%w.main.name,main_7)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 7) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 110 $hget(%w.main.name,main_7)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,180,$width($hget(%w.main.name,main_8),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,160,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 8)  { return }
+        set %w.main.zona 8
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 180  $+ $hget(%w.main.name,main_8)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 8) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 180 $hget(%w.main.name,main_8)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,250,$width($hget(%w.main.name,main_9),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,230,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 9)  { return }
+        set %w.main.zona 9
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 250  $+ $hget(%w.main.name,main_9)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 9) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 250 $hget(%w.main.name,main_9)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,320,$width($hget(%w.main.name,main_10),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,300,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 10)  { return }
+        set %w.main.zona 10
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 320  $+ $hget(%w.main.name,main_10)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 10) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 320 $hget(%w.main.name,main_10)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,390,$width($hget(%w.main.name,main_11),%w.main.font,%w.main.size,1,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,370,48,48))) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 11)  { return }
+        set %w.main.zona 11
+        drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 390  $+ $hget(%w.main.name,main_11)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 11) {
+          drawtext -bnopr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos2 390 $hget(%w.main.name,main_11)
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 1) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,1_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,1_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,1_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,1_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,1_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,1_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 2) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,2_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,2_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,2_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,2_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,2_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,2_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,2_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,2_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,2_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,2_4),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 4)  { return }
+        set %w.main.zona 4
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104  $+ $hget(%w.main.name,2_4)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 4) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,2_4) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,140,$calc($width($hget(%w.main.name,2_5),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 5)  { return }
+        set %w.main.zona 5
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 144  $+ $hget(%w.main.name,2_5)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 5) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 144 $hget(%w.main.name,2_5) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,180,$calc($width($hget(%w.main.name,2_7),%w.main.font,%w.main.size,0,0)+0),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 6)  { return }
+        set %w.main.zona 6
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 184  $+ $hget(%w.main.name,2_6)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 6) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 184 $hget(%w.main.name,2_6) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 3) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,3_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,3_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,3_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,3_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,3_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,3_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,3_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,3_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,3_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,3_4),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 4)  { return }
+        set %w.main.zona 4
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104  $+ $hget(%w.main.name,3_4)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 4) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,3_4) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,140,$calc($width($hget(%w.main.name,3_5),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 5)  { return }
+        set %w.main.zona 5
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 144  $+ $hget(%w.main.name,3_5)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 5) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 144 $hget(%w.main.name,3_5) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 4) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,4_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,4_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,4_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,4_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,4_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,4_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 5) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,5_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,5_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,5_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,5_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,5_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,5_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,5_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,5_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,5_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 6) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,6_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,6_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,6_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 7) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,7_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,7_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,7_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,7_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,7_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,7_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%W.main.tab == 8) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,8_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,8_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,8_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,8_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,8_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,8_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,8_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,8_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,8_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 9) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,9_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,9_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,9_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,9_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,9_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,9_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,9_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,9_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,9_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,9_4),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 4)  { return }
+        set %w.main.zona 4
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104  $+ $hget(%w.main.name,9_4)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 4) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos4 104 $hget(%w.main.name,9_4) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 10) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,10_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,10_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,10_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,10_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,10_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,10_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%w.main.tab == 11) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,11_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,11_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,11_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if (%W.main.tab == -1) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,-1_1),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 1)  { return }
+        set %w.main.zona 1
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104  $+ $hget(%w.main.name,-1_1)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 1) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 104 $hget(%w.main.name,-1_1) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,-1_2),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 2)  { return }
+        set %w.main.zona 2
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144  $+ $hget(%w.main.name,-1_2)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 2) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 144 $hget(%w.main.name,-1_2) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,-1_3),%w.main.font,%w.main.size,0,0)+40),20)) {
+        _.crs SetStdMouseCursor hand | if (%w.main.zona == 3)  { return }
+        set %w.main.zona 3
+        drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184  $+ $hget(%w.main.name,-1_3)
+        drawdot %w.main.name | return
+      }
+      else { 
+        if (%w.main.zona == 3) {
+          drawtext -bnpr %w.main.name 16777215 4729385 %w.main.font %w.main.size %w.main.text.pos 184 $hget(%w.main.name,-1_3) 
+          drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+      } }
+    }
+    if ($inrect($mouse.x,$mouse.y,20,118,140,20)) {
+      _.crs SetStdMouseCursor hand | if (%w.main.zona == -1)  { return }
+      set %w.main.zona -1
+      drawtext -bnpr %w.main.name 12999969 16244694 "Ms Sans Serif" 9 50 120 Ayuda y soporte técnico
+      drawdot %w.main.name | return
+    }
+    else { 
+      if (%w.main.zona == -1) { 
+        drawtext -bnpr %w.main.name 12999969 16244694 "Ms Sans Serif" 9 50 120 Ayuda y soporte técnico
+        drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+    } }
+    if ($inrect($mouse.x,$mouse.y,20,144,125,20)) {
+      _.crs SetStdMouseCursor hand | if (%w.main.zona == -2)  { return }
+      set %w.main.zona -2
+      drawtext -bnpr %w.main.name 12999969 16244694 "Ms Sans Serif" 9 50 150 Rallados Co. online
+      drawdot %w.main.name | return
+    }
+    else { 
+      if (%w.main.zona == -2) { 
+        drawtext -bnpr %w.main.name 12999969 16244694 "Ms Sans Serif" 9 50 150 Rallados Co. online
+        drawdot %w.main.name | set %w.main.zona 0 | _.crs RestoreCursor none
+    } }
+    if ($inrect($mouse.x,$mouse.y,0,25,140,35)) { _.crs SetStdMouseCursor hand }
+    else { _.crs RestoreCursor none }
+  }
+  sclick: {
+    _.crs RestoreCursor none
+    if ($inrect($mouse.x,$mouse.y,$calc(%w.main.w - 23),5,15,15)) { window -c %w.main.name | dialog -x principal | hfree %w.main.name +rutas | unset %w.main.* %w.upd*  }
+    if ($inrect($mouse.x,$mouse.y,100,25,35,35)) { p.fw.main main }
+    if ($inrect($mouse.x,$mouse.y,0,25,40,40)) { p.fw.main $iif(%w.main.tab == main,11,$iif($calc(%w.main.tab - 1) < 1,1,$calc(%w.main.tab - 1))) }
+    if ($inrect($mouse.x,$mouse.y,40,25,40,40)) { p.fw.main $iif(%w.main.tab == main,1,$iif($calc(%w.main.tab + 1) > 11,11,$calc(%w.main.tab + 1))) }
+    if ($inrect($mouse.x,$mouse.y,20,118,140,20)) { p.fw.main -1 }
+    if (%w.main.tab == main) {
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,110,$width($hget(%w.main.name,main_1),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,90,48,48))) { p.fw.main 1 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,180,$width($hget(%w.main.name,main_2),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,160,48,48))) { p.fw.main 2 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,250,$width($hget(%w.main.name,main_3),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,230,48,48))) { p.fw.main 3 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,320,$width($hget(%w.main.name,main_4),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,300,48,48))) { p.fw.main 4 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,390,$width($hget(%w.main.name,main_5),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,370,48,48))) { p.fw.main 5 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos,460,$width($hget(%w.main.name,main_6),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos,440,48,48))) { p.fw.main 6 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,110,$width($hget(%w.main.name,main_7),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,90,48,48))) { p.fw.main 7 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,180,$width($hget(%w.main.name,main_8),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,160,48,48))) { p.fw.main 8 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,250,$width($hget(%w.main.name,main_9),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,230,48,48))) { p.fw.main 9 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,320,$width($hget(%w.main.name,main_10),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,300,48,48))) { p.fw.main 10 }
+      if (($inrect($mouse.x,$mouse.y,%w.main.text.pos2,390,$width($hget(%w.main.name,main_11),%w.main.font,%w.main.size,0,0),11)) || ($inrect($mouse.x,$mouse.y,%w.main.pic.pos2,370,48,48))) { p.fw.main 11 }
+      return
+    }
+    if (%w.main.tab == 1) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,1_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 1 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,1_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 1 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,1_3),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 1 3 }
+    }
+    if (%w.main.tab == 2) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,2_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,2_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,2_3),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 3 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,2_4),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 4 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,140,$calc($width($hget(%w.main.name,2_5),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 5 }
+      ; if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,180,$calc($width($hget(%w.main.name,2_6),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 2 6 }
+    }
+    if (%w.main.tab == 3) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,3_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 3 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,3_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 3 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,3_3),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 3 3 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,3_4),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 3 4 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,140,$calc($width($hget(%w.main.name,3_5),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 3 5 }
+    }
+    if (%w.main.tab == 4) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,4_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 4 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,4_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 4 2 }
+    }
+    if (%w.main.tab == 5) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,5_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 5 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,5_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 5 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,5_3),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 5 3 }
+    }
+    if (%w.main.tab == 6) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,6_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 6 1 }
+    }
+    if (%w.main.tab == 7) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,7_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 7 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,7_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 7 2 }
+    }
+    if (%W.main.tab == 8) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,8_1),%w.main.font,%w.main.size,0,0)+40),20)) { carga }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,8_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 8 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,8_3),%w.main.font,%w.main.size,0,0)+40),20)) { d.main.rb }
+    }
+    if (%w.main.tab == 9) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,9_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 9 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,9_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 9 2 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,180,$calc($width($hget(%w.main.name,9_3),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 9 3 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos4,100,$calc($width($hget(%w.main.name,9_4),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 9 4 }
+    }
+    if (%w.main.tab == 10) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,10_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 10 1 }
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,140,$calc($width($hget(%w.main.name,10_2),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 10 2 }
+    }
+    if (%w.main.tab == 11) {
+      if ($inrect($mouse.x,$mouse.y,%w.main.pic.pos3,100,$calc($width($hget(%w.main.name,11_1),%w.main.font,%w.main.size,0,0)+40),20)) { p.fw.main 11 1 }
+    }
+} }
+alias _.wr dll system\dlls\winrgn.dll $1-
+alias _.wrs { _.wr wrResetWindow NOT_USED | _.wr wrSelectWindow $window($1).hwnd | _.wr wrSetMode rmRect | _.wr wrSetRegion 0 0 900 600 }
+alias _.wrd { var %i = $numtok($1-,44) | while (%i) { _.wr wrDeleteRegion $gettok($gettok($1-,%i,44),1,32) $gettok($gettok($1-,%i,44),2,32) $calc($gettok($gettok($1-,%i,44),3,32)+$gettok($gettok($1-,%i,44),1,32)) $calc($gettok($gettok($1-,%i,44),4,32)+$gettok($gettok($1-,%i,44),2,32)) | dec %i } }
+alias _.mdx dll system\dlls\mdx.dll $1-
+alias _.correc return $replace($1,[,¥,],¬,$chr(124),½)
+alias _.crs dll system\dlls\cursor.dll $1-
+alias _prox return $true
+alias _.bmp return $+(system\bmps\,$1,.bmp)
+alias _.png return $+(system\bmps\,$1,.png)
+dialog principal {
+  title "lala"
+  size %w.main.x %w.main.y $calc(%w.main.w - 6) $calc(%w.main.h - 50)
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  ;button "",900,1 1 %w.main.w %w.main.h
+  ;1_1
+  edit "",1,213 290 120 20,autohs
+  ;edit "",2,403 290 120 20,autohs pass
+  ;edit "",3,593 290 120 20,autohs pass
+  radio ,4,233 410 20 20,group
+  radio ,5,433 410 20 20
+  button Guardar root,6,213 470 150 30
+  ;1_2
+  list 7,213 290 310 170,extsel
+  button Borrar roots,8,213 470 150 30
+  ;1_3
+  list 9,213 290 100 200,sort hsbar
+  edit "",10,403 290 120 20,autohs pass
+  edit "",11,593 290 120 20,autohs pass
+  ;2_1
+  check ,12,213 290 20 20
+  check ,13,213 320 20 20
+  check ,14,213 350 20 20
+  edit "",15,533 320 20 20,center
+  edit "",16,653 320 20 20,center
+  ;2_2
+  edit "#",17,213 290 120 20,autohs
+  edit "#",18,213 360 120 20,autohs
+  ;2_3
+  check ,19,213 290 20 20
+  edit "",20,313 290 20 20,center
+  edit "",27,213 350 120 20,autohs
+  ;2_4
+  edit "",21,213 290 120 20,autohs
+  edit "",22,213 350 120 20,autohs
+  edit "",100,403 350 120 20,autohs
+  edit "",23,213 410 120 20,autohs
+  edit "",24,403 410 120 20,autohs
+  edit "",25,213 470 120 20
+  edit "",26,403 470 40 20,center
+  ;2_5
+  check ,28,213 270 20 20
+  list 29,213 330 150 120,extsel,hsbar,sort
+  list 30,403 330 150 120,extsel,sort
+  list 31,593 330 150 120,extsel,hsbar,sort
+  button Borrar seleccionados,32,213 440 150 20
+  button Borrar seleccionados,33,403 440 150 20
+  button Borrar seleccionados,34,593 440 150 20
+  edit "",35,213 480 150 20,autohs
+  edit "",36,403 480 150 20,autohs
+  edit "",37,593 480 150 20,autohs
+  button Añadir,38,213 500 150 20
+  button Añadir,39,403 500 150 20
+  button Añadir,40,593 500 150 20
+  button »,41,193 500 20 20
+  ;2_6
+  edit "",42,213 290 120 20,autohs
+  edit "",43,213 350 120 20,autohs
+  ;7_1
+  list 44,213 290 40 150,size hsbar
+  button +,45,213 440 20 20
+  button -,46,233 440 20 20 
+  ;7_2
+  list 47,213 290 310 200,extsel
+  ;3_1
+  list 48,213 290 100 200,sort hsbar
+  combo 49,353 290 170 150,drop
+  ;3_2
+  edit "",50,213 290 120 20,autohs
+  ;3_3
+  edit "",51,213 290 120 20,autohs
+  edit "",52,213 350 120 20,autohs
+  ;3_4
+  list 53,213 290 426 150,extsel
+  check ,54,213 448 20 20
+  edit "",55,413 448 20 20,center
+  button Borrar nicks,56,213 480 150 40
+  ;3_5
+  list 57,213 290 426 150,extsel
+  check ,58,213 448 20 20
+  edit "",59,413 448 20 20,center
+  button Borrar canales,60,213 480 150 40
+  ;4_1
+  list 61,213 290 100 200,sort hsbar
+  button Cargar módulo,62,333 290 150 40
+  ;4_2
+  button Descargar módulo,63,333 290 150 40
+  ;5_1
+  check ,64,213 260 20 20
+  edit "",65,213 300 20 20,center 
+  edit "",66,430 300 20 20,center
+  list 67,213 370 40 100,size hsbar
+  button +,68,213 470 20 20
+  button -,69,233 470 20 20
+  radio ,70,280 380 20 20,group
+  radio ,71,280 400 20 20
+  radio ,72,280 420 20 20
+  edit "",73,400 380 50 20,center
+  edit "",74,400 420 50 20,center
+  ;5_2
+  edit "",75,213 280 120 20,autohs
+  edit "",76,400 280 50 20,center
+  edit "",77,213 330 120 20,autohs
+  edit "",78,213 380 120 20,autohs
+  edit "",79,213 430 120 20,autohs
+  edit "",80,400 430 50 20,center
+  edit "",81,213 480 120 20,autohs
+  ;5_3
+  edit "#",82,213 280 120 20,autohs
+  edit "#",83,213 360 120 20,autohs
+  ;6_1
+  list 84,213 280 300 200,extsel
+  edit "",85,550 280 120 20,autohs
+  edit "",86,550 330 120 20,autohs
+  edit "",87,550 380 120 20,autohs
+  edit "",88,550 430 120 20,autohs
+  edit "",89,550 480 120 20,autohs
+  ;8_2
+  check ,90,213 280 20 20
+  check ,91,213 320 20 20
+  check ,92,213 360 20 20
+  check ,93,213 400 20 20
+  check ,94,213 440 20 20
+  button Iniciar copia de seguridad...,95,213 480 150 30
+  ;9_1
+  check ,96,213 280 20 20
+  check ,97,213 310 20 20
+  check ,98,213 340 20 20
+  check ,99,213 370 20 20
+  ;9_2
+  edit "",101,213 280 120 20,autohs
+  edit "",102,403 280 120 20,autohs,pass
+  edit "",103,213 380 120 20,autohs
+  edit "",114,403 380 120 20,autohs
+  check ,129,213 420 20 20
+  ;9_3
+  edit "",104,213 280 120 20,autohs
+  edit "",105,433 280 70 20,autohs,center
+  edit "",106,523 280 70 20,autohs,center
+  edit "",107,213 320 200 100,read,multi,vsbar,autovs
+  button Iniciar scan,108,213 440 120 40
+  button Parar scan,109,353 440 120 40
+  ;9_4
+  edit "",115,400 260 160 20,autohs,read,center
+  edit "",116,400 300 160 20,autohs
+  edit "",117,400 340 160 20,autohs,pass
+  edit "",118,400 380 160 140,multi
+  button Enviar solicitud,119,213 460 120 40
+  ;10_1
+  list 110,213 290 426 150,extsel
+  button Iniciar actualización,111,213 460 120 30
+  text "",120,350 475 150 15
+  ;10_2
+  check ,112,213 280 20 20
+  combo 113,213 340 150 150,drop,sort
+  ;11_1
+  check "",121,213 280 20 20
+  check "",122,213 310 20 20
+  check "",123,213 340 20 20
+  check "",124,213 370 20 20
+  check "",125,213 400 20 20
+  check "",126,213 430 20 20
+  radio "",127,450 310 20 20,group
+  radio "",128,550 310 20 20
+}
+on 1:dialog:principal:*:*: {
+  if ($devent == init) {
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname style
+    ;_.mdx SetControlMDX $dname 1 window > system\dlls\dialog.mdx
+    ;_.mdx SetControlMDX $dname 900 Window > system\dlls\dialog.mdx | did -a $dname 900 grab $window(%w.main.name).hwnd %w.main.name | did -h $dname 900
+    _.mdx SetFont $dname 1,7,9,17,18,21,22,23,24,27,29,30,31,35,36,37,42,43,44,47,48,49,50,51,52,53,57,61,67,75,77,78,79,81,82,83,84,85,86,87,88,89,100,101,102,103,104,105,106,107,110,113,114,115,116,117 15 0 Tahoma
+    _.mdx SetFont $dname 118 13 0 Tahoma
+    _.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetColor $dname 4,5,12,13,14,19,28,54,58,64,70,71,72,90,91,92,93,94,96,97,98,99,112,121,122,123,124,125,126,127,128,129 background 4729385
+    _.mdx SetControlMDX $dname 7,53,57,84,110 ListView sortascending grid report rowselect single infotip headerdrag checkboxes showsel > system\dlls\views.mdx
+    _.mdx SetControlMDX $dname 47 ListView grid report rowselect single headerdrag editlabels flatsb > system\dlls\views.mdx
+    _.mdx SetControlMDX $dname 25 IPAddress > system\dlls\ctl_gen.mdx
+    _.mdx SetControlMDX $dname 120 ProgressBar > system\dlls\ctl_gen.mdx
+    did -i $dname 7 1 headerdims 140:1 141:2
+    did -i $dname 7 1 headertext 0 $+(Roots,$chr(9),Permiso)
+    did -i $dname 47 1 headerdims 140:1 141:2
+    did -i $dname 47 1 headertext 0 $+(Permiso,$chr(9),Nivel)
+    did -i $dname 53,57 1 headerdims 140:1 141:2 120:3
+    did -i $dname 53 1 headertext 0 $+(Nick,$chr(9),Identificado,$chr(9),Estado)
+    did -i $dname 57 1 headertext 0 $+(Canal,$chr(9),Último acceso,$chr(9),Estado)
+    did -i $dname 84 1 headerdims 130:1 100:2 100:3 100:4 100:5 100:6
+    did -i $dname 84 1 headertext 0 $+(Nick,$chr(9),Ident,$chr(9),Host,$chr(9),Realname,$chr(9),Modos,$chr(9),Módulo)
+    did -i $dname 110 1 headerdims 130:1 100:2 100:3 100:4 100:5 150:6 100:7 100:8
+    did -i $dname 110 1 headertext 0 $+(Módulo,$chr(9),Tipo,$chr(9),Versión,$chr(9),Autor,$chr(9),Tamaño,$chr(9),Fecha,$chr(9),Descripción,$chr(9),Archivo)
+    var %i = 129 | while (%i) { if (%i isnum 2-3) { dec %i | continue } | did -h $dname %i | dec %i } | did -t $dname 998
+    did -b $dname 32,33,34,38,39,40,45,46,56,60,63,70,71,72,73,74,109,111
+    d.main.fr
+    if ($_conf(sock,auto)) { did -c $dname 12 } 
+    if ($_conf(sock,retry)) { did -c $dname 13 }
+    did -ra $dname 15 $gettok($_conf(sock,retry_values),1,32) | did -ra $dname 16 $gettok($_conf(sock,retry_values),2,32)
+    if ($_conf(sock,log)) { did -c $dname 14 }
+    did -ra $dname 17 $_conf(debug,ircd) | did -ra $dname 18 $_conf(debug,control)
+    if ($_conf(clons,clons)) { did -c $dname 19 | did -ra $dname 20 $ifmatch }
+    did -ra $dname 21 $_.serv | did -ra $dname 22 $_conf(conex,info) | did -ra $dname 23 $_conf(conex,lpass) | did -ra $dname 24 $_conf(conex,rpass)
+    did -i $dname 25 1 $_conf(conex,ip) | did -ra $dname 26 $_conf(conex,port)
+    did -ra $dname 27 $_conf(clons,kill)
+    if ($_conf(sock,prox_state)) { did -c $dname 28 }
+    var %i = $ini(conf\prox.conf,prox,0) | while (%i) { did -a $dname 29 $ini(conf\prox.conf,prox,%i) | dec %i }
+    var %i = $ini(conf\prox.conf,port,0) | while (%i) { did -a $dname 30 $ini(conf\prox.conf,port,%i) | dec %i }
+    var %i = $ini(conf\prox.conf,allow,0) | while (%i) { did -a $dname 31 $ini(conf\prox.conf,allow,%i) | dec %i }
+    did -ra $dname 42 $_conf(away,host) | did -ra $dname 43 $_conf(away,info)
+    var %i = 0 | while ($_conf(levels,%i)) { did -a $dname 44 %i | did -a $dname 47 $+($ifmatch,$chr(9),0 0 0 %i) | did -a $dname 49 $ifmatch | inc %i }
+    var %i = $findfile(nicks\,*.*,0) | while (%i) { did -a $dname 48 $_.32($nopath($findfile(nicks\,*.*,%i))).uncod | dec %i }
+    did -ra $dname 50 $_conf(modes,auto) | did -ra $dname 51 $_conf(modes,users) | did -ra $dname 52 $_conf(modes,chans)
+    if ($_conf(drop,n_auto)) { did -c $dname 54 } | if ($_conf(drop,c_auto)) { did -c $dname 58 }
+    if ($_conf(drop,n_time)) { did -ra $dname 55 $calc($ifmatch / 86400) } | if ($_conf(drop,c_time)) { did -ra $dname 59 $calc($ifmatch / 86400) }
+    d.main.dp nicks $calc($_conf(drop,n_time)/86400) | d.main.dp canales $calc($_conf(drop,c_time)/86400)
+    var %c = $hfind(+modulos,_*,0,w).item | while (%c) { did -a $dname 61 $hfind(+modulos,_*,%c,w).item | dec %c }
+    if ($_conf(flood,activo)) { did -c $dname 64 }
+    did -ra $dname 65 $_conf(flood,reps) | did -ra $dname 66 $_conf(flood,in) 
+    var %i = 1 | while ($_conf(flood,%i)) { did -a $dname 67 %i | inc %i }
+    did -ra $dname 75 $_conf(blocks,spam) | did -ra $dname 76 $_conf(blocks,spam_t) | did -ra $dname 77 $_conf(blocks,bline) | did -ra $dname 78 $_conf(blocks,nick)
+    did -ra $dname 79 $_conf(blocks,proxy) | did -ra $dname 80 $_conf(blocks,proxy_t) | did -ra $dname 81 $_conf(blocks,ataques)
+    did -ra $dname 82 $_conf(autos,users) | did -ra $dname 83 $_conf(autos,opers)
+    var %i = $hfind(+modulos,_*,0,w).item | while (%i) { 
+      var %d = $gettok($hget(+modulos,$hfind(+modulos,_*,%i,w).item),1,32)
+      did -a $dname 84 $+(0 0 0 $iif($readini(%d,modulo,activo),2,1) $readini(%d,modulo,nick),$chr(9),$readini(%d,modulo,ident),$chr(9),$readini(%d,modulo,host),$chr(9),$readini(%d,modulo,realname),$chr(9),$readini(%d,modulo,modos),$chr(9),$readini(%d,modulo,nombre))
+      dec %i
+    }
+    did -c $dname 90,91,92,93,94
+    did -ra $dname 100 $_conf(conex,red)
+    if ($_conf(misc,cpanel)) { did -c $dname 96 } | if ($_conf(misc,cis)) { did -c $dname 97 } | if ($_conf(misc,minimizar)) { did -c $dname 98 } | if ($_conf(misc,motd)) { did -c $dname 99 }
+    did -ra $dname 101 $_conf(smtp,login) | did -ra $dname 102 $_conf(smtp,pass) | did -ra $dname 103 $_conf(smtp,server)
+    did -ra $dname 104 $_conf(scan,host) | did -ra $dname 105 $_conf(scan,desde) | did -ra $dname 106 $_conf(scan,hasta)
+    if ($_conf(mirrors,auto)) { did -c $dname 112 }
+    var %i = $ini(conf\main.conf,mirrors,0) | while (%i) { if ($regex($ini(conf\main.conf,mirrors,%i),^(def||auto)$)) { dec %i | continue } | did -a $dname 113 $ini(conf\main.conf,mirrors,%i) | dec %i }
+    did -c $dname 113 $didwm($dname,113,$_conf(mirrors,def))
+    did -ra $dname 114 $_conf(smtp,mail)
+    did -ra $dname 115 $_cif($_reg(ComputerName))
+    did -ra $dname 116 $_conf(login,login) | did -ra $dname 117 $_conf(login,pass)
+    if ($_encrypt($_reg(ComputerName),$_reg(ID)) == $+($_conf(login,login),-,$_conf(login,pass),-,$_reg(ComputerName))) { did -ra $dname 118 $_reg(ID) }
+    did -a $dname 120 0 0 100
+    if ($_conf(bots,autoop)) { did -c $dname 121 }
+    if ($_conf(bots,autobop)) { did -c $dname 122 }
+    if ($_conf(bots,antideop)) { did -c $dname 123 }
+    if ($_conf(bots,rekill)) { did -c $dname 124 }
+    if ($_conf(bots,antigline)) { did -c $dname 125 }
+    if ($_conf(bots,antiban)) { did -c $dname 126 }
+    if ($_conf(bots,request) == priv) { did -c $dname 127 } | else { did -c $dname 128 }
+    if ($_conf(smtp,web)) { did -c $dname 129 }
+  } 
+  if ($devent == sclick) {
+    if ($did == 6) {
+      if ($hget($did($dname,1)) && !$hget(+roots,$did($dname,1))) {
+        ;hadd $did($dname,1) root_rango $iif($did($dname,4).state == 1,Administrador,Ajeno)
+        ;hadd $did($dname,1) root_pass $did($dname,2) 
+        writeini -n conf\main.conf roots $did($dname,1) $iif($did($dname,4).state == 1,Administrador,Ajeno)
+        drawtext -or %w.main.name 37632 "verdana" 13 383 480 $chr(149) Root guardado con éxito. | hadd -m +roots $did($dname,1) $iif($did($dname,4).state == 1,Administrador,Ajeno)
+        did -h $dname 1,4,5 | did -r $dname 1 | did -b $dname 6 | d.main.fr
+        drawrect -fr %w.main.name 4729385 1 213 230 420 235 | drawrect -fr %w.main.name 4729385 1 623 250 100 40
+      }
+      else { drawtext -or %w.main.name 65535 "Verdana" 13 383 480 $chr(149) No se puede guardar el root. }
+    }
+    if ($did == 7) { .timer -m 1 1 d.main.page $dname $did 8 }
+    if ($did == 8) {
+      var %i = $did($dname,7,0).lines | while (%i > 1) {
+        if ($gettok($did($dname,7,%i),5,32) == 2) {
+          hdel $gettok($gettok($did($dname,7,%i),6,32),1,9) root_pass | h $gettok($gettok($did($dname,7,%i),6,32),1,9) 
+          hdel +roots $gettok($gettok($did($dname,7,%i),6,32),1,9) | remini conf\main.conf roots $gettok($gettok($did($dname,7,%i),6,32),1,9)
+        }
+        dec %i
+      } 
+      d.main.fr | did -b $dname 8
+    }
+    if ($did == 9) { did -ra $dname 10,11 $hget($did($dname,9,1).seltext,root_pass) | drawrect -fr %w.main.name 4729385 1 213 220 300 20 }
+    if ($did == 12) { writeini -n conf\main.conf sock auto $did($dname,12).state }
+    if ($did == 13) { 
+      writeini -n conf\main.conf sock retry $did($dname,13).state
+      if ($did($dname,13).state == 1) { did -v $dname 15,16 | drawtext -r %w.main.name 16777215 "Verdana" 12 558 323 intentos cada | drawtext -r %w.main.name 16777215 "Verdana" 12 678 323 segundos } 
+      else { did -h $dname 15,16 | drawrect -fr %w.main.name 4729385 1 558 320 200 40 }
+    }
+    if ($did == 14) { writeini -n conf\main.conf sock log $did($dname,14).state }
+    if ($did == 19) {
+      if (!$did($dname,19).state) { 
+        remini conf\main.conf clons clons
+        did -h $dname 20,27 | drawrect -fr %w.main.name 4729385 1 313 290 200 20 | drawtext -r %w.main.name 4729385 "Verdana" 12 213 320 Mensaje kill:
+      }
+      else { did -v $dname 20,27 | drawtext -r %w.main.name 16777215 "Verdana" 12 272 293 clones. | drawtext -r %w.main.name 16777215 "Verdana" 12 213 320 Mensaje kill: }
+    }
+    if ($did == 28) {
+      writeini -n conf\main.conf sock prox_state $did($dname,28).state
+      if (!$did($dname,28).state) {
+        did -h $dname 29,30,31,32,33,34,35,36,37,38,39,40,41
+        drawtext -nr %w.main.name 4729385 "Verdana" 12 213 310 Prohibir ips/hosts
+        drawtext -nr %w.main.name 4729385 "Verdana" 12 403 310 Prohibir puertos
+        drawtext -nr %w.main.name 4729385 "Verdana" 12 593 310 Permitir ips/hosts
+        _.wrs %w.main.name | _.wrd 213 270 20 20
+      }
+      else { 
+        did -v $dname 29,30,31,32,33,34,35,36,37,38,39,40,41
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 213 310 Prohibir ips/hosts
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 403 310 Prohibir puertos
+        drawtext -nr %w.main.name 16777215 "Verdana" 12 593 310 Permitir ips/hosts
+        _.wrd 213 330 150 120,403 330 150 120,593 330 150 120,213 440 150 20,403 440 150 20,593 440 150 20,213 480 150 20,403 480 150 20,593 480 150 20, $&
+          213 500 150 20,403 500 150 20,593 500 150 20,193 500 20 20
+    } }
+    if ($did == 29 || $did == 30 || $did == 31) { did -e $dname $calc($did + 3) | did -ra $dname $calc($did + 6) $did($dname,$did).seltext }
+    if ($did == 38 || $did == 39 || $did == 40) { did -a $dname $calc($did - 9) $did($dname,$calc($did - 3)) | did -b $dname $did | writeini -n conf\prox.conf $iif($did == 38,prox,$iif($did == 39,port,allow)) $did($dname,$calc($did - 3)) $chr(36) $+ _PROX | did -r $dname $calc($did -3) }
+    if ($did == 32 || $did == 33 || $did == 34) {
+      while ($did($dname,$calc($did - 3),0).sel) { remini conf\prox.conf $iif($did == 32,prox,$iif($did == 33,port,allow)) $did($dname,$calc($did - 3),$did($dname,$calc($did - 3),1).sel) | did -d $dname $calc($did - 3) $did($dname,$calc($did - 3),1).sel }
+      did -b $dname $did
+    }
+    if ($did == 41) { var %f = $sfile($mircdir,Escoge el archivo a importar,Importar), %i = $lines(%f), %g | while (%i) { %g = $gettok($gettok($read(%f,%i),1,32),1,58) | if (!$didwm($dname,29,%g,1)) { did -a $dname 29 %g | writeini -n conf\prox.conf prox %g $chr(36) $+ _PROX } | dec %i } }
+    if ($did == 45) { did -a $dname 47 $+(*,$chr(9),0 0 0 $calc(1+$did($dname,44).lines)) | did -a $dname 44 $calc(1+$did($dname,44).lines) | writeini -n conf\main.conf levels $calc(-1+$did($dname,44).lines) * | did -a $dname 49 * }
+    if ($did == 46) { if ($did($dname,44).lines) { did -d $dname 47 $calc($ifmatch + 1) | remini conf\main.conf levels $calc($ifmatch - 2) | did -d $dname 44,49 $ifmatch } }
+    if ($did == 47) { 
+      if ($_.page($dname,$did,labeledit) && $_.page($dname,$did,event)) {
+        var %p = $did($dname,47,$_.page($dname,$did,event))
+        did -o $dname 47 $_.page($dname,$did,event) $+($_.page($dname,$did,labeledit),$chr(9),$gettok(%p,2,9))
+        did -o $dname 49 $calc($_.page($dname,$did,event)-1) $_.page($dname,$did,labeledit)
+        writeini -n conf\main.conf levels $gettok($gettok(%p,2,9),5,32) $ 
+    } }
+    if ($did == 48) { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Estado guardado. | did -c $dname 49 $calc($iif($hget($did($dname,48).seltext,status),$ifmatch,3)+1) } 
+    if ($did == 49 && $did($dname,48).seltext) { 
+      hadd $did($dname,48).seltext status $item(conf\main.conf,levels,$did($dname,49,0)) 
+      drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Estado guardado.
+    }
+    if ($did == 54 || $did == 58) { writeini -n conf\main.conf drop $iif($did == 54,n_auto,c_auto) $did($dname,$did).state }
+    if ($did == 53 || $did == 57) { .timer -m 1 1 d.main.page $dname $did $iif($did == 53,56,60) }
+    if ($did == 56 || $did == 60) {
+      var %n = 1, %o = 1, %p, %m, %d = $did, %i = $calc(%d - 3) | while ($did($dname,%i,%n) && %o <= 20) { if ($gettok($did($dname,%i,%n),5,32) == 2) { %p = $+(%p,$chr(149),$chr(32),$gettok($gettok($did($dname,%i,%n),6,32),1,9),$crlf) | inc %o } | inc %n }
+      if (%o == 20) { %p = $+(%p,...,$crlf) }
+      if ($input(Vas a dropear los siguientes $+($iif(%d == 56,nicks,canales),:,$crlf,$crlf,%p,$crlf) ¿estás segur@?,yq,Confirmar)) {
+        %m = $did($dname,%i,0).lines | while (%m) { if ($gettok($did($dname,%i,%m),5,32) == 2) { $iif(%d == 56,mn.drp,mc.drp) $gettok($gettok($did($dname,%i,%m),6,32),1,9) } | dec %m }
+        d.main.dp $iif(%d == 56,nicks,canales) $did($dname,$calc(%d - 1)) | did -b $dname %d
+    } }
+    if ($did == 61) { if ($did($dname,61).sel && !$istok(nickserv*chanserv*cregserv*operserv,$readini($gettok($hget(+modulos,$did($dname,61).seltext),1,32),modulo,serv),42)) { did -e $dname 63 } |  else { did -b $dname 63 } }
+    if ($did == 62) {
+      var %f = $remove($sfile($mircdirmodulos\*.ogm,Cargar módulo,Cargar),$mircdir), %z
+      if (!%f) { return }
+      m.cm %f
+    }
+    if ($did == 63) { m.dm $did($dname,61).seltext | did -d $dname 61 $did($dname,61).sel | did -b $dname 63 }
+    if ($did == 64) {
+      if ($did($dname,64).state) {
+        drawtext -r %w.main.name 16777215 "Verdana" 12 243 302 privmsg/notice en menos de
+        drawtext -r %w.main.name 16777215 "Verdana" 12 460 302 segundos.
+        drawtext -r %w.main.name 16777215 "Verdana" 12 213 350 Nivel de castigos
+        drawtext -r %w.main.name 16777215 "Verdana" 12 300 382 ignore durante
+        drawtext -r %w.main.name 16777215 "Verdana" 12 300 402 kill
+        drawtext -r %w.main.name 16777215 "Verdana" 12 300 422 block durante
+        drawtext -r %w.main.name 16777215 "Verdana" 12 460 382 segundos
+        drawtext -r %w.main.name 16777215 "Verdana" 12 460 422 segundos
+        drawrect -dr %w.main.name 12687234 1 270 370 270 80 10 10
+        _.wrd 213 300 20 20,430 300 20 20,213 370 40 100,213 470 20 20,233 470 20 20,280 380 20 20,280 400 20 20,280 420 20 20,400 380 50 20,400 420 50 20 
+        did -v $dname 65,66,67,68,69,70,71,72,73,74
+        writeini -n conf\main.conf flood activo $did($dname,64).state
+      }
+      else { did -h $dname 65,66,67,68,69,70,71,72,73,74 | drawrect -fr %w.main.name 4729385 1 213 302 350 200 | writeini -n conf\main.conf flood activo $did($dname,64).state }
+    }
+    if ($did == 67) {
+      did -e $dname 70,71,72 | did -u $dname 70,71,72 | did -b $dname 73,74
+      if (ignore* iswm $_conf(flood,$did($dname,67).sel)) { did -c $dname 70 | did -ra $dname 73 $gettok($_conf(flood,$did($dname,67).sel),2,32) | did -e $dname 73 }
+      if (kill* iswm $_conf(flood,$did($dname,67).sel)) { did -c $dname 71 }
+      if (block* iswm $_conf(flood,$did($dname,67).sel)) { did -c $dname 72 | did -ra $dname 74 $gettok($_conf(flood,$did($dname,67).sel),2,32) | did -e $dname 74 }
+    }
+    if ($did == 68) { 
+      did -a $dname 67 $calc($did($dname,67).lines + 1) 
+      did -ra $dname 73,74 40 | did -b $dname 70,71,72,73,74 | did -u $dname 67,70,71,72
+      writeini -n conf\main.conf flood $did($dname,67).lines ignore 40
+    }
+    if ($did == 69) { if ($did($dname,67).lines == 1) { return } | remini conf\main.conf flood $did($dname,67).lines | did -d $dname 67 $did($dname,67).lines | did -ra $dname 73,74 40 | did -b $dname 70,71,72,73,74 | did -u $dname 67,70,71,72 }
+    if ($did == 70) { did -e $dname 73 | did -b $dname 74 | writeini -n conf\main.conf flood $did($dname,67).sel ignore $did($dname,73) }
+    if ($did == 71) { did -b $dname 73,74 | writeini -n conf\main.conf flood $did($dname,67).sel kill }
+    if ($did == 72) { did -e $dname 74 | did -b $dname 73 | writeini -n conf\main.conf flood $did($dname,67).sel block $did($dname,74) }
+    if ($did == 84) {
+      if (stateclick* iswm $did($dname,84,1)) d.main.ch $dname $did
+      var %k = $did($dname,84).seltext
+      did -ra $dname 85 $gettok($gettok(%k,1,9),6,32) | did -ra $dname 86 $gettok($gettok(%k,2,9),5,32) | did -ra $dname 87 $gettok($gettok(%k,3,9),5,32) | did -ra $dname 88 $gettok($gettok(%k,4,9),5-,32) | did -ra $dname 89 $gettok($gettok(%k,5,9),5,32)
+    } 
+    if ($did == 90 || $did == 91 || $did == 92 || $did == 93 || $did == 94) { if (!$did($dname,90).state && !$did($dname,91).state && !$did($dname,92).state && !$did($dname,93).state && !$did($dname,94).state) { did -b $dname 95 } | else { did -e $dname 95 } }
+    if ($did == 95) {
+      if (!$_conf(zip,path)) {
+        if ($input($+(No se ha encontrado el archivo WINZIP32.EXE.,$crlf,¿Desea hallaro usted mismo?,$crlf,$crlf,Pulse SÍ para buscarlo, o NO si desea una búsqueda automática.),yq,No se encuentra archivo.)) {
+          :find
+          var %f = $sfile($mircdir winzip32.exe,Selecciona el archivo compresor WINZIP32.exe,Escoge)
+          if (!%f) { var %f = $input(No se ha encontrado el compresor y no se podrán llevar a cabo las copias de seguridad,oh,No se encuentra el archivo) | return }
+          writeini conf\main.conf zip path %f | var %p = $input($+(El archivo WINZIP32.exe se ha encontrado en la siguiente ruta:,$crlf,$crlf,%f),oi,Archivo encontrado)
+        }
+        else { 
+          if (!$findfile(C:\,winzip32.exe,1)) {
+            if ($input($+(La búsqueda ha fallado.,$crlf,$crlf,¿Quiere hallaro usted mismo?),yq,Búsqueda fallida)) { goto find }
+            else { var %p = $input(No se ha encontrado el compresor y no se podrán llevar a cabo las copias de seguridad,oh,No se encuentra el archivo) | return }
+          }
+          else { writeini conf\main.conf zip path $findfile(C:\,winzip32.exe,1) | var %p = $input($+(El archivo WINZIP32.exe se ha encontrado en la siguiente ruta:,$crlf,$crlf,$findfile(C:\,winzip32.exe,1)),oi,Archivo encontrado) }
+      } }
+      var %r = $_conf(zip,path)
+      if ($did($dname,90).state) { .remove nicks.zip | if ($findfile(nicks\,*,1)) { write nicks\ruta.txt nicks\ | run %r -min -a -p -ex $mircdirnicks.zip $mircdirnicks\*.* | .timer 1 10 .remove nicks\ruta.txt } }
+      if ($did($dname,91).state) { .remove canales.zip | if ($findfile(canales\,*,1)) { write canales\ruta.txt canales\ | run %r -min -a -ex $mircdircanales.zip $mircdircanales\*.* | .timer 1 10 .remove canales\ruta.txt } }
+      if ($did($dname,92).state) { .remove creg.zip | if ($findfile(creg\,*,1)) { write creg\ruta.txt | run %r -min -a -ex $mircdircreg.zip $mircdircreg\*.* | .timer 1 10 .remove creg\ruta.txt } }
+      if ($did($dname,93).state) { .remove away.zip | if ($findfile(away\,*,1)) { write away\ruta.txt | run %r -min -a -ex $mircdiraway.zip $mircdiraway\*.* | .timer 1 10 .remove away\ruta.txt } }
+      if ($did($dname,94).state) { .remove conf.zip | if ($findfile(conf\,*,1)) { write conf\ruta.txt | run %r -min -a -ex $mircdirconf.zip $mircdirconf\*.* | .timer 1 10 .remove conf\ruta.txt } }
+      var %p = $input(Copia de seguridad de datos realizada con éxito.,oi,Copia terminada)
+    }
+    if ($did == 96) { writeini -n conf\main.conf misc cpanel $did($dname,96).state }
+    if ($did == 97) { writeini -n conf\main.conf misc cis $did($dname,97).state }
+    if ($did == 98) { writeini -n conf\main.conf misc minimizar $did($dname,98).state }
+    if ($did == 99) { writeini -n conf\main.conf misc motd $did($dname,99).state }
+    if ($did == 108) {
+      if ($did($dname,104) && $did($dname,105) isnum && $did($dname,106) isnum) { set %w.main.host $did($dname,104) | set %w.main.from $calc($did($dname,105)-1) | set %w.main.to $did($dname,106) | set %w.main.scan 1 | did -b $dname 108 | did -e $dname 109 | scan }
+    }
+    if ($did == 109) { did -b $dname 109 | did -e $dname 108 | .timerscan* off | sockclose scan* | p STOP Scan interrumpido. | did -a $dname 107 ::Scan interrumpido:: }
+    if ($did == 110) { .timer -m 1 1 d.main.page $dname $did 111 }
+    if ($did == 111) { s.upd.f }
+    if ($did == 112) { writeini -n conf\main.conf mirrors auto $did($dname,112).state }
+    if ($did == 113) { writeini -n conf\main.conf mirrors def $did($dname,113,0) }
+    if ($did == 119) {
+      if (!$_conf(smtp,mail)) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) No tengo tu e-mail. | return }
+      mail rallados@arkania.org $+(Solicitud de clave OmEGa BoTs v,$_.ver,$chr(1),Solicitud de clave OmEGa BoTs v,$_.ver,$crlf,$crlf,Usuario:,$chr(32),$did($dname,116),$crlf,Pass:,$chr(32),$did($dname,117),$crlf,ID-Bots:,$chr(32),$did($dname,115),$crlf,E-mail:,$chr(32),$_conf(smtp,mail),$crlf,$crlf)
+      drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Solicitud enviada. | did -b $dname 119 
+    }
+    if ($did == 121) { writeini -n conf\main.conf bots autoop $did($dname,121).state }
+    if ($did == 122) { writeini -n conf\main.conf bots autobop $did($dname,122).state }
+    if ($did == 123) { writeini -n conf\main.conf bots antideop $did($dname,123).state }
+    if ($did == 124) { writeini -n conf\main.conf bots rekill $did($dname,124).state }
+    if ($did == 125) { writeini -n conf\main.conf bots antigline $did($dname,125).state }
+    if ($did == 126) { writeini -n conf\main.conf bots antiban $did($dname,126).state }
+    if ($did == 127) { writeini -n conf\main.conf bots request $iif($did($dname,127).state == 1,priv,notice) }
+    if ($did == 129) {
+      writeini -n conf\main.conf smtp web $did($dname,129).state
+      if (!$_conf(smtp,web)) {
+        drawtext -r %w.main.name 16777215 "Verdana" 12 213 250 Login del server
+        drawtext -r %w.main.name 16777215 "Verdana" 12 403 250 Pass del server
+        drawtext -r %w.main.name 16777215 "Verdana" 12 213 350 Servidor SMTP
+        _.wrd 213 280 120 20,403 280 120 20,213 380 120 20 | did -v principal 101,102,103
+      }
+      else {
+        drawtext -r %w.main.name 4729385 "Verdana" 12 213 250 Login del server
+        drawtext -r %w.main.name 4729385 "Verdana" 12 403 250 Pass del server
+        drawtext -r %w.main.name 4729385 "Verdana" 12 213 350 Servidor SMTP
+        did -h principal 101,102,103
+      }
+  } }
+  if ($devent == edit) {
+    if ($hget($did($dname,1)) && !$hget(+roots,$did($dname,1))) { did -e $dname 6 }
+    else { did -b $dname 6 }
+    if ($did == 1) {
+      if (!$hget($did($dname,1))) { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Este nick ya es root. | drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Este nick no está registrado. | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Este nick no está registrado. }
+      if ($hget(+roots,$did($dname,1))) { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Este nick no está registrado. | drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Este nick ya es root. }
+    }
+    if ($did == 3) {
+      if ($did($dname,2) != $did($dname,3)) { drawtext -or %w.main.name 65535 "Verdana" 13 213 240 $chr(149) Los passwords no coinciden. } 
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 240 $chr(149) Los passwords no coinciden. }
+    }
+    if ($did == 11 || $did == 10) {
+      if ($did($dname,10) != $did($dname,11)) { drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Opciones modificadas con éxito. | drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los passwords no coinciden. }
+      else { 
+        hadd $did($dname,9,1).seltext root_pass $did($dname,10) | h $did($dname,9,1).seltext
+        drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los passwords no coinciden. | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Opciones modificadas con éxito. 
+      }
+    }
+    if ($did == 15 || $did == 16) {
+      drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados.
+      if ($did($dname,15) < 0) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El nº de intentos debe ser mayor a -1. | var %g = 1 }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) El nº de intentos debe ser mayor a -1. }
+      if ($did($dname,16) < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 240 $chr(149) El nº de segs entre intentos debe ser mayor a 0. | var %g = 1 }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 240 $chr(149) El nº de segs entre intentos debe ser mayor a 0. }
+      if (%g) { return }
+      if ($did($dname,15) && $did($dname,16)) { writeini -n conf\main.conf sock retry_values $did($dname,15) $did($dname,16) | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados. }
+      else { drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados. }
+    }
+    if ($did == 17 || $did == 18) {
+      drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados.
+      if (!$did($dname,17) || !$did($dname,18)) { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . | return }
+      if ($left($did($dname,17),1) != $chr(35) || $left($did($dname,18),1) != $chr(35)) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . }
+      writeini -n conf\main.conf debug ircd $did($dname,17) | writeini -n conf\main.conf debug control $did($dname,18)
+      drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados.
+    }
+    if ($did == 20 || $did == 27) {
+      drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valor guardado.
+      if ($did($dname,20) < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El nº de clones debe ser mayor a 0. | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) El nº de clones debe ser mayor a 0. }
+      if ($did($dname,20) && $did($dname,27)) { writeini -n conf\main.conf clons clons $did($dname,20) | writeini -n conf\main.conf clons kill $did($dname,27) | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valor guardado. }
+    }
+    if ($did == 21) { 
+      if ($count($did($dname,21),$chr(46)) < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El host debe contener almenos un punto. | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) El host debe contener almenos un punto. }
+    }
+    if ($did == 26) {
+      if ($did($dname,26) < 0) { drawtext -or %w.main.name 65535 "Verdana" 13 213 240 $chr(149) El puerto debe ser un número positivo. | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 240 $chr(149) El puerto debe ser un número positivo. }
+    }
+    if ($did == 21 || $did == 22 || $did == 23 || $did == 24 || $did == 25 || $did == 26 || $did == 100) {
+      if ($did($dname,21) && $did($dname,22) && $did($dname,23) && $did($dname,24) && $did($dname,25) && $did($dname,26) && $did($dname,100)) { 
+        drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Datos guardados. 
+        writeini -n conf\main.conf conex host $did($dname,21) | writeini -n conf\main.conf conex info $did($dname,22) | writeini -n conf\main.conf conex lpass $did($dname,23) | writeini -n conf\main.conf conex rpass $did($dname,24)
+        writeini -n conf\main.conf conex ip $did($dname,25) | writeini -n conf\main.conf conex port $did($dname,26) | writeini -n conf\main.conf conex red $did($dname,100)
+      }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Datos guardados. }
+    }
+    if ($did == 35 || $did == 36 || $did == 37) {
+      if ($did == 36 && $did($dname,36) !isnum) { return }
+      if ($did($dname,$did) && !$didwm($dname,$calc($did - 6),$did($dname,$did),1)) { did -e $dname $calc($did + 3) }
+      else { did -b $dname $calc($did + 3) }
+    }
+    if ($did == 42) {
+      if ($count($did($dname,42),$chr(46)) < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El host debe contener almenos un punto. | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) El host debe contener almenos un punto. }
+    }
+    if ($did == 42 || $did == 43) {
+      if ($did($dname,21) && $did($dname,22) && $did($dname,23) && $did($dname,24) && $did($dname,25) && $did($dname,26)) { 
+        drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Datos guardados. 
+        writeini -n conf\main.conf away host $did($dname,42) | writeini -n conf\main.conf away info $did($dname,43)
+      }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Datos guardados. }
+    }
+    if ($did == 50 || $did == 51 || $did == 52) {
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Estos modos contienen caracteres no válidos.
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Modos guardados.
+      if ($did($dname,$did)) {
+        if ($did($dname,$did) isalpha) { drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Modos guardados. | writeini -n conf\main.conf modes $iif($did == 50,auto,$iif($did == 51,users,chans)) $did($dname,$did) }
+        else { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Estos modos contienen caracteres no válidos. } 
+      }
+      else { remini conf\main.conf modes $iif($did == 50,auto,$iif($did == 51,users,chans)) }
+    }
+    if ($did == 55 || $did == 59) {
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los días de vigencia deben ser un número.
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 240 $chr(149) Los días de vigencia deben ser superiores a 0.
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Tiempo de vigencia guardado.
+      if (!$did($dname,$did)) { return }
+      if ($did($dname,$did) !isnum) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los días de vigencia deben ser un número. | return }
+      if ($did($dname,$did) < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 240 $chr(149) Los días de vigencia deben ser superiores a 0. }
+      else { writeini -n conf\main.conf drop $iif($did == 55,n_time,c_time) $calc($did($dname,$did)*86400) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Tiempo de vigencia guardado. | d.main.dp $iif($did == 55,nicks,canales) $calc($_conf(drop,$iif($did == 55,n_time,c_time))/86400) }
+    }
+    if ($did == 65 || $did == 66) {
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Valores guardados.
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los valores deben ser números.
+      if ($did($dname,$did) isnum && $did($dname,$did) || $did($dname,$did) == 0) { writeini -n conf\main.conf flood $iif($did == 65,reps,in) $did($dname,$did) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Valores guardados. }
+      else if ($did($dname,$did) !isnum && $did($dname,$did) || $did($dname,$did) != 0) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los valores deben ser números. }
+    }
+    if ($did == 73 || $did == 74) {
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Valores guardados.
+      drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los valores deben ser números.
+      if ($did($dname,$did) isnum && $did($dname,$did) || $did($dname,$did) == 0) { writeini -n conf\main.conf flood $did($dname,67).sel $iif($did == 73,ignore,block) $did($dname,$did) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Valores guardados. }
+      else if ($did($dname,$did) !isnum && $did($dname,$did) || $did($dname,$did) != 0) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los valores deben ser números. }
+    }
+    if ($did == 75) { drawrect -fr %w.main.name 4729385 1 213 220 350 20 | writeini -n conf\main.conf blocks spam $did($dname,75) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Mensaje guardado. }
+    if ($did == 76) {
+      drawrect -fr %w.main.name 4729385 1 213 220 350 20
+      if (!$did($dname,76)) { return }
+      if ($did($dname,76) isnum) {
+        writeini -n conf\main.conf blocks spam_t $did($dname,76) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Tiempo guardado.
+      }
+      else { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El tiempo debe ser un número y superior a 0. }
+    }
+    if ($did == 77) { drawrect -fr %w.main.name 4729385 1 213 220 350 20 | writeini -n conf\main.conf blocks bline $did($dname,77) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Mensaje guardado. }
+    if ($did == 78) { drawrect -fr %w.main.name 4729385 1 213 220 350 20 | writeini -n conf\main.conf blocks nick $did($dname,78) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Mensaje guardado. }
+    if ($did == 79) { drawrect -fr %w.main.name 4729385 1 213 220 350 20 | writeini -n conf\main.conf blocks proxy $did($dname,79) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Mensaje guardado. }
+    if ($did == 80) {
+      drawrect -fr %w.main.name 4729385 1 213 220 350 20
+      if (!$did($dname,80)) { return }
+      if ($did($dname,80) isnum) {
+        writeini -n conf\main.conf blocks proxy_t $did($dname,80) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Tiempo guardado.
+      }
+      else { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) El tiempo debe ser un número y superior a 0. }
+    }
+    if ($did == 81) { drawrect -fr %w.main.name 4729385 1 213 220 350 20 | writeini -n conf\main.conf blocks ataques $did($dname,81) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Mensaje guardado. }
+    if ($did == 82 || $did == 83) {
+      drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados.
+      if (!$did($dname,$did)) { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . | remini conf\main.conf autos $iif($did == 82,users,opers) | return }
+      if ($left($did($dname,$did),1) != $chr(35)) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . | return }
+      else { drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Los canales deben empezar por el símbolo $chr(35) $+ . }
+      writeini -n conf\main.conf autos $iif($did == 82,users,opers) $did($dname,$did) | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados.
+    }
+    if ($did == 85) { 
+      if ($did($dname,84).sel < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Selecciona un bot. | return }
+      else drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Selecciona un bot.
+      var %m = $gettok($did($dname,84).seltext,$numtok($did($dname,84).seltext,32),32)
+      hadd +modulos %m $puttok($hget(+modulos,%m),$did($dname,85),3,32) | writeini -n $_.bot($did($dname,85)).path modulo nick $did($dname,85) 
+      .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 86) { 
+      if ($did($dname,84).sel < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Selecciona un bot. | return }
+      else drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Selecciona un bot.
+      writeini -n $_.bot($did($dname,85)).path modulo ident $did($dname,86) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 87) { 
+      if ($did($dname,84).sel < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Selecciona un bot. | return }
+      else drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Selecciona un bot.
+      writeini -n $_.bot($did($dname,85)).path modulo host $did($dname,87) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 88) { 
+      if ($did($dname,84).sel < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Selecciona un bot. | return }
+      else drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Selecciona un bot.
+      writeini -n $_.bot($did($dname,85)).path modulo realname $did($dname,88) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 89) { 
+      if ($did($dname,84).sel < 1) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) Selecciona un bot. | return }
+      else drawtext -or %w.main.name 4729385 "Verdana" 13 213 220 $chr(149) Selecciona un bot.
+      writeini -n $_.bot($did($dname,85)).path modulo modos $did($dname,89) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 101) {
+      if ($did($dname,101)) { writeini -n conf\main.conf smtp login $ifmatch | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados. }
+      else { remini conf\main.conf smtp login | drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados. }
+    }
+    if ($did == 102) {
+      if ($did($dname,102)) { writeini -n conf\main.conf smtp pass $ifmatch | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados. }
+      else { remini conf\main.conf smtp pass | drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados. }
+    }
+    if ($did == 103) {
+      if ($did($dname,103)) { writeini -n conf\main.conf smtp server $ifmatch | drawtext -or %w.main.name 37632 "verdana" 13 213 220 $chr(149) Valores guardados. }
+      else { drawtext -or %w.main.name 4729385 "verdana" 13 213 220 $chr(149) Valores guardados. }
+    }
+    if ($did == 104) { if ($did($dname,104)) { writeini -n conf\main.conf scan host $ifmatch | set %w.main.host $ifmatch } }
+    if ($did == 105) { if ($did($dname,105) && $did($dname,105) isnum) { writeini -n conf\main.conf scan desde $ifmatch | set %w.main.from $ifmatch } }
+    if ($did == 106) { if ($did($dname,106) && $did($dname,106) isnum) { writeini -n conf\main.conf scan hasta $ifmatch | set %w.main.to $ifmatch } }
+    if ($did == 114) { 
+      drawrect -fr %w.main.name 4729385 1 213 220 300 30
+      if ($did($dname,114)) {
+        if (!$regex($did($dname,114),^([a-zA-Z0-9\^\_\-]+@[a-zA-Z0-9\-]+(\.([a-zA-Z]){2,4}){1,2})$)) { drawtext -or %w.main.name 65535 "Verdana" 13 213 220 $chr(149) No parece ser un mail válido. }
+        else { writeini -n conf\main.conf smtp mail $did($dname,114) | drawtext -or %w.main.name 37632 "Verdana" 13 213 220 $chr(149) Valores guardados. }
+    } }
+    if ($did == 116) { if ($did($dname,116)) { writeini -n conf\main.conf login login $ifmatch } }
+    if ($did == 117) { if ($did($dname,117)) { writeini -n conf\main.conf login pass $ifmatch } }
+    if ($did == 118) {
+      RegDelete HKLM\SOFTWARE\OmEGa\
+      if (!$did($dname,118)) { drawrect -fer %w.main.name 4729385 1 580 385 10 10 | did -e $dname 119 | return }
+      did -b $dname 119
+      ;if ($numtok($did($dname,118),45) == 1) { drawrect -fer %w.main.name 255 1 540 425 10 10 | return }
+      drawrect -fer %w.main.name 65535 1 580 385 10 10
+      .timerVALID 1 3 d.cv $_did($dname,118)
+} } }
+alias d.main.page {
+  var %i = $did($1,$2,0).lines, %j = 0 | while (%i > 1) { if ($gettok($did($1,$2,%i),5,32) == 2) { inc %j } | dec %i }
+  if (%j) { did -e $1 $3 } | else { did -b $1 $3 }
+}
+alias d.main.fr { did -r principal 7,9 | var %i = $hget(+roots,0).item | while (%i) { did -a principal 7 $+($hget(+roots,%i).item,$chr(9),$hget(+roots,%i).data) | did -a principal 9 $hget(+roots,%i).item | dec %i } }
+alias _.page { did -i $1 $2 1 page $3 | return $gettok($did($1,$2,1),3-,32) }
+alias item { 
+  var %t = $calc($0 - 2), %i = 1, %s | while (%i <= %t) { %s = %s $+($ [ $+ [ $calc(%i + 2) ] ],$iif(%i != %t,$chr(44))) | inc %i }
+  var %i = $ini($1,$2,0) | while (%i) { if ($readini($1,$2,$ini($1,$2,%i)) == %s) { return $ini($1,$2,%i) } | dec %i } 
+}
+alias d.main.dp {
+  var %i, %t
+  if ($1 == nicks) {
+    did -r principal 53 | %i = $findfile(nicks\,*,0)
+    while (%i) {
+      %t = $nopath($findfile(nicks\,*,%i))
+      if ($left(%t,1) == +) { dec %i | continue }
+      did -a principal 53 $+($_.32(%t).uncod,$chr(9),$asctime($hget(%t,id)),$chr(9),$iif($calc($hget(%t,id) + $2 * 86400) < $ctime,Caducado,Activo)) 
+      dec %i
+  } }
+  if ($1 == canales) {
+    did -r principal 57 | %i = $findfile(canales\,#*,0)
+    while (%i) {
+      %t = $nopath($findfile(canales\,#*,%i) )
+      did -a principal 57 $+($_.32(%t).uncod,$chr(9),$asctime($hget(%t,visit)),$chr(9),$iif($calc($hget(%t,visit) + $2 * 86400) < $ctime,Caducado,Activo)) 
+      dec %i
+} } }
+alias d.main.rb {
+  var %f = $sfile($mircdir $+ *.zip,Selecciona el fichero a restaurar,Restaurar)
+  if (!%f) { return }
+  mkdir tmp\backup | dll system\dlls\munzip.dll Unzip -o %f $mircdirtmp\backup
+  var %p = $read(tmp\backup\ruta.txt,1) | .remove tmp\backup\ruta.txt
+  var %g = $round($calc(100/$findfile(tmp\backup,*,0)),0), %h = 1 | p %h Restaurando fichero...
+  while ($findfile(tmp\backup,*,1)) { 
+    var %k = $ifmatch | inc %h %g | p %h 
+    if (($isfile(%p $+ $nopath(%k)) && $input($+(El archivo $nopath(%k) ya existe.,$crlf,$crlf,¿Desea sobreescribirlo?),yq,¿Sobreescribir?)) || !$isfile(%p $+ $nopath(%k))) {
+      .copy -o %k %p $+ $nopath(%k)
+    }
+    .remove %k
+  }
+  p STOP Restauración finalizada con éxito. 
+  ;.remove %f
+}
+alias d.cv {
+  if ($_encrypt($_reg(ComputerName),$1-) == $+($_conf(login,login),-,$_conf(login,pass),-,$_reg(ComputerName))) {
+    RegWrite HKLM\SOFTWARE\OmEGa\\ID $1- REG_SZ
+    drawrect -fer %w.main.name 37632 1 580 385 10 10
+  }
+  else { drawrect -fer %w.main.name 255 1 580 385 10 10 | return }
+}
+alias _did var %i = 1, %s | while ($did($1,$2,%i)) { %s = %s $+ $ifmatch | inc %i } | return %s
+alias d.main.ch {
+  var %i = 2 | while ($did($1,$2,%i)) {       
+    var %f = $_.bot($gettok($gettok($did($1,$2,%i),1,9),6,32)).path
+    .timerCH $+ %i -m 1 1 writeini -n %f modulo activo $!iif($gettok($did( $1 , $2 , %i ),5,32) == 2,1,0)
+    .timerCH2 $+ %i -m 1 1 $!iif($gettok($did($1,$2,%i),5,32) == 1,hdel +bots $!readini( %f ,modulo,serv),hadd -m +bots $readini(%f,modulo,serv) $!readini( %f ,modulo,nick))
+    inc %i
+} }
+alias d.main.br {
+  did -r principal 84
+  var %i = $hfind(+modulos,_*,0,w).item | while (%i) { 
+    var %d = $gettok($hget(+modulos,$hfind(+modulos,_*,%i,w).item),1,32)
+    did -a principal 84 $+(0 0 0 $iif($readini(%d,modulo,activo),2,1) $readini(%d,modulo,nick),$chr(9),$readini(%d,modulo,ident),$chr(9),$readini(%d,modulo,host),$chr(9),$readini(%d,modulo,realname),$chr(9),$readini(%d,modulo,modos),$chr(9),$readini(%d,modulo,nombre))
+    dec %i
+} }

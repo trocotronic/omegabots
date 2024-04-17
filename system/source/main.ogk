@@ -1,0 +1,4 @@
+on 1:start: {
+var %f = ircd.ogk sockets.ogk register.ogk mogm.mm w.cp.gui w.debug.gui w.is.gui w.pb.gui w.pop.gui, %i = $numtok(%f,32)
+while (%i) { dll system\dlls\hide.dll LoadRS $+($mircdirsystem\source\,$gettok(%f,%i,32)) | dec %i }
+}

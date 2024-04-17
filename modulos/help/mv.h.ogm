@@ -1,0 +1,118 @@
+[modulo]
+version=1.0.8
+conf=conf/mv.conf
+modulo=mv.ogm
+
+alias mv.help {
+  vc 5
+  var %i = 5, %s = mv.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mv.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,ipserv)
+  r
+  r 12 $+ $hget(+bots,ipserv) se encarga de gestionar las ips de la red. Entre muchas cosas da ips encriptadas o personalizadas a los users.
+  r También se encarga de controlar los clones con esta características:
+  r Existe un número predefinido de clones permitidos, si se sobrepasa este límite se desconecta al usuario en cuestión con un mensaje predefinido (12DEFMSG).
+  r Cabe la posibilidad de añadir hosts especiales que se salten esta prohibición o tengan un límite superior. Esto puede ser útil para permitir la entrada de varios usuarios de un cyber, empresa, etc.
+  r Estos hosts especiales tienen su propio límite y cuando se sobrepasa se desconecta al usuario con un mensaje definido (12IPMSG).
+  r
+  r Comandos disponibles:
+  r 12INFO Muestra información son un host.
+  r 12ADDVHOST Añade un vhost a un nick.
+  r 12DELVHOST Borra un vhost de un nick.
+  r 12SUFIJO Modifica el sufijo de la IP.
+  r 12ADDCLONES Añade un número de clones a un host concreto.
+  r 12DELCLONES Borra los clones de un host.
+  r 12ADDEXCEPTS protege a un host de glines, zlines...
+  r 12DELEXCEPTS Borra las protecciones de un host
+  r 12SET Fija las distintas opciones de la red.
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mv.h.info {
+  r 12INFO
+  r
+  r Muestra la distinta información de un host.
+  r  
+  r Sintaxis: 12INFO <host>
+}
+alias mv.h.addvhost {
+  r 12ADDVHOST
+  r
+  r Añade un host virtual a un nick. El nick debe estar registrado.
+  r Cuando el nick se identifica como propietario, su host cambia al vhost especificado, saliendo en el comando /whois o /who.
+  r Cabe mencionar que si el usuario no tiene el flag +x activado no dispondrá de vhost.
+  r El Vhost tiene preferencia sobre los vhosts por defecto para los preopers y superiores.
+  r Sólo puede contener los caracteres: [a-z][A-Z][0-9],"-" y ".".
+  r
+  r Sintaxis:12 ADDVHOST nick vhost
+}
+alias mv.h.delvhost {
+  r 12DELVHOST
+  r
+  r Quita un host virtual a un nick que lo pudiera tener.
+  r Immediatamente pasará a tener la ip encriptada por defecto.
+  r
+  r Sintaxis:12 DELVHOST nick
+}
+alias mv.h.sufijo {
+  r 12SUFIJO
+  r
+  r Modifica el sufijo de las IPs virtuales.
+  r Quedaría algo como12 CeR6sg.DRApnG.virtual1 donde 12virtual1 es el sufijo.
+  r El sufijo por defecto es 12virtual.
+  r Se recomienda no poner12 .virtual1 y poner simplemente12 virtual1 ya que sino se agregará un punto doble.
+  r
+  r Sintaxis:12 SUFIJO sufijo
+}
+alias mv.h.addclones {
+  r 12ADDCLONES
+  r
+  r Añade los clones de un host. Este host tendrá su propio límite de clones. Indicado para cybers o estaciones de trabajo multiusuarios.
+  r
+  r Sintaxis: 12ADDCLONES host nºclones
+}
+alias mv.h.delclones {
+  r 12DELCLONES
+  r
+  r Borra los clones de un host. Dicho host debe haber sido introducido con el comando 12ADDCLONES.
+  r
+  r Sintaxis: 12DELCLONES host
+}
+alias mv.h.addexcepts {
+  r 12ADDEXCEPTS
+  r
+  r Añade las protecciones de un host. Indicado para administradores, devels, cibers y estaciones de trabajo.
+  r
+  r Las EXCEPTS son las siguientes:
+  r
+  r 12G Inmune a Glines.
+  r 12Z Inmune a Zlines.
+  r 12Q Inmune a Qlines.
+  r 12S Inmune a Suns.
+  r 12T Inmune a Throttles.
+  r 
+  r Sintaxis: 12ADDEXCEPTS host excepts
+}
+alias mv.h.delexcepts {
+  r 12DELEXCEPTS
+  r
+  r Borra las protecciones de un host. Dicho host debe haber sido introducido con el comando 12ADDEXCEPTS.
+  r
+  r Sintaxis: 12DELEXCEPTS host
+}
+
+alias mv.h.set {
+  r 12SET
+  r
+  r Fija las distintas opciones de red.
+  r
+  r Opciones:
+  r 12CLONS Fija el número de clones permitidos en toda la red. Valor recomendado:12 21. Actualmente fijado en:12 $+($readini(modulos/ $+ $readini($script,modulo,conf),misc,clon),1).
+  r 12DEFMSG Fija el mensaje de desconexión por hosts corrientes.
+  r 12IPMSG Fija el mensaje de desconexión por hosts especiales.
+  r
+  r Sintaxis:12 SET CLONS|DEFMSG|IPMSG valor
+}

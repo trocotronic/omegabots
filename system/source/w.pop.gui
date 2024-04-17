@@ -1,0 +1,68 @@
+alias popup {
+  var %w.pop = popups.ogp, %w.pop.f = "Tahoma", %w.pop.t = 11, %w.pop.w = $_.pop(%w.pop,%w.pop.f,%w.pop.t).w, %w.pop.h = $_.pop(%w.pop,%w.pop.f,%w.pop.t).h, %w.pop.x = $_.pop($mouse.x,%w.pop.w).x, %w.pop.y = $_.pop($mouse.y,%w.pop.h).y, %w.pop.name = @pop
+  window -c %w.pop.name
+  window -Bfhkpz +d %w.pop.name %w.pop.x %w.pop.y %w.pop.w %w.pop.h %w.pop.name %w.pop.f %w.pop.t
+  drawpic -mnrs %w.pop.name 1 1 %w.pop.w %w.pop.h 1 1 1 54 $_.png(popups)
+  var %i = 1, %h = 2, %w = $iif($read(%w.pop,w,$+($chr(123),*)),30,10) | while ($hmatch(+popups,$+(%i,_,*),1)) { 
+    if ($gettok($ifmatch,2,95) != $chr(45)) { drawtext -nr %w.pop.name 16777215 %w.pop.f %w.pop.t %w $iif($chr(123) isin $read(%w.pop,%i),$calc(%h + 2),%h) $gettok($hmatch(+popups,$+(%i,_,*),1),2,95) }
+    else { drawline -nr %w.pop.name 16777215 1 10 $calc(4+%h) $calc(%w.pop.w - 10) $calc(4+%h) }
+    if ($chr(123) isin $read(%w.pop,%i)) { drawpic -mnrst %w.pop.name 65280 8 %h 20 20 $iif($gettok($gettok($gettok($read(%w.pop,%i),1,123),1,125),2,44),$ifmatch 48 48) $_.png($gettok($gettok($gettok($read(%w.pop,%i),1,123),1,125),1,44)) | hadd -m +pop_cords %i 0 %h %w.pop.w 20 }
+    else { hadd -m +pop_cords %i 0 %h %w.pop.w %w.pop.t }
+    inc %h $iif($chr(123) isin $read(%w.pop,%i),18,$calc(%w.pop.t + 2)) | inc %i
+  }
+  drawdot %w.pop.name | window -a %w.pop.name | drawsave %w.pop.name tmp\popup.bmp
+}
+alias _.pniv {
+  var %l = 0 | while ($left($1,%l) == $str($chr(46),%l)) { inc %l }
+  return $calc(%l - 1)
+}
+alias _.pop {
+  if (!$prop) { return $1 }
+  if ($prop == w) {
+    var %i = $lines($1), %w = 0 | while (%i) { if ($width($gettok($hmatch(+popups,$+(%i,_,*)),2,95),$2,$3,0,1) > %w) { %w = $ifmatch } | dec %i }
+    if ($read($1,w,$+($chr(123),*))) { return $calc(35+%w) }
+    return $calc(20+%w)
+  }
+  if ($prop == h) {
+    var %i = $lines($1), %h = 0 | while (%i) { %h = $calc($iif($chr(123) isin $read($1,%i),16,$3)+2+%h) | dec %i }
+    return $calc(6+%h)
+  }
+  if ($prop == x) {
+    if ($calc($1 + $2) > $window(-3).w) { return $calc($1 - $2) }
+    return $1
+  }
+  if ($prop == y) {
+    if ($calc($1 + $2) > $window(-3).h) { return $calc($1 - $2) }
+    return $1
+} }
+menu @pop {
+  mouse: pop.col $mouse.x $mouse.y
+  sclick: pop.cli $mouse.x $mouse.y
+}
+alias pop.col {
+  var %i = 1 | while ($hget(+pop_cords,%i)) {
+    tokenize 32 $1 $2 $ifmatch
+    if ($inrect($1,$2,$3,$4,$5,$6)) { break }
+    else { inc %i }
+  }
+  if ($read(popups.ogp,%i) == -) { return }
+  if (%w.pop.a != %i) { 
+    if ($hget(+pop_cords,%i)) { 
+      tokenize 32 $ifmatch | drawrect -fnr @pop 15252383 1 $1 $2 $3 $4 
+      if ($chr(123) isin $read(popups.ogp,%i)) { drawpic -mnrst @pop 65280 8 $2 20 20 $iif($gettok($gettok($gettok($read(popups.ogp,%i),1,123),1,125),2,44),$ifmatch 48 48) $_.png($gettok($gettok($gettok($read(popups.ogp,%i),1,123),1,125),1,44)) }
+      var %w = $iif($read(popups.ogp,w,$+($chr(123),*)),30,10) | drawtext -nr @pop 1 "Tahoma" 11 %w $iif($chr(123) isin $read(popups.ogp,%i),$calc($2 + 2),$2) $gettok($hmatch(+popups,$+(%i,_,*),1),2,95)
+      drawdot @pop
+    }
+    if ($hget(+pop_cords,%w.pop.a)) { tokenize 32 $ifmatch | drawpic -m @pop $1 $2 $1 $2 $3 $4 tmp\popup.bmp }
+  }
+  set %w.pop.a %i
+}
+alias pop.cli {
+  var %i = 1 | while ($hget(+pop_cords,%i)) {
+    tokenize 32 $1 $2 $ifmatch
+    if ($inrect($1,$2,$3,$4,$5,$6)) { break }
+    else { inc %i }
+  }
+  window -c @pop
+  $hget(+popups,$hmatch(+popups,$+(%i,_,*),1))
+}

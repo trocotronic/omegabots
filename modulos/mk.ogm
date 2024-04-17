@@ -1,0 +1,195 @@
+[modulo]
+version=1.0.8
+nombre=_link
+prefijo=mk
+serv=LinkServ
+ayuda=help\mk.h.ogm
+conf=conf\mk.conf
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=LinK
+ident=LinK
+host=servicios.&red
+realname=Servicio de linkaje de canales con otras redes
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+link=link
+unlink=unlink
+connect=connect
+disconnect=disconnect
+redes=redes
+add=add
+del=del
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mk.privmsg | return
+  :AUTH_OK | mk.sockop | return
+  :%g | return
+}
+on 1:load: if ($sock(ircd)) mk.sockop
+alias mk.sockop { hfree +links | hmake +links | hload -bo +links conf\links.db | sockwrite -nt ircd SERVER $_.conf($script,server) 2 : $+ $_.conf($script,desc) }
+alias mk.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mk.connect {
+  vc 5
+  if (!%parv[4]) { e 1 CONNECT red }
+  if (!$hget(+links,%parv[4])) { e 0 Esta red no se encuentra en la lista. }
+  if ($sock(link. [ $+ [ %parv[4] ] ])) { e 0 Esta red ya se encuentra linkada. }
+  sock link. $+ %parv[4] $hget(+links,%parv[4]) %parv[0] | r Linkaje a la red12 %parv[4] realizado.
+}
+alias mk.disconnect {
+  vc 5
+  if (!%parv[4]) { e 1 DISCONNECT red }
+  if (!$sock(link. [ $+ [ %parv[4] ] ])) { e 0 Esta red no se encuentra linkada. }
+  sockclose link. [ $+ [ %parv[4] ] ]
+  var %i = $tget(redes,%parv[4],0) | while (%i) { 
+    if ($left($tget(redes,%parv[4],%i),1) == $chr(35)) { dec %i | continue }
+    var %n = $tget(redes,%parv[4],%i), %j = $tget(redes,%parv[4],%n,0)
+    while (%j) { k %n PART $tget(redes,%parv[4],%n,%j) :Cerrando conexión con %parv[4] | dec %j }
+    k %n $_.tok(QUIT) :Cerrando conexión con %parv[4]
+    dec %i
+  }
+  tdel redes %parv[4] | r Deslinkaje con12 %parv[4] realizado con éxito. 
+}
+alias mk.link {
+  vc 5
+  if (!%parv[5]) { e 1 LINK red #canal }
+  if (!$sock(link. [ $+ [ %parv[4] ] ])) { e 0 Esta red no está disponible. }
+  set %link[ticks] $ticks | sockwrite -nt link. $+ %parv[4] JOIN %parv[5] | sockwrite -nt link. $+ %parv[4] WHO %parv[5] | sockwrite -nt link. $+ %parv[4] MODE %parv[5] b | sockwrite -nt link. $+ %parv[4] MODE %parv[5] | r Linkaje con12 %parv[5] de12 %parv[4] realizado. | da Linkaje con12 %parv[5] de la red12 $upper(%parv[4]) realizado con éxito. 
+}
+alias mk.unlink {
+  vc 5
+  if (!%parv[5]) { e 1 UNLINK red #canal }
+  if (!$sock(link. [ $+ [ %parv[4] ] ])) { e 0 Esta red no está disponible. }
+  var %i = $tget(redes,%parv[4],%parv[5],0) | while (%i) {
+    var %n = $tget(redes,%parv[4],%parv[5],%i) | k %n $_.tok(PART) %parv[5] :Deslinkaje recibido | tdel redes %parv[4] %n %parv[5]
+    if (!$tget(redes,%parv[4],%n,0)) { k %n $_.tok(QUIT) :Deslinkaje recibido | tdel redes %parv[4] %n }
+    dec %i 
+  }
+  tdel redes %parv[4] %parv[5]
+  sockwrite -nt link. $+ %parv[4] PART %parv[5] | r Deslinkaje con12 %parv[5] de12 %parv[4] realizado. | da Deslinkaje con12 %parv[5] de la red12 $upper(%parv[4]) realizado con éxito.
+}
+alias mk.add {
+  vc 5
+  if (!%parv[6]) { e 1 ADD nombrered host puerto }
+  if ($hget(+links,0).data == 10) { e 0 Sólo se permite agregar 10 redes diferentes. }
+  if (%parv[6] !isnum) { e 2 ADD nombrered host puerto }
+  hadd -m +links %parv[4] %parv[5] %parv[6] | hsave -bo +links conf\links.db | r Red12 %parv[4] añadida con éxito.
+}
+alias mk.del {
+  vc 5
+  if (!%parv[4]) { e 1 DEL nombrered }
+  hdel +links %parv[4] | hsave -bo +links conf\links.db | r Red12 %parv[4] borrada con éxito.
+}
+alias mk.redes {
+  vc 5
+  r *** Redes disponibles para linkar ***
+  var %i = 1 | while (%i <= $hget(+links,0).data) { r 12 $+ $hget(+links,%i).item Servidor:12 $+($gettok($hget(+links,%i).data,1,32),:12,$gettok($hget(+links,%i).data,2,32)) | inc %i }
+}
+on 1:sockopen:link.*: {
+  if ($sockerr) { k $readini($script,modulo,nick) $_.tok(PRIVMSG) $gettok($sock($sockname).mark,1,9) :No es posible conectar con la red $gettok($sockname,2-,46) | return }
+  var %link[nick] = $+($rand(A,Z),$rand(a,z),$rand(A,Z),$rand(a,z),$rand(A,Z),$rand(a,z),$rand(A,Z),$rand(a,z))
+  sockwrite -nt $sockname NICK %link[nick]
+  sockwrite -nt $sockname USER $lower(%link[nick]) $lower(%link[nick]) 0 :Linkaje de la red $_.net
+  sockmark $sockname $_.link($sock(link.*,0)).sep
+}
+on 1:sockread:link.*: {
+  var %s, %t, %n = $gettok($sockname,2-,46), %w | sockread %s
+  ;if (%s) echo -s 12 $ifmatch
+  if ($gettok(%s,1,32) == PING) { sockwrite -nt $sockname PONG $gettok(%s,2,32) | return }
+  %t = $gettok(%s,2,32) | goto %t
+  :332 | k $readini($script,modulo,nick) $_.tok(TOPIC) $gettok(%s,4,32) $gettok(%s,5-,32) | return
+  :352 | %w = $_.link(%n,$gettok(%s,8,32)).nick | if (!$tget(redes,%n,%w,0)) { 
+    sockwrite -nt ircd $_.tok(NICK) %w 1 $ctime $gettok(%s,5,32) 127.0.0.1 $_.conf($script,server) 0 : $+ $gettok(%s,11-,32) 
+    k $hget(+bots,nickserv) $_.tok(CHGHOST) %w $gettok(%s,6,32)
+  }
+  mk.jl %n %w $gettok(%s,4,32) | return
+  :315 | if ($left($gettok(%s,4,32),1) == $chr(35)) { set %link[names] 1 | sockwrite -nt $sockname NAMES $gettok(%s,4,32) } | return
+  :353 | if ($tget(redes,%n,$gettok(%s,5,32),0) && %link[names]) {
+    %w = $gettok(%s,2,58) | var %i = 1, %j = $numtok(%w,32) 
+    while (%i <= %j) {
+      unset %m | if (+ isin $gettok(%w,%i,32)) { var %m = v } | if ($chr(37) isin $gettok(%w,%i,32)) { var %m = %m $+ h } | if (@ isin $gettok(%w,%i,32)) { var %m = %m $+ o }
+      if (%m) { k $readini($script,modulo,nick) $_.tok(MODE) $gettok(%s,5,32) + $+ %m $str($+($remove($gettok(%w,%i,32),+,$chr(37),@),$sock($sockname).mark,$chr(32)),$len(%m)) }
+      inc %i
+  } }
+  return
+  :366 | if (%link[names]) { k $readini($script,modulo,nick) $_.tok(PRIVMSG) $gettok(%s,4,32) :Sincronización realizada en12 $calc(($ticks - %link[ticks])/1000) segundos | unset %link* } | return
+  :367 | k $readini($script,modulo,nick) $_.tok(MODE) $gettok(%s,4,32) +b $gettok(%s,5,32) | return
+  :324 | k $readini($script,modulo,nick) $_.tok(MODE) $gettok(%s,4,32) $gettok(%s,5-,32) | return
+  :PRIVMSG | if ($left($gettok(%s,3,32),1) != $chr(35)) { return } | k $_.link(%n,$gettok(%s,1,32)).nick $_.tok(PRIVMSG) $gettok(%s,3,32) $gettok(%s,4-,32) | return
+  :TOPIC | k $_.link(%n,$gettok(%s,1,32)).nick $_.tok(TOPIC) $gettok(%s,3,32) $gettok(%s,4-,32) | return
+  :KICK | k $_.link(%n,$gettok(%s,1,32)).nick $_.tok(KICK) $gettok(%s,3,32) $+($gettok(%s,4,32),$sock($sockname).mark) $gettok(%s,5-,32) | mk.pl %n $+($gettok(%s,4,32),$sock($sockname).mark) $gettok(%s,3,32) | return
+  :MODE 
+  if ($_.link(%n,$gettok(%s,1,32)).nick == $_.link(%n,$gettok(%s,3,32)).nick) return
+  if (!$tget(redes,%n,$_.link(%n,$gettok(%s,1,32)).nick,0)) { 
+    sockwrite -nt ircd $_.tok(NICK) $_.link(%n,$gettok(%s,1,32)).nick 1 $ctime $_.link(%n,$gettok(%s,1,32)).user 127.0.0.1 $_.serv 0 :IRCop 
+    k $hget(+bots,nickserv) $_.tok(CHGHOST) $_.link(%n,$gettok(%s,1,32)).nick $_.link(%n,$gettok(%s,1,32)).host
+    tadd redes %n $_.link(%n,$gettok(%s,1,32)).nick $gettok(%s,3,32) $ctime
+    k $_.link(%n,$gettok(%s,1,32)).nick $_.tok(UMODE2) +oNS $ctime
+  }
+  var %m = $gettok(%s,5-,32), %i = 1 | while ($gettok(%m,%i,32)) { if ($tget(redes,%n,$+($ifmatch,$sock($sockname).mark),0)) { var %ss = %ss $+($gettok(%m,%i,32),$sock($sockname).mark) } | else { var %ss = %ss $gettok(%m,%i,32) } | inc %i }
+  k $_.link(%n,$gettok(%s,1,32)).nick $_.tok(MODE) $gettok(%s,3,32) $gettok(%s,4,32) %ss | return
+  :JOIN | %w = $_.link(%n,$gettok(%s,1,32)).nick  
+  if (!$tget(redes,%n,%w,0) && $sock(ircd)) { 
+    sockwrite -nt ircd $_.tok(NICK) %w 1 $ctime $gettok($gettok(%s,2,33),1,64) 127.0.0.1 $_.conf($script,server) 0 :Usuario linkado a %n 
+    k $hget(+bots,nickserv) $_.tok(CHGHOST) %w $gettok($gettok(%s,1,32),2,64)
+  } 
+  mk.jl %n %w $gettok($gettok(%s,3,32),1-,58) | return
+  :PART | mk.pl %n $_.link(%n,$gettok(%s,1,32)).nick $gettok(%s,3,32) $gettok(%s,4-,32) | return
+  :QUIT | mk.ql %n $_.link(%n,$gettok(%s,1,32)).nick $gettok(%s,3-,32) | return
+  :NICK | mk.nl %n $_.link(%n,$gettok(%s,1,32)).nick $_.link(%n,$remove($gettok(%s,3,32),:)).nick | return
+  :%t
+}
+on 1:sockclose:link.*: set %parv[0] $readini($script,modulo,nick) | set %parv[4] $gettok($sockname,2,46) | mk.disconnect
+alias _.link {
+  if ($prop == nick) return $+($remove($gettok($2,1,33),$chr(58)),$sock(link. $+ $1).mark)
+  if ($prop == user) return $gettok($gettok($2,2,33),1,64)
+  if ($prop == host) return $gettok($2,2,64)
+  if ($prop == sep) {
+    if ($1 == 1) return -
+    if ($1 == 2) return ^
+    if ($1 == 3) return _
+    if ($1 == 4) return `
+    if ($1 == 5) return [
+    if ($1 == 6) return ]
+    if ($1 == 7) return \
+    if ($1 == 8) return $chr(123)
+    if ($1 == 9) return $chr(124)
+    if ($1 == 10) return $chr(125)
+  }
+}
+alias mk.jl {
+  k $2 $_.tok(JOIN) $3
+  tadd redes $1 $2 $3 $ctime
+  tadd redes $1 $3 $2 $ctime
+}
+alias mk.pl {
+  k $2 $_.tok(PART) $3 $4-
+  tdel redes $1 $2 $3 | tdel redes $1 $3 $2
+  if (!$tget(redes,$1,$2,0)) {
+    tdel redes $1 $2
+    k $2 $_.tok(QUIT) 
+  }
+}
+alias mk.ql {
+  var %i = $tget(redes,$1,$2,0) | while (%i) { tdel redes $1 $tget(redes,$1,$2,%i) $2 | dec %i }
+  tdel redes $1 $2 | k $2 $_.tok(QUIT) $3-
+}
+alias mk.nl {
+  var %i = $tget(redes,$1,$2,0) | while (%i) { var %c = $tget(redes,$1,$2,%i) | tdel redes $1 %c $2 | tadd redes $1 %c $3 $ctime | tadd redes $1 $3 %c $ctime | dec %i }
+  tdel redes $1 $2 | k $2 $_.tok(NICK) $3 $ctime
+}

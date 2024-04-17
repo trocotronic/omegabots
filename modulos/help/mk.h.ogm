@@ -1,0 +1,83 @@
+[modulo]
+version=1.0.8
+conf=conf\mk.conf
+modulo=mk.ogm
+
+alias mk.help {
+  vc 5
+  var %i = 5, %s = mk.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mk.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,linkserv)
+  r
+  r 12 $+ $hget(+bots,linkserv) permite enlazar varios canales de varias redes distintas.
+  r Un canal linkado de una red permite visualizar el tiempo real todo lo que ocurre en dicho canal de otra red al canal mismo canal de nuestra red.
+  r Este sistema soporta hasta 10 redes distintas y un número infinito de canales.
+  r El tiempo real comporta introducir los nicks pertenecientes en la red. Para evitar confusiones de nicks, cada nick de una red en concreto precederá a un símbolo como ^ _ o `.
+  r
+  r Para hacer eso disponible cuenta con los siguientes comandos:
+  r 12LINK Linka un canal.
+  r 12UNLINK Deslinka un canal.
+  r 12CONNECT Conecta el bot a la red.
+  r 12DISCONNECT Desconecta el bot de la red.
+  r 12ADD Añade una red a la lista de redes soportadas.
+  r 12DEL Borra una red de la lista de redes soportadas.
+  r 12REDES Lista el conjunto de redes soportadas.
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mk.h.link {
+  r 12LINK
+  r
+  r Linka un canal de una red a la propia red. Esta unión puede llevarse a cabo cuando existe una conexión con la red a la que se desea linkar.
+  r Por ejemplo, si se quiere unir el canal #A de la red A con el canal #A de nuestra red, basta con linkar ambos canales.
+  r El hecho de linkar en tiempo real implica que lo que ocurra en el canal de la propia red NO será visto por el canal de la red linkada; pero sí a la inversa.
+  r
+  r Sintaxis: 12LINK red #canal
+  r Debe existir una conexión con la red mediante el comando CONNECT.
+}
+alias mk.h.link {
+  r 12UNLINK
+  r
+  r Deslinka un canal de una red introducido con el comando LINK.
+  r
+  r Sintaxis: 12UNLINK red #canal
+}
+alias mk.h.connect {
+  r 12CONNECT
+  r
+  r Conecta este servicio a la red especificada. Dicha red debe figurar en la lista de redes soportadas, añadidas con el comando ADD.
+  r
+  r Sintaxis: 12CONNECT red
+}
+alias mk.h.disconnect {
+  r 12DISCONNECT
+  r
+  r Desconecta el servicio de la red especificada.
+  r No se recomienda usar este comando si existen canales linkados a la dicha red.
+  r
+  r Sintaxis: 12DISCONNECT red
+}
+alias mk.h.add {
+  r 12ADD
+  r
+  r Añade una red a la lista de redes soportadas.
+  r
+  r Sintaxis: 12ADD nombre servidor puerto
+}
+alias mk.h.del {
+  r 12DEL
+  r
+  r Borra una red de la lista de redes soportadas.
+  r
+  r Sintaxis: 12DEL nombre
+}
+alias mk.h.redes {
+  r 12REDES
+  r
+  r Lista todas las redes soportadas con su correspondiente servidor.
+  r
+  r Sintaxis: 12REDES
+}

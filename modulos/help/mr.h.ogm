@@ -1,0 +1,108 @@
+[modulo]
+version=1.0.8
+conf=conf\mn.conf
+modulo=mn.ogm
+
+alias mr.help {
+  var %i = 5, %s = mr.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mr.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,cregserv)
+  r
+  r 12 $+ $hget(+bots,cregserv)  se encarga de gestionar el pre-registro de canales para una mayor comodidad.
+  r Este servicio está tan solo para los nicks registrados.
+  r Solicitar el pre-registro de un canal indica que si es aceptado, el canal pasará a ser propiedad del nick solicitante, disponiendo de total control sobre el mismo.
+  r Para poder usar a12 $hget(+bots,cregserv) debes utilizar /msg $hget(+bots,cregserv) COMANDO para disfrutar de todas sus ventajas.
+  r
+  r Comandos disponibles.
+  r 12REGISTER Solicita el registro de un canal.
+  r 12INFO Muestra la información de un canal en fase de registro.
+  r 12APOYA Emite tu apoyo a un canal en fase de registro.
+  r 12APOYOS Lista tus apoyos emitidos o los de un canal registrado.
+  r 12LIST Lista los distintos canales en fase de registro.
+  r 12DROP Borra un canal de la fase de registro.
+  if ($_.get(%parv[0]).status > 4) { r 12ACEPTAR Acepta y registra un canal. }
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mr.h.register {
+  r 12REGISTER
+  r
+  r Permite solicitar el registro de un canal. Dicho canal debe reunir con el apoyo de diferentes personas y una vez reunidos la administración decidirá su aprobación.
+  r Acualmente, debes reunir12 $_.conf($script,apoyos) apoyos en un máximo de12 $_.conf($script,days) días.
+  r
+  r Sin embargo, los nicks que no tengan una antigüedad de12 $_.conf($script,antig) días no podrán usar este servicio.
+  r Además, para mantener un orden, solo podrás utilizar este servicio una vez cada12 $_.conf($script,freq) horas.
+  r Por último, solo se permite el registro de12 $_.conf($script,max) canales por nick.
+  r
+  r Sintaxis:12 REGISTER #canal contraseña descripción
+  r
+  r El #canal especificado no puede estar registrado y no puede estar en fase de registro. La descripción debe ser breve, clara y concisa.
+}
+alias mr.h.info {
+  r 12INFO
+  r 
+  r Muestra la distinta información de un canal en fase de registro.
+  r Si es el founder quien ejecuta el comando, se le mostrarán todos los apoyos recibidos hasta la fecha.
+  r
+  r Sintaxis:12 INFO #canal
+}
+alias mr.h.apoya {
+  r 12APOYA
+  r
+  r Para registrar un canal es necesario que se dispongan de un número de personas que apoyen dicho canal.
+  r El founder no puede apoyar su canal.
+  r Tal y como sucedía con12 REGISTER , el nick debe tener una antigüedad de12 $_.conf($script,antig) días.
+  r Antes de apoyar, infórmese sobre la temática del canal, intereses, etc. y si está de acuerdo, emita su apoyo.
+  r Sólo puedes emitir un apoyo cada12 $_.conf($script,freq) horas.
+  r
+  r Sintaxis:12 APOYA #canal
+}
+alias mr.h.apoyos {
+  r 12APOYOS
+  r
+  r Lista los apoyos de un canal o nick.
+  r Si se especifica un canal registrado, se mostrarán todos los apoyos que recibió en su fase de registro.
+  r Si no se especifica nada, listará los apoyos que has emitido.
+  r
+  r Sintaxis:12 APOYOS [#canal]
+}
+alias mr.h.list {
+  r 12LIST
+  r
+  r Lista los canales en fase de registro siguiendo un patrón definido.
+  r
+  r Sintaxis:12 LIST patrón
+  r
+  r Dicho patrón puede contener comodines.
+  if ($_.get(%parv[0]).status > 4) { 
+    r 
+    r Como eres oper o superior, además visualizarás si ha recibido los apoyos o ha expiado. 
+    r Si además añades el parámetro -f, sólo se visualizarán aquellos canales que hayan expiado o estén listos para aprobación.
+    r Sintaxis:12 LIST patrón -f
+} }
+alias mr.h.drop {
+  r 12DROP
+  r 
+  r Borra un canal de la base de datos de pre-registro de canales. Una vez eliminada la solicitud, el canal quedará nuevamente disponible para cualquier nick registro.
+  r
+  if ($_.get(%parv[0]).status > 4) { r Sintaxis:12 DROP #canal [motivo] }
+  else { r Sintaxis:12 DROP #canal }
+  r
+  if ($_.get(%parv[0]).status > 4) {
+    r Como eres ircop o superior, puedes dropear cualquier canal adjuntando un motivo si así lo prefieres que será enviado vía memo al founder. 
+    r Así pues, cuando un canal haya expiado podrás dropearlo usando este comando.
+  }
+  else { r Sólo el founder puede dropear su propio canal. }
+}
+alias mr.h.aceptar {
+  vc 5
+  r 12ACEPTAR
+  r
+  r Registra un canal y pasa a la gestión de12 $hget(+bots,chanserv)
+  r No es necesario que el canal haya reunido los apoyos, pero sí es recomendable.
+  r
+  r Sintaxis:12 ACEPTAR #canal
+}

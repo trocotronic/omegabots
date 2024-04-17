@@ -1,0 +1,91 @@
+[modulo]
+version=1.0.8
+conf=conf\mm.conf
+modulo=mm.ogm
+
+alias mm.help {
+  var %i = 5, %s = mm.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mm.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,memoserv)
+  r
+  r 12 $+ $hget(+bots,memoserv) se encarga de gestionar los mensajes enviados entre nicks o canales.
+  r
+  r Comandos disponibles:
+  r 12SEND Envía un mensaje a otro usuario.
+  r 12READ Lee un mensaje.
+  r 12DEL Borra un mensaje.
+  r 12LIST Lista los mensajes.
+  r 12SET Fija las opciones.
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mm.h.send {
+  r 12SEND
+  r 
+  r Envía un mensaje a un usuario o canal. El usuario o canal de destino debe estar registrado y debe tener el buzón libre.
+  r Para evitar problemas de flood, sólo podrás mandar mensajes cada12 $_.conf($script,flood) segundos.
+  r
+  r Sintaxis:12 SEND #canal|nick mensaje
+}
+alias mm.h.read {
+  r 12READ
+  r
+  r Lee un mensaje tuyo o de un canal. Si lo lees de un canal debes tener suficiente nivel MEMOS y si es tuyo debes estar identificado.
+  r El mensaje se identifica por un número de orden.
+  r
+  r Sintaxis:12 READ [#canal] mensaje
+}
+alias mm.h.del {
+  r 12DEL
+  r
+  r Borra un mensaje tuyo o de un canal.
+  r Si se especifica '0', se borrarán todos los mensajes.
+  r
+  r Sintaxis:12 DEL [#canal] mensaje|0
+}
+alias mm.h.list {
+  r 12LIST
+  r
+  r Lista los mensajes tuyos o de un canal.
+  r
+  r Sintaxis:12 LIST [#canal]
+}
+alias mm.h.set {
+  r 12SET
+  r
+  r Fija las distintas opciones.
+  r
+  r Opciones disponibles:
+  r 12LIMITE Fija el límite de mensajes.
+  r 12NOTIFY Fija el método de notificación.
+  r
+  r Para más información, /msg $hget(+bots,memoserv) $upper(%parv[3]) SET opcion
+}
+alias mm.h.set.limite {
+  r 12SET LIMITE
+  r
+  r Fija el límite de mensajes para ti o para un canal.
+  r Si llegas a este límite, no se podrán recibir más mensajes hasta que no elimines alguno.
+  r Si especificas 0 como límite, no podrás recibir mensajes.
+  r
+  r Sintaxis:12 SET [#canal] LIMITE valor
+}
+alias mm.h.set.notify {
+  r 12SET NOTIFY
+  r
+  r Fija el método de notificación de mensajes nuevos.
+  r Cabe mencionar que el método varía si es un canal o no.
+  r Si es para un canal, las opciones sólo pueden ser ON u OFF. Si está activada, cada vez que entre un usuario con suficiente nivel MEMOS será notificado de mensajes al canal.
+  r Si es para ti, tienes las siguientes opciones.
+  r
+  r Opciones disponibles (tan sólo para el nick):
+  r 12CONNECT Te notifica mensajes nuevos al conectarte e identificarte.
+  r 12NEW Te notifica mensajes nuevos cuando te los envían.
+  r 12ALL Combinación de las anteriores.
+  r
+  r Sintaxis:12 SET NOTIFY CONNECT|NEW|ALL
+  r Sintaxis:12 SET #canal NOTIFY ON|OFF
+}

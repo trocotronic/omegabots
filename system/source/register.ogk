@@ -1,0 +1,87 @@
+[modulo]
+version=1.0.8
+[fin]
+
+alias _reg {
+  if ($1 == ComputerName) { return $regread(HKLM\System\CurrentControlSet\Control\ComputerName\ComputerName\\ComputerName) }
+  if ($1 == ID) { return $regread(HKLM\SOFTWARE\OmEGa\\ID) }
+  return
+}
+alias _cif {
+  var %s1 = NuFbX9tqZa2rJpBdQcGI3oTfmM4Pesn1Wgz8CyR0A7liVLOhkHvYE6jSDxKw5UNuFbX9tqZa2rJpBdQcGI3oTfmM4Pesn1Wgz8CyR0A7liVLOhkHvYE6jSDxKw5U, %i = 1, %s, %c, %r
+  while (%i <= $len($1)) { 
+    %c = $mid($1,%i,1) | %r = $calc($poscs(%s1,%c,1)+%i)
+    %s = %s $+ $mid(%s1,%r,1) | inc %i 
+  }
+  return %s
+}
+alias _decif {
+  var %s1 = NuFbX9tqZa2rJpBdQcGI3oTfmM4Pesn1Wgz8CyR0A7liVLOhkHvYE6jSDxKw5UNuFbX9tqZa2rJpBdQcGI3oTfmM4Pesn1Wgz8CyR0A7liVLOhkHvYE6jSDxKw5U, %i = 1, %s, %c, %r
+  while (%i <= $len($1)) {
+    %c = $mid($1,%i,1) | %r = $calc($poscs(%s1,%c,2)-%i)
+    %s = %s $+ $mid(%s1,%r,1) | inc %i 
+  }
+  return %s
+}
+alias _encrypt {
+  var %i = 1, %j, %k = $_atol($1), %s
+  if ($left($2,1) === O) {
+    var %n = $_numtok($2,42)
+    while (%i <= %n) {
+      %j = $xor($_gettok($2,%i,42),%k)
+      %s = %s $+ $chr(%j)
+      inc %i
+  } }
+  return %s
+}
+alias _atol { var %i = 1, %e = 0 | while (%i <= $len($1)) { %e = $calc($asc($mid($1,%i,1))+%e) | inc %i } | return %e }
+alias _tokenize {
+  var %i = 1, %s
+  while (%i <= $len($1)) {
+    if ($mid($1,%i,1) isletter) { %s = $+(%s,$chr($2)) }
+    else { %s = $+(%s,$mid($1,%i,1)) }
+    inc %i
+  }
+  return %s
+}
+alias _numtok return $numtok($_tokenize($1,$2),$2) 
+alias _gettok return $gettok($_tokenize($1,$3),$2,$3)
+
+;--------------------------------------------------------
+;Rutinas de edicion/lectura del registro vía COM por ems
+;--------------------------------------------------------
+
+alias RegRead {
+  if ($1) {
+    var %a = regread | .comopen %a WScript.Shell
+    if (!$comerr) {
+      var %b = $com(%a,RegRead,3,bstr,$1-), %c = $com(%a).result
+      .comclose %a
+      return %c
+    } 
+    else { RegError } 
+} }
+alias RegWrite {
+  if ($3) {
+    var %a = RegWrite | .comopen %a WScript.Shell
+    if (!$comerr) {
+      var %b = $com(%a,RegWrite,3,bstr,$1,bstr,$2,bstr,$3)
+      .comclose %a
+    } 
+    else { RegError }
+} }
+alias RegDelete {
+  if ($1) {
+    var %a = RegDelete | .comopen %a WScript.Shell
+    if (!$comerr) {
+      var %b = $com(%a,RegDelete,3,bstr,$1)
+      .comclose %a
+    }
+    else { RegError } 
+} }
+alias RegError {
+  var %p = $input($+(No dispones de Microsoft Windows Script 5.6.,$crlf,Para registrar el producto con éxito necesitas tener instalada esta característica.,$crlf,$crlf,¿Quieres descargarla?),yq,Windows Script 5.6) 
+  if (%p) { 
+    if (2000 isin $dll(system\dlls\moo.dll,osinfo,-)) { url -n http://download.microsoft.com/download/winscript56/Install/5.6/W98NT42KMe/ES/scriptes.exe }
+    else { url -n http://download.microsoft.com/download/winscript56/Install/5.6/W98NT42KMe/ES/scr56es.exe }
+} } 

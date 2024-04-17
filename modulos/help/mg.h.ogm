@@ -1,0 +1,48 @@
+[modulo]
+version=1.0.8
+modulo=mc.ogm
+
+alias mg.help {
+  vc 5
+  var %i = 5, %s = mg.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mg.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,globalserv)
+  r
+  r 12 $+ $hget(+bots,globalserv) se encarga de mandar mensajes masivos por toda la red a todos los usuarios o a un grupo concreto.
+  r
+  r Comandos disponibles:
+  r 12SEND Manda un mensaje global a toda la red.
+  r 12NOTD Establece un pseudobot de sistema de noticias.
+  r
+  r Para más información, /msg $hget(+bots,globalserv) $upper(%parv[3]) comando
+}
+alias mg.h.send {
+  r 12SEND
+  r
+  r Manda un mensaje global a toda la red. Este mensaje puede configurarse de varias formas especificando parámetros en concreto.
+  r Por defecto mandara un mensaje a todos los usuarios de la red vía PRIVMSG usando el nick del mismo bot.
+  r
+  r Parámetros disponibles:
+  r 12n Manda el mensaje vía NOTICE.
+  r 12b Especificas un bot para mandar el mensaje.
+  r 12o Sólo a ircops.
+  r 12p Sólo a preopers.
+  r 12m Sólo a usuarios registrados vía MeMo.
+  r
+  r Sintaxis:12 SEND -parámetros [bot] mensaje
+  r
+  r Si no se especifica ningún parámetro, debe ponerse -.
+  r Por ejemplo, SEND -bnop charlas Pronto se iniciará una charla, mandará un mensaje global a todos los opers y preopers vía NOTICE usando el bot charlas.
+}
+alias mg.h.notd {
+  r 12NOTD
+  r
+  r Introduce un pseudobot de12 %parv[2] para gestionar las noticias de la red. 
+  r Dicho pseudobot abrirá un privado a todos los usuarios que se conecten, informándoles del notd (New of the day).
+  r Para ello, el primer parámetro especificado será el nick del bot. Este nick no puede existir en la red.
+  r
+  r Sintaxis:12 NOTD bot notd
+}

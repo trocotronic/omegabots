@@ -1,0 +1,27 @@
+[modulo]
+version=1.0.8
+conf=conf\ml.conf
+modulo=ml.ogm
+
+alias ml.help {
+  var %i = 5, %s = ml.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias ml.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,langserv)
+  r
+  r 12 $+ $hget(+bots,langserv) lleva diferentes aspectos relacionados con los idiomas, desde su traducción hasta su pronunciación
+  r
+  r Comandos disponibles:
+  r 12NIHONGO Devuelve la prounciación de un nick en japonés.
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias ml.h.nihongo {
+r 12NIHONGO
+r
+r Devuelve la pronunciación de un nick en japonés.
+r
+r Sintaxis:12 NIHONGO nick
+}

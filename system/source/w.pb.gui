@@ -1,0 +1,46 @@
+alias p.cw.pb {
+  if ($_IsBadOs) return
+  %W.pb.w = 200
+  %w.pb.h = 100
+  %w.pb.x = $round($calc($window(-1).w / 2 - %w.pb.w / 2),0)
+  %w.pb.y = $round($calc($window(-1).h / 2 - %w.pb.h / 2),0)
+  %w.pb.name = @pb
+  %w.pb.font = Tahoma
+  %w.pb.size = 13
+  window -Bfhkpz +d @pb $calc(%w.pb.x - 475) $calc(%w.pb.y - 475) %w.pb.w %w.pb.h %w.pb.name %w.pb.font %w.pb.size
+  dll system\dlls\ontop.dll Attach $window(%w.pb.name).hwnd | dll system\dlls\ontop.dll PutOnTop $window(%w.pb.name).hwnd true
+  dll system\dlls\ontop.dll PutOnTop $window(%w.main.name).hwnd false
+  _.wr wrSelectWindow $window(%w.pb.name).hwnd | _.wr wrSetMode rmRect | _.wr wrSetRegion 0 0 %w.pb.w %w.pb.h 
+  dialog -m pb pb
+  dll system\dlls\hide.dll WinPar $window(%w.pb.name).hwnd $dialog(pb).hwnd
+  drawpic -ms %w.pb.name 0 0 %w.pb.w %w.pb.h 0 0 1 299 $_.png(base)
+  drawpic -ms %w.pb.name $calc(%w.pb.w - 70) 0 70 15 19 2 115 25 $_.png(base)
+  drawpic -ms %w.pb.name 0 0 $calc(%w.pb.w - 70) 15 4 2 14 25 $_.png(base)
+  drawtext -or %w.pb.name 16777215 "Tebruchet MS" 10 20 3 Progreso
+  drawpic -mst %w.pb.name 0 5 5 10 10 0 0 94 94 $_.png(omega)
+  drawdot %w.pb.name | window -a %w.pb.name
+}
+dialog pb {
+  title "lala"
+  size %w.pb.x %w.pb.y $calc(%w.pb.w - 6) $calc(%w.pb.h - 50)
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  text "",1,10 60 180 15
+}
+on 1:dialog:pb:*:*: {
+  if ($devent == init) {
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname style
+    _.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetControlMDX $dname 1 ProgressBar > system\dlls\ctl_gen.mdx
+    _.wrd 10 60 180 15 | did -a $dname 1 0 0 100
+  }
+}
+alias p {
+  if ($_IsBadOs) return
+  if (!$dialog(pb)) { p.cw.pb }
+  if ($2-) { drawrect -fr %w.pb.name 7093044 1 10 30 190 15 | drawtext -r %w.pb.name 16777215 Tahoma 11 10 30 $ifmatch }
+  if ($1 == STOP) { .timer 1 2 window -c %w.pb.name | .timer 1 2 dialog -x pb | unset %w.pb* | return }
+  did -a pb 1 $1
+}

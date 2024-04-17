@@ -1,0 +1,144 @@
+[modulo]
+version=1.0.8
+nombre=_lang
+prefijo=ml
+serv=LangServ
+archivos=
+ayuda=help\ml.h.ogm
+conf=conf\ml.conf
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=NiHoNGo
+ident=NiHoNGo
+host=servicios.&red
+realname=Servicio de idiomas
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+nihongo=nihongo
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | ml.privmsg | return
+  :%g | return
+}
+alias ml.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias ml.nihongo {
+  vu
+  if (!%parv[4]) { e 1 NIHONGO nick }
+  if ($_.lang($gettok(%parc,5-,32)).nihon) r La pronunciación de12 $gettok(%parc,5-,32) es12 $ifmatch
+  else e 0 El nick contiene caracteres inválidos.
+}
+alias _.lang {
+  if ($prop == nihon) {
+    var %i = 0, %c, %d, %s, %v = aeiouàáâäèéêëìíîïòóôöùúûü, %n = $replace($1-,à,a,á,a,â,a,ä,a,è,e,é,e,ê,e,ë,e,ì,i,í,i,î,i,ï,i,ò,o,ó,o,ô,o,ö,o,ù,u,ú,u,û,u,ü,u,$chr(32),$chr(160))
+    if (jk isin $1-) || (jl isin $1-) || (jm isin $1-) || (jn isin $1-) || (jb isin $1-) || (xi isin $1-) return
+    while (%i <= $calc($len(%n)-1)) {
+      %c = $mid(%n,$calc(1+%i),1)
+      if (%c !isin xgjymnaeiouqvlcwbkrdfhznpst -') { return }
+      if ($calc(1+%i) > $calc($len(%n)-1)) { %d = u }
+      else { %d = $mid(%n,$calc(2+%i),1) }
+      if (%c == $chr(160) || %c == $chr(45) || %c == $chr(39)) { %s = %s $+ %c | inc %i }
+      if (%d == y && %c !isin %v) { %d = i }
+      if (%c == x) {
+        if (%i == 0) { %c = z }
+        else { %c = k }
+      }
+      if (%c == g) {
+        if (%d == e || %d == i || %d == y) { %c = j }
+        else {
+          if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+          else { %s = %s $+ %c $+ u | inc %i }
+      } }
+      if (%c == j) {
+        if (%d == a  || %d == u || %d == o) { %s = %s $+ %c $+ %d | inc %i 2 }
+        if (%d == e || %d == i) { %s = %s $+ ji | inc %i 2 }
+      }
+      if (%c == y) {
+        if (%d == a || %d == u || %d == o) { %s = %s $+ %c $+ %d | inc %i 2 }
+        else { %c = i }
+      }
+      if (%c == m) {
+        if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+        else {
+          if (%d == b || %d == m || %d == p) { %s = %s $+ n | inc %i }
+          else { %s = %s $+ mu | inc %i }
+      } }
+      if (%c isin %v || (%c == n && %d !isin %v)) { %s = %s $+ %c | inc %i }
+      if (%c == q) { %c = k }
+      if (%c == v) { %c = b }
+      if (%c == l) { %c = r }
+      if (%c == c) { 
+        if (%d == h) { %s = %s $+ chi | inc %i 3 }
+        else { 
+          if (%d == e  || %d == i || %d == y) { %c = s }
+          else { %c = k }
+      } }
+      if (%c == w) {
+        if (%d == a || %d == o) { %s = %s $+ %c $+ %d | inc %i 2 }
+        else { 
+          if (%d == i || %d == e) { %s = %s $+ u $+ %d | inc %i 2 }
+          else { %c = k }
+      } }
+      if (%c == b || %c == k || %c == r) {
+        if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+        else { %s = %s $+ %c $+ u | inc %i }
+      }
+      if (%c == d) {
+        if (%d == i || %d == a || %d == e) { %s = %s $+ de | inc %i 2 }
+        if (%d == u || %d == o) { %s = %s $+ do | inc %i 2 }
+        if (%d !isin %v) { %s = %s $+ de | inc %i }
+      }
+      if (%c == f) {
+        %s = %s $+ fu | inc %i
+        if (%d isin %v) { inc %i }
+      }
+      if (%c == h) {
+        if (%d == u) { %s = %s $+ fu | inc %i 2 }
+        else {
+          if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+          else { %s = %s $+ fu | inc %i }
+      } }
+      if (%c == z) {
+        if (%d == i) { %c = j }
+        else { 
+          if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+          else { %s = %s $+ zu | inc %i }
+      } }
+      if (%c == n) { if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 } }
+      if (%c == p) { 
+        if (%d == h) { %s = %s $+ fu | inc %i 2 }
+        if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+        else { %s = %s $+ pu | inc %i }
+      }
+      if (%c == s) {
+        if (%d == i || %d == h) { %s = %s $+ shi | inc %i 2 | if (%d == h) { inc %i } }
+        else { 
+          if (%d isin %v) { %s = %s $+ %c $+ %d | inc %i 2 }
+          else { %s = %s $+ su | inc %i }
+      } }  
+      if (%c == t) { 
+        if (%d == a || %d == e || %d == o) { %s = %s $+ %c $+ %d | inc %i 2 }
+        if (%d == u || (%d !isin %v && %d != h)) { 
+          %s = %s $+ tsu | inc %i 
+          if (%d == u) { inc %i }
+          if (%d == s && $mid($1-,$calc(1+%i),1) == u) { inc %i 2 }
+        }
+        if (%d == i) { %s = %s $+ chi | inc %i 2 }
+        if (%d == h) { %s = %s $+ fu | inc %i 3 }
+    } } 
+    return $+($upper($left(%s,1)),$right(%s,-1))
+} }

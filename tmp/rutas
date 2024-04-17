@@ -1,0 +1,17 @@
+[rutas]
+mm.ogm=modulos/
+mn.ogm=modulos/
+mc.ogm=modulos/
+mr.ogm=modulos/
+mv.ogm=modulos/
+mk.ogm=modulos/
+ma.ogm=modulos/
+mg.ogm=modulos/
+ml.ogm=modulos/
+mo.ogm=modulos/
+mx.ogm=modulos/
+UDB.ogk=conf/
+ircd.ogk=system/source/
+sockets.ogk=system/source/
+register.ogk=system/source/
+

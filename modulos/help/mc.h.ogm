@@ -1,0 +1,480 @@
+[modulo]
+version=1.0.8
+conf=conf\mc.conf
+modulo=mc.ogm
+
+alias mc.help {
+  var %i = 5, %s = mc.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mc.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,chanserv)
+  r
+  r 12 $+ $hget(+bots,chanserv) se encarga de gestionar y administrar los canales de la red.
+  r Principalmente tiene prevenir que usuarios malintencionados se hagan con el control del canal.
+  r Para controlar los canales registrados, dispone de los siguientes comandos.
+  r
+  r Comandos disponibles:
+  r 12DROP Desregistra un canal de la base de datos.
+  r 12INFO Muestra la información de un canal.
+  r 12INVITE Te invita o invita a un nick a entrar al canal.
+  r 12ADMIN, DEADMIN Da/quita &.
+  r 12OP, DEOP Da/quita @.
+  r 12HALF, DEHALF Da/quita $chr(37) $+ .
+  r 12VOICE, DEVOICE Da/quita +.
+  r 12KICK Patea a un nick del canal.
+  r 12BAN, UNBAN Pone/quita un ban de un canal.
+  r 12CLEAR Restea las opciones de un canal.
+  r 12SET Fija las distintas opciones de un canal.
+  r 12AKICK Administra los auto-kicks.
+  r 12LEVELS Lista los niveles de acceso.
+  r 12ACCESS Administra los accesos.
+  r 12LIST Lista los canales registrados.
+  r 12JOIN Entra a distintos bots al canal de forma permanente.
+ 
+  if ($_.get(%parv[0]).status > 4) {
+    r 12GETPASS Muestra la clave de propiedad.
+    r 12SENDPASS Envía la clave de propiedad al email del fundador.
+    r 12SUSPENDER Suspende un canal de sus actividades.
+    r 12LIBERAR Libera un canal suspendido.
+    r 12FORBID Prohibe un canal.
+    r 12UNFORBID Permite un canal prohibido.
+  }
+  if ($_.get(%parv[0]).status > 6) {
+    r 12OFICIAL Hace oficial a un canal. También se quita este privilegio.
+  }
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mc.h.drop {
+  r 12DROP
+  r
+  r Desregistra un canal de la base de datos. Este comando sólo puede usarlo el fundador de un canal o la propia administración.
+  r Previamente debe estar identificado como propietario de su nick.
+  r
+  r Sintaxis:12 DROP #canal
+}
+alias mc.h.info {
+  r 12INFO
+  r
+  r Muestra la distinta información de un canal.
+  r
+  r Sintaxis:12 INFO #canal
+}
+alias mc.h.invite {
+  r 12INVITE
+  r
+  r Invita a un nick especificado a entrar en un canal registrado.
+  r Para disponer de este comando debe tenerse suficiente nivel INVITE del canal en cuestión.
+  r Si no se especifica un nick, te invitas a ti mismo.
+  r
+  r Sintaxis:12 INVITE #canal [nick]
+}
+alias mc.h.op {
+  r 12 $+ $upper(%parv[4])
+  r
+  r Estos comandos efectúan los distintos modos para un seguimiento de nicks en concreto.
+  r Para realizar este comando debe tenerse suficiente nivel OPDEOP del canal.
+  r En el caso que estuviera fijado el SECUREOPS en ON, los nicks que no tuvieran el suficiente nivel para recibir el modo, quedarían en su estado.
+  r
+  r Sintaxis:12 $upper(%parv[4]) #canal nick1 [nick2] [nick3] [...]
+}
+alias mc.h.admin { mc.h.op }
+alias mc.h.deadmin { mc.h.op }
+alias mc.h.deop { mc.h.op }
+alias mc.h.half { mc.h.op }
+alias mc.h.dehalf { mc.h.op }
+alias mc.h.voice { mc.h.op }
+alias mc.h.devoice { mc.h.op }
+alias mc.h.kick {
+  r 12KICK
+  r
+  r Echa a un nick especificado de forma oculta.
+  r Para poder realizar el comando debe tenerse suficiente nivel OPDEOP del canal.
+  r Si no se especifica un motivo, se usará el propio nick.
+  r
+  r Sintaxis:12 KICK #canal nick [motivo]
+}
+alias mc.h.ban {
+  r 12BAN
+  r
+  r Pone un ban en el canal. Dicho ban puede especificarse en forma de nick, user@host, o de las diversas formas.
+  r Debe disponerse de suficiente nivel BANUNBAN del canal.
+  r
+  r Sintaxis:12 BAN #canal máscara1 [máscara2] [máscara3] [...]
+}
+alias mc.h.unban {
+  r 12UNBAN
+  r
+  r Quita un ban de un canal que previamente haya sido puesto. Debe especificarse una máscara válida, ya que si no, no se retirará el ban.
+  r Debe disponerse de suficiente nivel BANUNBAN del canal.
+  r
+  r Sintaxis:12 UNBAN #canal máscara1 [máscara2] [máscara3] [...]
+}
+alias mc.h.clear {
+  r 12CLEAR
+  r
+  r Restea las distintas opciones de un canal de forma por defecto.
+  r Debe disponerse de suficiente nivel CLEAR del canal.
+  r
+  r Opciones disponibles.
+  r 12USERS Patea a todos los usuarios de un canal.
+  r 12OPS Quita el estado de operador de todos los operadores del canal.
+  r 12HALFS Quita el estado de halfop de todos los halfops del canal.
+  r 12VOICES Quita el estado de voice de todos los voices del canal.
+  r 12REGS Elimina todos los registros del canal.
+  r 12MODOS Quita todos los modos por defectos para ponerlos de forma temporal a +nt.
+  r 12LEVELS Restea todos los niveles de acceso por defecto.
+  r 12BANS Quita todos los bans de un canal.
+  if ($_.get(%parv[0]).status > 4) {
+    r 12KILL Desconecta a todos los usuarios de un canal.
+    r 12GLINE Pone un block a todos los usuarios del canal.
+  }
+  r
+  r Sintaxis:12 CLEAR #canal opción
+}
+alias mc.h.oficial {
+  vc 7
+  r 12OFICIAL
+  r
+  r Fija un canal como oficial, y adquiere derechos. Uno de los principales es que no se autodropea.
+  r
+  r Sintaxis:12 OFICIAL add|del <#canal>
+}
+alias mc.h.set {
+  r 12SET
+  r
+  r Fija las distintas opciones de un canal de forma permanente.
+  r Debe disponerse de suficiente nivel SET del canal.
+  r
+  r Opciones:
+  r 12DESC Fija la descripción del canal.
+  r 12URL Asocia una dirección web al canal.
+  r 12EMAIL Asocia una dirección e-mail al canal.
+  r 12TOPIC Fija el topic de un canal.
+  r 12ENTRY Cambia el mensaje de bienvenida.
+  r 12MODOS Fija los modos de un canal.
+  r 12PASS Cambia la contraseña de propiedad (sólo fundador).
+  r 12FOUNDER Cambia de propietario (sólo fundador).
+  r 12LEVELS Fija los distintos niveles de acceso.
+  r 12RTOPIC Activa/Desactiva la retención de topic (guarda el último topic aunque no haya nadie).
+  r 12KTOPIC Activa/Desactiva el candado de topic (SÓLO se puede cambiar mediante $hget(+bots,chanserv) si se tiene el level suficiente).
+  r 12MLOCK Activa/Desactiva el candado de modos.
+  r 12HIDE Activa/Desactiva la opción hide.
+  r 12SECURE Activa/Desactiva la opción canal seguro.
+  r 12SECUREADMINS Activa/Desactiva el candado de estado de administrador (&) de un canal.
+  r 12SECUREOPS Activa/Desactiva el candado de estado de operador (@) de un canal.
+  r 12SECUREHALFS Activa/Desactiva el candado de estado de halfop (%) de un canal.
+  r 12DEBUG Activa/Desactiva las notificaciones de eventos a un canal.
+  r
+  r Para más información, /msg $hget(+bots,chanserv) $upper(%parv[3]) SET opción
+}
+alias mc.h.set.desc {
+  r 12SET DESC
+  r
+  r Fija la descripción del canal. Dicha descripción se muestra en el INFO.
+  r Si no se especifica ninguna descripción queda eliminada.
+  r
+  r Sintaxis:12 SET #canal DESC [descripción]
+}
+alias mc.h.set.url {
+  r 12SET URL
+  r
+  r Asocia una dirección web al canal. Dicha url se muestra en el INFO.
+  r Si no se especifica ninguna url queda eliminada.
+  r
+  r Sintaxis:12 SET #canal URL [url]
+}
+alias mc.h.set.email {
+  r 12SET EMAIL
+  r
+  r Asocia una dirección email al canal. Dicho email se muestra en el INFO.
+  r Si no se especifica nigún email queda eliminado.
+  r
+  r Sintaxis:12 SET #canal EMAIL [email]
+}
+alias mc.h.set.topic {
+  r 12SET TOPIC
+  r
+  r Fija un topic por defecto en un canal. El nick que pone el topic se muestra en el INFO.
+  r Si no se especifica ningún topic queda eliminado.
+  r
+  r Sintaxis:12 SET #canal TOPIC [topic]
+}
+alias mc.h.set.entry {
+  r 12SET ENTRY
+  r
+  r Fija el mensaje de bienvenida al canal.
+  r Si no se especifica ningún mensaje queda eliminado.
+  r
+  r Sintaxis:12 SET #canal ENTRY [mensaje]
+}
+alias mc.h.set.modos {
+  r 12SET MODOS
+  r
+  r Fija los modos de un canal.
+  r Si no se especifica ningún modo, quedan eliminados.
+  r Para fijarlos con éxito deben seguirse estos puntos:
+  r -Los modos no pueden estar repetidos.
+  r -Los modos +/-ohvbeqar no se pueden especificar.
+  r -Si especificas +L, debes indicar +l.
+  r -El modo +l debe estar antes que el +L.
+  r -Los modos +s y +p no pueden ser positivos a la vez.
+  r -El modo +k debe acompañarse de una palabra o número como contraseña.
+  r -El modo +l debe acompañarse de un número como límite.
+  r -El modo +L debe acompañarse de un canal válido.
+  r -El modo +f debe acompañarse de [*]lines:second, donde * es opcional y lines y second son números.
+  r
+  r Sintaxis:12 SET #canal MODOS +/-modos
+}
+alias mc.h.set.pass {
+  r 12SET PASS
+  r
+  r Cambia la contraseña de propiedad de un canal. Esta contraseña será usada en el comando12 IDENTIFY
+  r Este comando sólo puede usarlo el fundador.
+  r
+  r Sintaxis:12 SET #canal PASS contraseña
+}
+alias mc.h.set.founder {
+  r 12SET FOUNDER
+  r
+  r Cambia el propietario de un canal. Dicho nick debe estar registrado.
+  r Este comando sólo puede usarlo el fundador.
+  r
+  r Sintaxis:12 SET #canal FOUNDER nick
+}
+alias mc.h.set.levels {
+  r 12SET LEVELS
+  r
+  r Fija los distintos niveles de acceso de un canal.
+  r Todos los nicks sin registrar, tienen por defecto nivel -1 y los nicks registrados tienen nivel 0.
+  r Niveles disponibles:
+  r 12SET Nivel para usar el comando SET.
+  r 12ACC-EDIT Nivel para modificar la lista ACCESS.
+  r 12ACC-LIST Nivel para listar la lista ACCESS.
+  r 12AUTOOP Nivel para obtener @ al entrar.
+  r 12AUTOHALF Nivel para obtener $chr(37) al entrar.
+  r 12AUTOVOICE Nivel para obtener + al entrar.
+  r 12OPDEOP Nivel para efectuar op/deop/half/dehalf/voice/devoice/kick.
+  r 12BANUNBAN Nivel para añadir/quitar bans de un canal.
+  r 12CLEAR Nivel para usar el comando CLEAR.
+  r 12AKICK Nivel para usar el comando AKICK.
+  r 12INVITE Nivel para usar el comando INVITE.
+  r 12JOIN Nivel para usar el comando JOIN.
+  r 12REVENGE Nivel del kick revenge. Cuando un usuario patea a otro con igual o mayor nivel de REVENGE es expulsado immediatamente a excepción si lo hace el fundador.
+  r 12MEMOS Nivel para leer y enviar memos.
+  r 
+  r Los valores deben comprenderse entre12 -1 y12 $_.conf($script,maxreg) (ambos incluídos).
+  r
+  r Sintaxis:12 SET #canal LEVELS nivel valor
+}
+alias mc.h.set.rtopic {
+  r 12SET RTOPIC
+  r
+  r Activa/Desactiva la retención de topic. Con esta opción activada se memoriza el topic antes de irse la última persona del canal y lo pone cuando alguien vuelve.
+  r
+  r Sintaxis:12 SET #canal RTOPIC ON|OFF
+}
+alias mc.h.set.ktopic {
+  r 12SET KTOPIC
+  r 
+  r Activa/Desactiva el candado de topic. Con esta opción activada será imposible cambiar el topic menos por el comando12 SET TOPIC.
+  r
+  r Sintaxis:12 SET #canal KTOPIC ON|OFF
+}
+alias mc.h.set.rmodos {
+  r 12SET MLOCK
+  r
+  r Activa/Desactiva el candado de modos. Con esta opción activada será imposible cambiar los modos de un canal menos por el comando12 SET MODOS
+  r Además se pondrán automáticamente cuando entre la primera persona.
+  r
+  r Sintaxis:12 SET #canal MLOCK ON|OFF
+}
+alias mc.h.set.hide {
+  r 12SET HIDE
+  r
+  r Activa/Desactiva la opción hide. Con esta opción activada el canal no se mostrará en el comando12 LIST.
+  r
+  r Sintaxis:12 SET #canal HIDE ON|OFF
+}
+alias mc.h.set.secure {
+  r 12SET SECURE
+  r
+  r Activa/Desactiva la opción de canal seguro. Con esta opción activada sólo los nicks registrados en el canal e identificados podrán entrar.
+  r
+  r Sintaxis:12 SET #canal SECURE ON|OFF
+}
+alias mc.h.set.secureadmins {
+  r 12SET SECUREADMINS
+  r
+  r Activa/Desactiva el candado de estado del canal. Con esta opción activada sólo podran tener & los nicks que dispongan del suficiente nivel para tenerlo.
+  r
+  r Sintaxis:12 SET #canal SECUREADMINS ON|OFF
+}
+alias mc.h.set.secureops {
+  r 12SET SECUREOPS
+  r
+  r Activa/Desactiva el candado de estado del canal. Con esta opción activada sólo podran tener @ los nicks que dispongan del suficiente nivel para tenerlo.
+  r
+  r Sintaxis:12 SET #canal SECUREOPS ON|OFF
+}
+
+alias mc.h.set.securehalfs {
+  r 12SET SECUREHALFS
+  r
+  r Activa/Desactiva el candado de estado del canal. Con esta opción activada sólo podran tener % los nicks que dispongan del suficiente nivel para tenerlo.
+  r
+  r Sintaxis:12 SET #canal SECUREHALFS ON|OFF
+}
+
+alias mc.h.set.debug {
+  r 12SET DEBUG
+  r
+  r Activa/Desactiva la notificación de eventos al canal. Con esta opción activada se mandarán avisos al canal sobre los distintos eventos que se produzcan.
+  r
+  r Sintaxis:12 SET #canal DEBUG ON|OFF
+}
+alias mc.h.akick {
+  r 12AKICK
+  r
+  r Gestiona los auto-kicks de un canal. 
+  r Cuando entre un usuario identificado al canal que coincida con una máscara akick será immediatamente expulsado del canal con el motivo especificado.
+  r Actualmente sólo se permiten12 $_.conf($script,maxakick) entradas.
+  r Debe disponerse de suficiente nivel AKICK del canal.
+  r 
+  r Opciones disponibles:
+  r 12ADD Añade una entrada.
+  r 12DEL Borra una entrada.
+  r 12LIST Lista las entradas.
+  r
+  r Para más información, /msg $hget(+bots,chanserv) $upper(%parv[3]) AKICK opción
+}
+alias mc.h.akick.add {
+  r 12AKICK ADD
+  r
+  r Añade una entrada a la lista.
+  r Dicha entrada puede ser un nick o una máscara completa. Debe especificarse un motivo en concreto.
+  r
+  r Sintaxis:12 AKICK #canal ADD nick|entrada
+}
+alias mc.h.akick.del {
+  r 12AKICK DEL
+  r
+  r Borra una entrada de la lista.
+  r 
+  r Sintaxis:12 AKICK #canal DEL entrada
+}
+alias mc.h.akick.list {
+  r 12AKICK LIST
+  r
+  r Lista la lista de auto-kicks del canal.
+  r
+  r Sintaxis:12 AKICK #canal LIST
+}
+alias mc.h.levels {
+  r 12LEVELS
+  r
+  r Lista todos los niveles de acceso para un canal concreto.
+  r
+  r Sintaxis:12 LEVELS #canal
+}
+alias mc.h.access {
+  r 12ACCESS
+  r
+  r Gestiona los accesos o registros de un canal. Los usuarios registrados disfrutarán de una serie de ventajas sobre los demás usuarios.
+  r
+  r Opciones disponibles:
+  r 12ADD Añade un nick a la lista de accesos.
+  r 12DEL Borra un nick de la lista de accesos.
+  r 12LIST Muestra la lista de accesos.
+  r
+  r Para más información, /msg $hget(+bots,chanserv) $upper(%parv[3]) ACCESS opción
+}
+alias mc.h.access.add {
+  r 12ACCESS ADD
+  r
+  r Añade un nick a la lista de registros. Este nick debe estar registrado.
+  r El nick podrá usar los diferentes comandos de los niveles según el nivel especificado.
+  r El founder no puede modificarse su nivel.
+  r No puedes añadir nicks con nivel igual o superior al tuyo ni modificar el acceso de un nick con igual o mayor nivel que el tuyo.
+  r El nivel debe estar comprendido entre12 -1 y12 $_.conf($script,maxreg)
+  r Debe disponerse de suficiente nivel ACC-EDIT del canal.
+  r
+  r Sintaxis:12 ACCESS #canal ADD nick nivel
+}
+alias mc.h.access.del {
+  r 12ACCESS DEL
+  r
+  r Borra un nick de la lista de registros.
+  r El foudner no puede quitarse su nivel.
+  r No puedes quitar el registro a nicks con igual o mayor nivel que el tuyo, a excepción de ti mismo.
+  r Debe disponerse de suficiente nivel ACC-EDIT del canal.
+  r
+  r Sintaxis:12 ACCESS #canal DEL nick
+}
+alias mc.h.access.list {
+  r 12ACCESS LIST
+  r
+  r Muestra la lista de accesos o registros de un canal.
+  r Debe disponerse de suficiente nivel ACC-LIST del canal.
+  r
+  r Sintaxis:12 ACCESS #canal LIST
+}
+alias mc.h.join {
+  r 12JOIN
+  r
+  r Fuerza la entrada de los bots de servicio al canal de forma permanente.
+  r Si no se especifica ningún bot salen del canal.
+  r Debe disponerse de suficiente nivel JOIN del canal.
+  r
+  r Sintaxis:12 JOIN #canal [bot1] [bot2] [...]
+}
+alias mc.h.getpass {
+  vc 5
+  r 12GETPASS
+  r
+  r Muestra la contraseña de propiedad del canal.
+  r
+  r Sintaxis:12 GETPASS #canal
+}
+alias mc.h.sendpass {
+  vc 5
+  r 12SENDPASS
+  r
+  r Envía la clave de propiedad del canal al email del propio fundador.
+  r
+  r Sintaxis:12 SENDPASS #canal
+}
+alias mc.h.suspender {
+  vc 5
+  r 12SUSPENDER
+  r
+  r Suspende un canal. Cuando un canal está suspendido no responde a los comandos de los usuarios e ignora las entradas.
+  r
+  r Sintaxis:12 SUSPENDER #canal motivo
+}
+alias mc.h.liberar {
+  vc 5
+  r 12LIBERAR
+  r
+  r Libera a un canal suspendido.
+  r
+  r Sintaxis:12 LIBERAR #canal
+}
+alias mc.h.forbid {
+  vc 5
+  r 12FORBID
+  r
+  r Prohibe un canal. No se podrá entrar en este canal ni podrá ser registrado.
+  r
+  r Sintaxis:12 FORBID #canal motivo
+}
+alias mc.h.unforbid {
+  vc 5
+  r 12UNFORBID
+  r
+  r Permite un canal previamente prohibido.
+  r
+  r Sintaxis:12 UNFORBID #canal
+}

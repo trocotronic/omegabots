@@ -1,0 +1,104 @@
+[modulo]
+version=1.0.8
+nombre=_spam
+prefijo=ma
+serv=AntispamServ
+archivos=
+ayuda=help\ma.h.ogm
+conf=conf\ma.conf
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=_antispam
+ident=guardian
+host=servicios.&red
+realname=Servicio de antispam
+modos=oOaANChrtvwBq
+
+[comandos]
+ayuda=help
+help=help
+addchan=addchan
+delchan=delchan
+addword=addword
+delword=delword
+join=j
+part=p
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | ma.privmsg | return
+  :B_JOIN | ma.join $1- | return
+  :PART | ma.part | return
+  :QUIT | ma.quit | return
+  :%g | return
+}
+alias ma.join {
+  if ($tget(chans,$2,total,0) == $_.conf($script,users) && !$istok($_.conf($script,chans),$2,44)) { k $readini($script,modulo,nick) $_.tok(JOIN) $2 }
+}
+alias ma.part {
+  if ($tget(chans,%parv[2],total,0) == $_.conf($script,users) && !$istok($readini($script,modulo,residente),%parv[2],44)) { k $hget(+bots,antispamserv) $_.tok(PART) %parv[2] }
+}
+alias ma.privmsg {
+  if ($left(%parv[2],1) == $chr(35)) {
+    var %i = 1 | while ($ini(modulos\ $+ $readini($script,modulo,conf),words,%i)) {
+      if ($ifmatch isin %parc && $_.get(%parv[0]).status < 5) { sockwrite -nt ircd TKL + G * $_.get(%parv[0]).ip $readini($script,modulo,nick) $calc($ctime + $_conf(blocks,spam_t)) $ctime : $+ $_conf(blocks,spam)
+        ;   _tkl + G * $_.get(%parv[0]).ip $_.serv $_conf(blocks,spam_t) $gmt : $+ $_conf(blocks,spam)
+      break }
+      inc %i
+    } 
+    return
+  }
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+}
+alias ma.quit {
+  var %i = $tget(nicks,%parv[0],total,0), %c | while (%i) {
+    %c = $tget(nicks,%parv[0],total,%i)
+    if ($tget(chans,%c,total,0) == $_.conf($script,users) && !$istok($readini($script,modulo,residente),%c,44)) { k $hget(+bots,antispamserv) $_.tok(PART) %c }
+    dec %i
+} }
+alias ma.addchan {
+  vc 5
+  if (!%parv[4]) { e 0 ADDCHAN #canal }
+  writeini modulos\ $+ $readini($script,modulo,conf) misc chans $addtok($_.conf($script,chans),%parv[4],44)
+  r Canal12 %parv[4] añadido para ser ignorado.
+}
+alias ma.delchan {
+  vc 5
+  if (!%parv[4]) { e 0 DELCHAN #canal }
+  if ($remtok($_.conf($script,chans),%parv[4],44)) { writeini modulos\ $+ $readini($script,modulo,conf) misc chans $ifmatch }
+  else { writeini modulos\ $+ $readini($script,modulo,conf) misc chans $chr(44) }
+  r Canal12 %parv[4] borrado de ser ignorado. 
+}
+alias ma.addword {
+  vc 5
+  if (!%parv[4]) { e 0 ADDWORD palabra }
+  writeini modulos\ $+ $readini($script,modulo,conf) words $_.32(%parv[4]).cod * 
+  r Palabra12 %parv[4] añadida como spam. 
+}
+alias ma.delword {
+  vc 5
+  if (!%parv[4]) { e 0 DELWORD palabra }
+  remini modulos\ $+ $readini($script,modulo,conf) words $_.32(%parv[4]).cod
+  r Palabra12 %parv[4] borrada como spam.
+}
+alias ma.j {
+  vc 5
+  if (!%parv[4]) { e 0 JOIN #canal }
+  k %parv[2] $_.tok(JOIN) %parv[4] 
+  r $readini($script,modulo,nick) ha entrado en12 %parv[4]
+}
+alias ma.p {
+  vc 5 
+  if (!%parv[4]) { e 0 PART #canal }
+  k %parv[2] $_.tok(PART) %parv[4]
+  r $readini($script,modulo,nick) ha salido de12 %parv[4]
+
+}

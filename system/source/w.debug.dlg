@@ -1,0 +1,56 @@
+alias p.cw.debug {
+  if ($dialog(debug)) { dialog -v debug } | else { dialog -m debug debug }
+}
+dialog debug {
+  title "Debug"
+  option dbu
+  size -1 -1 200 95
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  tab "ircd",100,1 1 200 95
+  tab "80 (http)",200
+  tab "25 (smtp)",300
+  tab "sms",400
+  edit "",1,2 25 195 65,autohs multi,tab 100
+  edit "",2,2 25 195 65,autohs multi,tab 200
+  edit "",3,2 25 195 65,autohs multi,tab 300
+  edit "",4,2 25 195 65,autohs multi,tab 400
+}
+on 1:dialog:debug:*:*: {
+  if ($devent == init) {
+    did -t $dname 998 
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    ;_.mdx SetDialog $dname style
+    ;_.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetDialog $dname icon $mircdirsystem\icons\logo.ico
+    _.mdx SetFont $dname 1,2,3,4,100,200,300,400 11 0 Verdana
+    _.mdx SetControlMDX $dname 1,2,3,4 richedit nohidesel read autohs multi return vsbar hsbar > system\dlls\ctl_gen.mdx
+  }
+}
+alias p.cw.motd {
+  if ($dialog(motd)) { dialog -v motd } | else { dialog -m motd motd }
+}
+dialog motd {
+  title "MOTD"
+  option dbu
+  size -1 -1 155 85
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  text "MOTD del día:",3,5 7 50 10
+  combo 1,50 5 100 17,drop
+  edit "",2,5 20 145 60,multi read sort
+}
+on 1:dialog:motd:*:*: {
+  if ($devent == init) {
+    did -t $dname 998 
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname icon $mircdirsystem\icons\logo.ico
+    ;_.mdx SetDialog $dname style
+    ;_.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetFont $dname 1,2,3 15 0 Verdana
+  } 
+  if ($devent == sclick) {
+    if ($did == 1) { did -ra $dname 2 $eval($hget(+motd,$ctime($did($dname,1,$did($dname,1,0)))),2) }
+} }

@@ -1,0 +1,928 @@
+alias p.cw.main { 
+  set %d.open 1 | writeini conf\main.conf interface interface dlg 
+  if ($dialog(principal)) dialog -v principal
+  else dialog -m principal principal 
+}
+dialog principal {
+  title "Panel de Control"
+  option dbu
+  size -1 -1 300 175
+  button "ok",999,270 175 30 15,ok
+  text "Pulsa la opción que prefieras",990,105 180 150 10
+  button "WINDOW",998,0 0 303 25
+  list 997,0 25 100 165,size
+
+  tab "A",110,999 999 100 100
+  tab "B",120
+  tab "",130
+
+  tab "",210
+  tab "",220
+  tab "",230
+  tab "",240
+  tab "",250
+
+  tab "",310
+  tab "",320
+  tab "",330
+  tab "",340
+  tab "",350
+
+  tab "",410
+  tab "",420
+
+  tab "",510
+  tab "",520
+  tab "",530
+
+  tab "",610
+
+  tab "",710
+  tab "",720
+
+  tab "",810
+  tab "",820
+  tab "",830
+
+  tab "",910
+  tab "",920
+  tab "",930
+  tab "",940
+
+  tab "",1010
+  tab "",1020
+
+  tab "",1110
+
+  tab "ERASE",1
+
+  box "Roots",100,105 25 195 35
+  text "El sistema de roots permite gestionar varios roots de la red. Los roots son la máxima figura y tienen pleno control sobre los servicios de la red. Pueden acceder a todos los comandos que se ofrecen. Existen dos tipos: el Administrador y los Ajenos. Sólo puede haber un solo Administrador pero tantos Ajenos como se desee.",101,110 32 190 35
+  box "Añadir",102,105 60 195 40,tab 110
+  text "Nick",103,110 70 50 10,tab 110
+  ;text "Pass",104,110 80 50 10,tab 110
+  ;text "Confirmar pass",105,110 90 50 10,tab 110
+  text "Escoge la clase",106,110 80 50 10,tab 110
+  edit "",107,150 70 50 10,autohs,tab 110
+  ;edit "",108,150 80 50 10,autohs pass,tab 110
+  ;edit "",109,150 90 50 10,autohs pass,tab 110
+  radio "Administrador",111,120 90 50 7,tab 110,group
+  radio "Ajeno",112,190 90 50 7,tab 110
+  box "Lista de roots",113,105 60 195 70,tab 120
+  list 114,110 70 100 70,extsel,tab 120
+  button "Borrar marcados",115,215 70 50 20,tab 120
+  box "Cambiar contraseñas",116,105 60 195 70,tab 130
+  list 117,110 70 40 70,tab 130
+  edit "",118,155 70 50 10,autohs pass,tab 130
+
+  box "Servidor",200,105 25 195 25
+  text "En este apartado se fijan todas las opciones pertenecientes al servidor. Estos parámetros son los que deben figurar en la configuración del UnrealIRCd.",201,110 32 190 35
+  box "Conexión",202,105 50 195 40,tab 210
+  check "Conexión automática al inicio",203,110 57 80 10,tab 210
+  check "Reconexión",204,110 67 40 10,tab 210
+  check "Loguear socket",205,110 77 80 10,tab 210
+  edit "",206,155 67 10 10,center,tab 210
+  text "intentos cada",207,168 69 30 10,tab 210
+  edit "",208,200 67 10 10,center,tab 210
+  text "segundos",209,212 69 30 10,tab 210
+  box "Debug",211,105 50 195 30,tab 220
+  text "Debug IRC",212,110 59 50 10,tab 220
+  edit "#",213,160 57 50 10,autohs,tab 220
+  text "Debug servicios",214,110 69 50 10,tab 220
+  edit "#",215,160 67 50 10,autohs,tab 220
+  box "Clones",216,105 50 195 30,tab 230
+  check "Activo",217,110 57 50 10,tab 230
+  edit "",218,110 67 10 10,center,tab 230
+  text "clones",219,122 69 30 10,tab 230
+  text "Mensaje kill",221,155 69 40 10,tab 230
+  edit "",222,195 67 50 10,autohs,tab 230
+  box "Servidor",223,105 50 195 80,tab 240
+  text "Host",224,110 60 20 10,tab 240
+  edit "",225,150 58 50 10,autohs,tab 240
+  text "Información",226,110 70 30 10,tab 240
+  edit "",227,150 68 50 10,autohs,tab 240
+  text "Nombre de la red",228,110 80 50 10,tab 240
+  edit "",229,150 78 50 10,autohs,tab 240
+  text "Contraseña local",231,110 95 50 10,tab 240
+  edit "",232,155 93 50 10,autohs pass,tab 240
+  text "Contraseña remota",233,110 105 50 10,tab 240
+  edit "",234,155 103 50 10,autohs pass,tab 240
+  text "Ip",235,110 120 10 10,tab 240
+  edit "",236,120 118 60 10,tab 240
+  text "Puerto",237,185 120 20 10,tab 240
+  edit "",238,205 118 20 10,center,tab 240
+  box "Proxies",239,105 50 195 125,tab 250
+  text "Prohibir ips/hosts",241,110 68 50 10,tab 250
+  text "Prohibir puertos",242,175 68 50 10,tab 250
+  text "Permitir ips/hosts",243,240 68 50 10,tab 250
+  list 244,110 75 60 70,extsel hsbar sort,tab 250
+  list 245,175 75 60 70,extsel sort,tab 250
+  list 246,240 75 60 70,extsel hsbar sort,tab 250
+  button "Borrar seleccionados",247,110 135 60 10,tab 250
+  button "Borrar seleccionados",248,175 135 60 10,tab 250
+  button "Borrar seleccionados",249,240 135 60 10,tab 250
+  edit "",251,110 150 60 10,autohs,tab 250
+  edit "",252,175 150 60 10,autohs,tab 250
+  edit "",253,240 150 60 10,autohs,tab 250
+  button "Añadir",254,110 160 60 10,tab 250
+  button "Añadir",255,175 160 60 10,tab 250
+  button "Añadir",256,240 160 60 10,tab 250
+  check "Activar",257,110 57 50 10,tab 250
+  button "»",258,285 57 10 10,tab 250
+
+  box "Usuarios/Canales",300,105 25 195 30
+  text "Los usuarios y canales forman una parte imprescindible del irc. Llevar una correcta administración de los mismos es muy importante si se quiere manejar una red que tenga futuro. Administra aseñadamente este apartado.",301,110 32 190 20
+  box "Permisos",302,105 55 195 80,tab 310
+  text "Nicks registrados",303,110 62 50 10,tab 310
+  list 304,110 70 50 70,hsbar sort,tab 310
+  text "Niveles",305,170 62 50 10,tab 310
+  combo 306,170 70 50 70,drop,tab 310
+  box "Automodos",307,105 55 195 30,tab 320
+  text "Modos de usuario al conectar",308,110 62 70 10,tab 320
+  edit "",309,110 70 50 10,autohs,tab 320
+  box "Modos no permitidos",311,105 55 195 30,tab 330
+  text "Modos no permitidos en usuarios",312,110 62 90 10,tab 330
+  edit "",313,200 60 50 10,autohs,tab 330
+  text "Modos no permitidos en canales",314,110 72 90 10,tab 330
+  edit "",315,200 70 50 10,autohs,tab 330
+  box "Drop de nicks",316,105 55 195 75,tab 340
+  text "Nicks registrados",317,110 62 70 7,tab 340
+  list 318,110 70 100 70,extsel,tab 340
+  button "Dropear seleccionados",319,215 70 70 10,tab 340
+  check "Dropeo automático",321,215 90 50 10,tab 340
+  text "Días de vigencia",322,215 110 50 10,tab 340
+  edit "",323,260 108 10 10,center,tab 340
+  box "Drop de canales",324,105 55 195 75,tab 350
+  text "Canales registrados",325,110 62 70 7,tab 350
+  list 326,110 70 100 70,extsel,tab 350
+  button "Dropear seleccionados",327,215 70 70 10,tab 350
+  check "Dropeo automático",328,215 90 50 10,tab 350
+  text "Días de vigencia",329,215 110 50 10,tab 350
+  edit "",331,260 108 10 10,center,tab 350
+
+  box "Módulos",400,105 25 195 35
+  text "Los módulos corresponden a los distintos servicios o bots de la red. Cada módulo desempeña una función distinta. Todos son totalmente independientes los unos de los otros. Carga y descarga los que creas oportunos. Recuerda que los módulos pueden actualizarse automáticamente.",401,110 32 190 30
+  list 402,110 70 50 70
+  box "Cargar",403,105 60 195 75,tab 410
+  button "Cargar módulo",404,165 70 70 10,tab 410
+  box "Descargar",405,105 60 195 75,tab 420
+  button "Descargar módulo",406,165 70 70 10,tab 420
+
+  box "Red",500,105 25 195 30
+  text "Es muy importante configurar correctamente la red. Así se previenen de ataques malintencionados y de otro cualquier aspecto que pueda alterar el buen funcionamiento de la misma.",501,110 32 190 20
+  box "Flood",502,105 55 195 100,tab 510
+  check "Activo",503,110 65 50 10,tab 510
+  edit "",504,110 80 10 10,center,tab 510
+  text "privmsg/notice en menos de",505,125 82 70 10,tab 510
+  edit "",506,195 80 10 10,center,tab 510
+  text "segundos",507,210 82 30 10,tab 510
+  box "Nivel de castigos",508,110 95 150 55,tab 510
+  radio "ignore durante",509,140 105 42 10,group,tab 510
+  edit "",511,185 105 10 10,center,autohs,tab 510
+  text "segundos",512,200 107 30 10,tab 510
+  radio "kill",513,140 115 40 10,tab 510
+  radio "block durante",514,140 125 40 10,tab 510
+  edit "",515,185 125 10 10,center,autohs,tab 510
+  text "segundos",516,200 127 30 10,tab 510
+  list 539,115 105 20 30,hsbar sort size,tab 510
+  button "+",541,115 135 10 10,tab 510
+  button "-",542,125 135 10 10,tab 510
+  box "Blocks",517,105 55 195 110,tab 520
+  text "Mensaje en block por spam",518,110 65 70 10,tab 520
+  edit "",519,110 75 50 10,autohs,tab 520
+  text "durante",521,165 77 30 10,tab 520
+  edit "",522,190 75 10 10,center,autohs,tab 520
+  text "segundos",523,205 77 30 10,tab 520
+  text "Mensaje en block por bline",524,110 90 70 10,tab 520
+  edit "",525,110 100 50 10,autohs,tab 520
+  text "Mensaje en kill por protección de nick",526,110 115 100 10,tab 520
+  edit "",527,110 125 50 10,autohs,tab 520
+  text "Mensaje en block por proxy abierto",528,110 140 100 10,tab 520
+  edit "",529,110 150 50 10,autohs,tab 520
+  text "durante",531,165 152 30 10,tab 520
+  edit "",532,190 150 10 10,center,autohs,tab 520
+  text "segundos",533,205 152 30 10,tab 520
+  box "Autojoins",534,105 55 195 35,tab 530
+  text "Autojoin en usuarios",535,110 65 60 10,tab 530
+  edit "#",536,175 65 50 10,autohs,tab 530
+  text "Autojoin en opers",537,110 75 60 10,tab 530
+  edit "#",538,175 75 50 10,autohs,tab 530
+
+  box "Bots",600,105 25 195 30
+  text "Cada servicio posee un nick, una ident, un host, sus modos, su realname y demás cosas. Cambia todos los aspectos que creas convenientes para que esta configuración se ajuste a tus necesidades.",601,110 32 190 20
+  box "Bots cargados",602,105 55 195 115,tab 610
+  list 603,110 65 100 98,extsel size,tab 610
+  text "Nick",604,215 65 20 10,tab 610
+  edit "",605,215 73 50 10,autohs,tab 610
+  text "Ident",606,215 85 20 10,tab 610
+  edit "",607,215 93 50 10,autohs,tab 610
+  text "Host",608,215 105 20 10,tab 610
+  edit "",609,215 113 50 10,autohs,tab 610
+  text "Realname",611,215 125 30 10,tab 610
+  edit "",612,215 133 50 10,autohs,tab 610
+  text "Modos",613,215 145 20 10,tab 610
+  edit "",614,215 153 50 10,autohs,tab 610
+
+  box "Permisos",700,105 25 195 30
+  text "Incluso los permisos y diferentes rangos se pueden configurar. Puedes agregar, quitar o cambiar rangos, siempre en orden por supuesto. Si cambias algun rango, recuerda a modificar los servicios para que los cambios surjan efecto.",701,110 32 190 20
+  box "Niveles",702,105 55 195 75,tab 710
+  list 703,110 65 20 50,size,tab 710
+  button "+",704,110 115 10 10,tab 710
+  button "-",705,120 115 10 10,tab 710
+  box "Niveles actuales",707,105 55 195 95,tab 720
+  list 706,110 65 95 80,extsel size,tab 720
+
+  box "Mantenimiento",800,105 25 195 30
+  text "Mantén OmEGa Bots al día y toda tu base de datos. Haz copias de seguridad a menudo para que ocurran desgracias. Estas bases se guardan en archivos *.zip. Debes tenerlo instalado y configurado correctamente.",801,110 32 190 20
+  box "Backup",802,105 55 195 75,tab 820
+  check "Nicks",803,110 65 50 10,tab 820
+  check "Canales registrados",804,110 75 50 10,tab 820
+  check "Canales en fase de registro",805,110 85 70 10,tab 820
+  check "Aways",806,110 95 50 10,tab 820
+  check "Configuración",807,110 105 50 10,tab 820
+  button "Iniciar backup",808,110 115 50 10,tab 820
+
+  box "Configuración",900,105 25 195 30
+  text "Adapta OmEGa Bots a tus necesidades y gustos. Cambia y configura todo lo que desees para que te aporten las máximas posibilidades que ofrecen. Recuerda a registrar tu producto para tener pleno acceso a todas sus características.",901,110 32 190 20
+  box "Ventanas",902,105 55 195 55,tab 910
+  check "Abrir Panel de Configuración al iniciar",903,110 65 100 10,tab 910
+  check "Abrir ventana Información de sistema",904,110 75 100 10,tab 910
+  check "Minimizar al iniciar",905,110 85 100 10,tab 910
+  check "Solicitar MOTD al iniciar",906,110 95 100 10,tab 910
+  box "SMTP",907,105 55 195 65,tab 920
+  text "Login del server",908,110 65 50 10,tab 920
+  edit "",909,110 73 50 10,autohs,tab 920
+  text "Pass del server",911,170 65 50 10,tab 920
+  edit "",912,170 73 50 10,autohs pass,tab 920
+  text "Host del server",913,110 85 50 10,tab 920
+  edit "",914,110 93 50 10,autohs,tab 920
+  text "Tu e-mail",915,170 85 50 10,tab 920
+  edit "",916,170 93 50 10,autohs,tab 920
+  check "SMTP vía web",917,110 105 50 10,tab 920
+  box "Scaner",918,105 55 195 85,tab 930
+  text "Dirección",919,110 65 50 10,tab 930
+  edit "",921,110 73 50 10,autohs,tab 930
+  text "Rango de puertos",922,165 65 50 10,tab 930
+  edit "",923,165 73 20 10,center,tab 930
+  text "-",924,187 75 5 10,tab 930
+  edit "",925,190 73 20 10,center,tab 930
+  edit "",926,110 85 100 50,read multi vsbar autovs,tab 930
+  button "Iniciar scan",937,215 75 50 10,tab 930
+  button "Parar scan",938,215 90 50 10,tab 930
+  box "Registrar producto",927,105 55 195 115,tab 940
+  text "ID-Bots",928,110 65 30 10,tab 940
+  edit "",929,140 63 70 10,autohs read center,tab 940
+  text "Login",931,110 75 30 10,tab 940
+  edit "",932,140 73 70 10,autohs,tab 940
+  text "Pass",933,110 85 30 10,tab 940
+  edit "",934,140 83 70 10,autohs pass,tab 940
+  text "Clave",935,110 95 30 10,tab 940
+  edit "",936,140 93 70 70,autohs,multi,tab 940
+
+
+  box "Actualización",1000,105 25 195 30
+  text "Actualiza y conserva OmEGa Bots al día para obtener nuevas características y funciones. En este apartado sólo se actualizarán los módulos. El núcleo o motor de los bots deberá ser descargado de la web.",1001,110 32 190 20
+  box "Actualización",1002,105 55 195 80,tab 1010
+  text "Módulos disponibles",1003,110 65 50 10,tab 1010
+  list 1004,110 75 100 70,extsel,tab 1010
+  button "Iniciar actualización",1005,215 75 50 10,tab 1010
+  text "",1006,215 120 70 10,tab 1010
+  box "Configuración",1007,105 55 195 35,tab 1020
+  check "Buscar actualización al iniciar",1008,110 65 75 10,tab 1020
+  text "Mirror por defecto",1009,110 77 50 10,tab 1020
+  combo 1011,160 75 50 10,drop sort,tab 1020
+
+  box "Configuración de los servicios",1100,105 25 195 25
+  text "Es muy importante tener bien configurados todo el sistema de los bots. Todo lo que concierne a su funcionamiento interno y externo lo encontrarás aquí.",1101,110 32 190 20
+  box "Miscelánea",1102,105 55 195 75,tab 1110
+  check "Dar @ a los ircops",1103,110 65 50 10,tab 1110
+  check "Darse @ al entrar",1104,110 75 50 10,tab 1110
+  check "Anti de@p",1105,110 85 50 10,tab 1110
+  check "Reconectar en kill",1106,110 95 50 10,tab 1110
+  check "Evitar mass glines",1107,110 105 50 10,tab 1110
+  check "Evitar bans",1108,110 115 50 10,tab 1110
+  box "Respuestas por",1109,170 95 75 30,tab 1110
+  radio "Privado",1111,175 102 50 10,group,tab 1110
+  radio "Notice",1112,175 112 50 10,tab 1110
+
+}
+on 1:dialog:principal:*:*: {
+  if ($devent == init) {
+    .timer -h 1 1 did -fu $dname 1
+    window -Bfhkpz +d @header 1 1 $calc(303 * $dbuw) $calc(25 * $dbuh) @header Verdana 13
+    drawpic -s @header 0 0 $calc(303 * $dbuw) $calc(25 * $dbuh) 7 33 95 18 $_.png(base)
+    drawtext -nor @header 4729385 "Tebruchet MS" 20 5 5 Panel de control
+    drawtext -nr @header 4729385 "Verdana" 8 5 $calc(25 * $dbuh - 13) DLG v1.1
+    drawpic -st @header 65280 $calc(303 * $dbuw - 45) 5 $calc($dbuw * 20) $calc($dbuh * 20) $_.png(cpanel)
+    drawtext -nr @header 479385 "Tebruchet MS" 10 $calc(303 * $dbuw / 2 - 20) $calc(25 * $dbuh - 15) http://www.rallados.net
+    did -h $dname 402
+    d.main.v $dname 0 0
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname style
+    ;_.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetControlMDX $dname 998 Window > system\dlls\dialog.mdx
+    did -a $dname 998 grab $window(@header).hwnd @header
+    _.mdx SetFont $dname 100,101,102,103,106,107,111,112,113,114,115,116,117,118 12 0 Tahoma
+    _.mdx SetFont $dname 200,201,202,203,204,205,206,207,208,209,211,212,213,214,215,216,217,218,219,221,222,223,224,225,226,227,228,229,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258 12 0 Tahoma
+    _.mdx SetFont $dname 300,301,302,303,304,305,306,307,308,309,311,312,313,314,315,316,317,318,319,321,322,323,324,325,326,327,328,329,331 12 0 Tahoma
+    _.mdx SetFont $dname 400,401,402,403,404,405,406 12 0 Tahoma
+    _.mdx SetFont $dname 500,501,502,503,504,505,506,507,508,509,511,512,513,514,515,516,517,518,519,521,522,523,524,525,526,527,528,529,531,532,533,534,535,536,537,538,539,541,542 12 0 Tahoma
+    _.mdx SetFont $dname 600,601,602,603,604,605,606,607,608,609,611,612,613,614 12 0 Tahoma
+    _.mdx SetFont $dname 700,701,702,703,704,705,706,707 12 0 Tahoma
+    _.mdx SetFont $dname 800,801,802,803,804,805,806,807,808 12 0 Tahoma
+    _.mdx SetFont $dname 900,901,902,903,904,905,906,907,908,909,911,912,913,914,915,916,917,918,919,921,922,923,924,925,926,927,928,929,931,932,933,934,935,936,937,938 12 0 Tahoma
+    _.mdx SetFont $dname 990,997,998,999 12 0 Tahoma
+    _.mdx SetFont $dname 1000,1001,1002,1003,1004,1005,1006,1007,1008,1009,1011 12 0 Tahoma
+    _.mdx SetFont $dname 1100,1101,1102,1103,1104,1105,1106,1107,1108,1109,1111,1112 12 0 Tahoma
+    _.mdx SetControlMDX $dname 997 TreeView linesatroot hasbuttons showsel > system\dlls\views.mdx
+    _.mdx SetControlMDX $dname 114,318,326,603,1004 ListView sortascending grid report rowselect single infotip headerdrag checkboxes showsel > system\dlls\views.mdx
+    _.mdx SetControlMDX $dname 706 ListView grid report rowselect single headerdrag editlabels flatsb showsel > system\dlls\views.mdx
+    _.mdx SetControlMDX $dname 236 IpAddress > system\dlls\ctl_gen.mdx
+    _.mdx SetControlMDX $dname 1006 ProgressBar > system\dlls\ctl_gen.mdx
+    did -i $dname 997 1 iconsize normal small
+    ;1
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\accessibility.ico
+    ;2
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\add_remove.ico
+    ;3
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\configuration.ico
+    ;4
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\cpanel.ico
+    ;5
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\defrag.ico
+    ;6
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\follow.ico
+    ;7
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\hardware.ico
+    ;8
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\help.ico
+    ;9
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\home_share.ico
+    ;10
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\misc.ico
+    ;11
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\net.ico
+    ;12
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\noteboard.ico
+    ;13
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\secure.ico
+    ;14
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\star.ico
+    ;15
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\users.ico
+    ;16
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\help_f.ico
+    ;17
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\information_f.ico
+    ;18 
+    did -i $dname 997 1 seticon normal 0, $+ $mircdirsystem\icons\cpanel_n.ico
+    did -a $dname 997 18 18 18 Principal
+    did -i $dname 997 1 cb last
+    did -a $dname 997 14 14 14 Control de root
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Añadir root
+    did -a $dname 997 6 6 6 Borrar root
+    ;did -a $dname 997 6 6 6 Cambiar opciones de root
+    did -i $dname 997 1 cb up
+    did -a $dname 997 13 13 13 Opciones de servidor
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Opciones de conexión
+    did -a $dname 997 6 6 6 Canales de debug
+    did -a $dname 997 6 6 6 Control de clones
+    did -a $dname 997 6 6 6 Host, información y contraseñas
+    did -a $dname 997 6 6 6 Configuración de proxies
+    did -i $dname 997 1 cb up
+    did -a $dname 997 15 15 15 Gestión de usuarios/canales
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Asignar permisos a usuarios
+    did -a $dname 997 6 6 6 Modos de usuario al conectar
+    did -a $dname 997 6 6 6 Modos no permitidos
+    did -a $dname 997 6 6 6 Dropeo de nicks
+    did -a $dname 997 6 6 6 Dropeo de canales
+    did -i $dname 997 1 cb up
+    did -a $dname 997 7 7 7 Configuración de módulos
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Cargar módulo
+    did -a $dname 997 6 6 6 Descargar módulo
+    did -i $dname 997 1 cb up
+    did -a $dname 997 11 11 11 Sistema de red
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Configurar anti-flood
+    did -a $dname 997 6 6 6 Blocks
+    did -a $dname 997 6 6 6 Automatismos
+    did -i $dname 997 1 cb up
+    did -a $dname 997 12 12 12 Identidad de los bots
+    did -a $dname 997 1 1 1 Control de permisos
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Añadir/Quitar permiso
+    did -a $dname 997 6 6 6 Modificar permisos
+    did -i $dname 997 1 cb up
+    did -a $dname 997 5 5 5 Mantenimiento
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Refrescar
+    did -a $dname 997 6 6 6 Copias de seguridad
+    did -a $dname 997 6 6 6 Restaurar copias de seguridad
+    did -i $dname 997 1 cb up
+    did -a $dname 997 3 3 3 Configuración interna
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Configuración de ventanas
+    did -a $dname 997 6 6 6 Configuración smtp
+    did -a $dname 997 6 6 6 Scan de puertos
+    did -a $dname 997 6 6 6 Registrar producto
+    did -i $dname 997 1 cb up
+    did -a $dname 997 2 2 2 Actualización
+    did -i $dname 997 1 cb last
+    did -a $dname 997 6 6 6 Buscar actualizaciones
+    did -a $dname 997 6 6 6 Configurar
+    did -i $dname 997 1 cb up
+    did -a $dname 997 4 4 4 Configuración de los bots
+    did -i $dname 997 1 cb up
+    did -a $dname 997 8 8 8 Contenido e índice
+    did -a $dname 997 16 16 16 Información extendida
+    did -a $dname 997 17 17 17 Acerca de...
+    did -i $dname 114 1 headerdims 115:1 80:2
+    did -i $dname 114 1 headertext 0 $+(Roots,$chr(9),Permiso)
+    did -i $dname 318,326 1 headerdims 115:1 80:2 80:3
+    did -i $dname 318 1 headertext 0 $+(Nick,$chr(9),Identificado,$chr(9),Estado)
+    did -i $dname 326 1 headertext 0 $+(Canal,$chr(9),Último acceso,$chr(9),Estado)
+    did -i $dname 603 1 headerdims 130:1 100:2 100:3 100:4 100:5 100:6
+    did -i $dname 603 1 headertext 0 $+(Nick,$chr(9),Ident,$chr(9),Host,$chr(9),Realname,$chr(9),Modos,$chr(9),Módulo)
+    did -i $dname 706 1 headerdims 90:1 90:2
+    did -i $dname 706 1 headertext 0 $+(Permiso,$chr(9),Nivel)
+    did -i $dname 1004 1 headerdims 100:1 100:2 100:3 100:4 100:5 100:6 100:7 100:8
+    did -i $dname 1004 1 headertext 0 $+(Módulo,$chr(9),Tipo,$chr(9),Versión,$chr(9),Autor,$chr(9),Tamaño,$chr(9),Fecha,$chr(9),Descripción,$chr(9),Archivo)
+    did -b $dname 115,247,248,249,254,255,256,319,327,406,509,511,513,514,515,704,705,808,937,938
+    did -c $dname 112 | d.main.fr
+    if ($_conf(sock,auto)) did -c $dname 203
+    if ($_conf(sock,retry)) did -c $dname 204
+    else did -h $dname 206,207,208,209
+    did -ra $dname 206 $gettok($_conf(sock,retry_values),1,32) | did -ra $dname 208 $gettok($_conf(sock,retry_values),2,32)
+    if ($_conf(sock,log)) did -c $dname 205
+    did -ra $dname 213 $_conf(debug,ircd) | did -ra $dname 215 $_conf(debug,control)
+    if ($_conf(clons,clons)) did -c $dname 217
+    else did -h $dname 218,219,221,222
+    did -ra $dname 218 $_conf(clons,clons) | did -ra $dname 222 $_conf(clons,kill)
+    did -ra $dname 225 $_conf(conex,host) | did -ra $dname 227 $_conf(conex,info) | did -ra $dname 229 $_conf(conex,red)
+    did -ra $dname 232 $_conf(conex,lpass) | did -ra $dname 234 $_conf(conex,rpass) | did -o $dname 236 1 $_conf(conex,ip) | did -ra $dname 238 $_conf(conex,port)
+    if ($_conf(sock,prox_state)) did -c $dname 257 
+    else did -h $dname 241,242,243,244,245,246,247,248,249,251,252,253,254,255,256,258
+    var %i = $ini(conf\prox.conf,prox,0) | while (%i) { did -a $dname 244 $ini(conf\prox.conf,prox,%i) | dec %i }
+    var %i = $ini(conf\prox.conf,port,0) | while (%i) { did -a $dname 245 $ini(conf\prox.conf,port,%i) | dec %i }
+    var %i = $ini(conf\prox.conf,allow,0) | while (%i) { did -a $dname 246 $ini(conf\prox.conf,allow,%i) | dec %i }
+    var %i = $findfile(nicks\,*,0) | while (%i) { did -a $dname 304 $_.32($nopath($findfile(nicks\,*,%i))).uncod | dec %i }
+    var %i = 0 | while ($_conf(levels,%i)) { did -a $dname 306 $ifmatch | did -a $dname 703 %i | did -a $dname 706 $+($ifmatch,$chr(9),0 0 0 %i) | inc %i }
+    did -ra $dname 309 $_conf(modes,auto) | did -ra $dname 313 $_conf(modes,users) | did -ra $dname 315 $_conf(modes,chans)
+    if ($_conf(drop,n_auto)) did -c $dname 321 | if ($_conf(drop,c_auto)) did -c $dname 328
+    did -ra $dname 323 $calc($_conf(drop,n_time)/86400) | did -ra $dname 331 $calc($_conf(drop,c_time)/86400)
+    d.main.dp nicks $calc($_conf(drop,n_time)/86400) | d.main.dp canales $calc($_conf(drop,c_time)/86400)
+    var %i = $hfind(+modulos,_*,0,w).item | while (%i) { did -a $dname 402 $hfind(+modulos,_*,%i,w).item | dec %i }
+    if ($_conf(flood,activo)) did -c $dname 503
+    else did -h $dname 504,505,506,507,508,509,511,512,513,514,515,516,539,541,542
+    did -ra $dname 504 $_conf(flood,reps) | did -ra $dname 506 $_conf(flood,in)
+    var %i = 1 | while ($_conf(flood,%i)) { did -a $dname 539 %i | inc %i }
+    did -ra $dname 519 $_conf(blocks,spam) | did -ra $dname 522 $_conf(blocks,spam_t) 
+    did -ra $dname 525 $_conf(blocks,bline) | did -ra $dname 527 $_conf(blocks,nick)
+    did -ra $dname 529 $_conf(blocks,proxy) | did -ra $dname 532 $_conf(blocks,proxy_t)
+    did -ra $dname 536 $_conf(autos,users) | did -ra $dname 538 $_conf(autos,opers)
+    d.main.br
+    if ($_conf(misc,cpanel)) did -c $dname 903 | if ($_conf(misc,cis)) did -c $dname 904 | if ($_conf(misc,minimizar)) did -c $dname 905 | if ($_conf(misc,motd)) did -c $dname 906
+    did -ra $dname 909 $_conf(smtp,login) | did -ra $dname 912 $_conf(smtp,pass) | did -ra $dname 914 $_conf(smtp,server) | did -ra $dname 916 $_conf(smtp,mail)
+    if ($_conf(smtp,web)) { did -c $dname 917 | did -h $dname 908,909,911,912,913,914,915,916 }
+    did -ra $dname 921 $_conf(scan,host) | did -ra $dname 923 $_conf(scan,desde) | did -ra $dname 925 $_conf(scan,hasta)
+    if ($_conf(scan,host) && $_conf(scan,desde) && $_conf(scan,hasta)) { did -e $dname 937 }
+    did -ra $dname 929 $_cif($_reg(ComputerName)) | did -ra $dname 932 $_conf(login,login) | did -ra $dname 934 $_conf(login,pass)
+    if ($_encrypt($_reg(ComputerName),$_reg(ID)) == $+($_conf(login,login),-,$_conf(login,pass),-,$_reg(ComputerName))) { did -ra $dname 936 $_reg(ID) }
+    if ($_conf(mirrors,auto)) did -c $dname 1008 
+    var %i = $ini(conf\main.conf,mirrors,0) | while (%i) { if ($regex($ini(conf\main.conf,mirrors,%i),^(def|auto)$)) { dec %i | continue } | did -a $dname 1011 $ini(conf\main.conf,mirrors,%i) | dec %i }
+    did -c $dname 1011 $didwm($dname,1011,$_conf(mirrors,def))
+    if ($_conf(bots,autoop)) did -c $dname 1103 | if ($_conf(bots,autobop)) did -c $dname 1104 | if ($_conf(bots,antideop)) did -c $dname 1105
+    if ($_conf(bots,rekill)) did -c $dname 1106 | if ($_conf(bots,antigline)) did -c $dname 1107 | if ($_conf(bots,antiban)) did -c $dname 1108
+    if ($_conf(bots,request) == priv) did -c $dname 1111
+    else did -c $dname 1112
+  }
+  if ($devent == sclick) {
+    unset %d.open
+    if ($did == 997) { 
+      var %d = $gettok($did($dname,997,1),4-,32)
+      did -fu $dname 1 | did -h $dname 402 | d.e
+      if (2 2* iswm %d) {
+        d.main.v $dname 100 101
+        if (%d == 2 2 2) did -fu $dname 110
+        if (%d == 2 2 3) did -fu $dname 120
+        if (%d == 2 2 4) did -fu $dname 130
+      }
+      if (2 3* iswm %d) {
+        d.main.v $dname 200 201
+        if (%d == 2 3 2) did -fu $dname 210
+        if (%d == 2 3 3) did -fu $dname 220
+        if (%d == 2 3 4) did -fu $dname 230
+        if (%d == 2 3 5) did -fu $dname 240
+        if (%d == 2 3 6) did -fu $dname 250
+      }
+      if (2 4* iswm %d) {
+        d.main.v $dname 300 301
+        if (%d == 2 4 2) did -fu $dname 310
+        if (%d == 2 4 3) did -fu $dname 320
+        if (%d == 2 4 4) did -fu $dname 330
+        if (%d == 2 4 5) did -fu $dname 340
+        if (%d == 2 4 6) did -fu $dname 350
+      }
+      if (2 5* iswm %d) {
+        d.main.v $dname 400 401
+        if (%d == 2 5 2) { did -fu $dname 410 | did -v $dname 402 }
+        if (%d == 2 5 3) { did -fu $dname 420 | did -v $dname 402 }
+      }
+      if (2 6* iswm %d) {
+        d.main.v $dname 500 501
+        if (%d == 2 6 2) did -fu $dname 510
+        if (%d == 2 6 3) did -fu $dname 520
+        if (%d == 2 6 4) did -fu $dname 530
+      }
+      if (2 7* iswm %d) {
+        d.main.v $dname 600 601
+        did -fu $dname 610
+      }
+      if (2 8* iswm %d) {
+        d.main.v $dname 700 701
+        if (%d == 2 8 2) did -fu $dname 710
+        if (%d == 2 8 3) did -fu $dname 720
+      }
+      if (2 9* iswm %d) {
+        d.main.v $dname 800 801
+        if (%d == 2 9 2) carga
+        if (%d == 2 9 3) did -fu $dname 820
+        if (%d == 2 9 4) d.main.rb
+      }
+      if (2 10* iswm %d) {
+        d.main.v $dname 900 901
+        if (%d == 2 10 2) did -fu $dname 910
+        if (%d == 2 10 3) did -fu $dname 920
+        if (%d == 2 10 4) did -fu $dname 930
+        if (%d == 2 10 5) did -fu $dname 940
+      }
+      if (2 11* iswm %d) {
+        d.main.v $dname 1000 1001
+        if (%d == 2 11 2) { did -fu $dname 1010 | s.upd }
+        if (%d == 2 11 3) did -fu $dname 1020
+      }
+      if (2 12* iswm %d) {
+        d.main.v $dname 1100 1101
+        did -fu $dname 1110
+    } }
+    if ($did == 114) .timer -m 1 1 d.main.page $dname $did 115
+    if ($did == 115) {
+      var %i = $did($dname,114,0).lines | while (%i > 1) {
+        if ($gettok($did($dname,114,%i),5,32) == 2) { 
+          ; hdel $gettok($gettok($did($dname,114,%i),6,32),1,9) root_pass | h $gettok($gettok($did($dname,114,%i),6,32),1,9) 
+          hdel +roots $gettok($gettok($did($dname,114,%i),6,32),1,9) | remini conf\main.conf roots $gettok($gettok($did($dname,114,%i),6,32),1,9)
+        }
+        dec %i
+      }
+      d.main.fr | did -b $dname 115
+    } 
+    if ($did == 117) did -ra $dname 118 $hget($did($dname,117,1).seltext,root_pass)
+    if ($did == 203) writeini conf\main.conf sock auto $did($dname,203).state
+    if ($did == 204) { 
+      writeini conf\main.conf sock retry $did($dname,204).state
+      if ($did($dname,204).state) did -v $dname 206,207,208,209
+      else did -h $dname 206,207,208,209
+    }
+    if ($did == 205) writeini conf\main.conf sock log $did($dname,205).state
+    if ($did == 217) {
+      if ($did($dname,217).state) { did -v $dname 218,219,221,222 }
+      else { did -h $dname 218,219,221,222 | writeini conf\main.conf clons clons 0 }
+    }
+    if ($did == 257) {
+      if ($did($dname,257).state) did -v $dname 244,245,246,247,248,249,251,252,253,254,255,256
+      else did -h $dname 244,245,246,247,248,249,251,252,253,254,255,256
+      writeini conf\main.conf sock prox_state $did($dname,257).state
+    }
+    if ($regex($did,^(244|245|246)$)) did -ra $dname $calc(7+$did) $did($dname,$did,1).seltext 
+    if ($regex($did,^(247|248|249)$)) {
+      while ($did($dname,$calc($did - 3),0).sel) { 
+        remini conf\prox.conf $iif($did == 247,prox,$iif($did == 248,port,allow)) $did($dname,$calc($did - 3),$did($dname,$calc($did - 3),1).sel) 
+        did -d $dname $calc($did - 3) $did($dname,$calc($did - 3),1).sel
+    } }
+    if ($regex($did,^(254|255|256)$)) { 
+      did -a $dname $calc($did - 10) $did($dname,$calc($did - 3)) | did -b $dname $did 
+      writeini conf\prox.conf $iif($did == 247,prox,$iif($did == 248,port,allow)) $did($dname,$calc($did - 3)) $!_PROX | did -r $dname $calc($did - 3) 
+    }
+    if ($did == 258) { 
+      var %f = $sfile($mircdir,Escoge el archivo a importar,Importar), %i = $lines(%f), %g
+      while (%i) { %g = $gettok($gettok($read(%f,%i),1,32),1,58) | if (!$didwm($dname,247,%g,1)) { did -a $dname 247 %g | writeini -n conf\prox.conf prox %g $!_PROX } | dec %i } 
+    }
+    if ($did == 304) did -c $dname 306 $calc($iif($hget($did($dname,304).seltext,status),$ifmatch,3)+1)
+    if ($did == 306 && $did($dname,304,1).seltext) {
+      hadd $did($dname,304,1).seltext status $item(conf\main.conf,levels,$did($dname,306,0)) 
+      d.e Estado guardado.
+    }
+    if ($regex($did,^(318|326)$)) .timer -m 1 1 d.main.page $dname $did $calc(1+$did)
+    if ($regex($did,^(319|327)$)) {
+      var %n = 1, %o = 1, %p, %m, %d = $did, %i = $calc(%d - 1) | while ($did($dname,%i,%n) && %o <= 20) { if ($gettok($did($dname,%i,%n),5,32) == 2) { %p = $+(%p,$chr(149),$chr(32),$gettok($gettok($did($dname,%i,%n),6,32),1,9),$crlf) | inc %o } | inc %n }
+      if (%o == 20) { %p = $+(%p,...,$crlf) }
+      if ($input(Vas a dropear los siguientes $+($iif(%d == 319,nicks,canales),:,$crlf,$crlf,%p,$crlf) ¿estás segur@?,yq,Confirmar)) {
+        %m = $did($dname,%i,0).lines | while (%m) { if ($gettok($did($dname,%i,%m),5,32) == 2) { $iif(%d == 319,mn.drp,mc.drp) $gettok($gettok($did($dname,%i,%m),6,32),1,9) } | dec %m }
+        d.main.dp $iif(%d == 319,nicks,canales) $did($dname,$calc(%d + 4)) | did -b $dname %d | d.e $iif(%d == 319,Nicks,Canales) dropeados con éxito.
+    } }
+    if ($did == 402) { if ($did($dname,402).sel && !$istok(nickserv*chanserv*cregserv*operserv,$readini($gettok($hget(+modulos,$did($dname,402).seltext),1,32),modulo,serv),42)) { did -e $dname 406 } |  else { did -b $dname 406 } }
+    if ($did == 404) {
+      var %f = $remove($sfile($mircdirmodulos\*.ogm,Cargar módulo,Cargar),$mircdir)
+      if (!%f) return | m.cm %f
+    }
+    if ($did == 406) { m.dm $did($dname,402).seltext | did -d $dname 406 $did($dname,402).sel | did -b $dname 406 }
+    if ($did == 503) { 
+      writeini conf\main.conf flood activo $did($dname,503).state
+      if ($did($dname,503).state) did -v $dname 504,505,506,507,508,509,511,512,513,514,515,516,539,541,542
+      else did -h $dname 504,505,506,507,508,509,511,512,513,514,515,516,539,541,542
+    }
+    if ($did == 509) { did -e $dname 511 | did -b $dname 515 | writeini -n conf\main.conf flood $did($dname,539).sel ignore $did($dname,511) | d.e Flood guardado. }
+    if ($did == 513) { did -b $dname 511,515 | writeini -n conf\main.conf flood $did($dname,539).sel kill | d.e Flood guardado. }
+    if ($did == 514) { did -e $dname 515 | did -b $dname 511 | writeini -n conf\main.conf flood $did($dname,539).sel block $did($dname,513) | d.e Flood guardado. }
+    if ($did == 539) {
+      did -eu $dname 509,513,514 | did -b $dname 511,515
+      if (ignore* iswm $_conf(flood,$did($dname,539).sel)) { did -c $dname 509 | did -ra $dname 511 $gettok($_conf(flood,$did($dname,539).sel),2,32) | did -e $dname 511 }
+      if (kill* iswm $_conf(flood,$did($dname,539).sel)) { did -c $dname 513 }
+      if (block* iswm $_conf(flood,$did($dname,539).sel)) { did -c $dname 514 | did -ra $dname 515 $gettok($_conf(flood,$did($dname,539).sel),2,32) | did -e $dname 515 }
+    }
+    if ($did == 541) {
+      did -a $dname 539 $calc($did($dname,539).lines + 1) 
+      did -ra $dname 511,515 40 | did -b $dname 509,511,513,514,515 | did -u $dname 509,513,514,539
+      writeini -n conf\main.conf flood $did($dname,539).lines ignore 40
+    }
+    if ($did == 542) { if ($did($dname,539).lines == 1) { return } | remini conf\main.conf flood $did($dname,539).lines | did -d $dname 539 $did($dname,539).lines | did -ra $dname 511,515 40 | did -bu $dname 509,511,513,514,515 }
+    if ($did == 603) {
+      if (stateclick* iswm $did($dname,603,1)) d.main.ch $dname $did
+      var %k = $did($dname,603).seltext
+      did -ra $dname 605 $gettok($gettok(%k,1,9),6,32) | did -ra $dname 607 $gettok($gettok(%k,2,9),5,32) | did -ra $dname 609 $gettok($gettok(%k,3,9),5,32) | did -ra $dname 612 $gettok($gettok(%k,4,9),5-,32) | did -ra $dname 614 $gettok($gettok(%k,5,9),5,32)
+    } 
+    if ($did == 706) {
+      if ($_.page($dname,$did,labeledit) && $_.page($dname,$did,event)) {
+        var %p = $did($dname,706,$_.page($dname,$did,event))
+        did -o $dname 706 $_.page($dname,$did,event) $+($_.page($dname,$did,labeledit),$chr(9),$gettok(%p,2,9))
+        did -o $dname 306 $calc($_.page($dname,$did,event)-1) $_.page($dname,$did,labeledit)
+        writeini -n conf\main.conf levels $gettok(%p,10,32) $gettok($gettok(%p,1,9),6,32)
+    } }
+    if ($regex($did,^(803|804|805|806|807)$)) {
+      if (!$did($dname,803).state && !$did($dname,804).state && !$did($dname,805).state && !$did($dname,806).state && !$did($dname,807).state) { did -b $dname 808 } | else did -e $dname 808 
+    }
+    if ($did == 808) {
+      if (!$_conf(zip,path)) {
+        if ($input($+(No se ha encontrado el archivo WINZIP32.EXE.,$crlf,¿Desea hallaro usted mismo?,$crlf,$crlf,Pulse SÍ para buscarlo, o NO si desea una búsqueda automática.),yq,No se encuentra archivo.)) {
+          :find
+          var %f = $sfile($mircdir winzip32.exe,Selecciona el archivo compresor WINZIP32.exe,Escoge)
+          if (!%f) { var %f = $input(No se ha encontrado el compresor y no se podrán llevar a cabo las copias de seguridad,oh,No se encuentra el archivo) | return }
+          writeini conf\main.conf zip path %f | var %p = $input($+(El archivo WINZIP32.exe se ha encontrado en la siguiente ruta:,$crlf,$crlf,%f),oi,Archivo encontrado)
+        }
+        else { 
+          if (!$findfile(C:\,winzip32.exe,1)) {
+            if ($input($+(La búsqueda ha fallado.,$crlf,$crlf,¿Quiere hallaro usted mismo?),yq,Búsqueda fallida)) { goto find }
+            else { var %p = $input(No se ha encontrado el compresor y no se podrán llevar a cabo las copias de seguridad,oh,No se encuentra el archivo) | return }
+          }
+          else { writeini conf\main.conf zip path $findfile(C:\,winzip32.exe,1) | var %p = $input($+(El archivo WINZIP32.exe se ha encontrado en la siguiente ruta:,$crlf,$crlf,$findfile(C:\,winzip32.exe,1)),oi,Archivo encontrado) }
+      } }
+
+      var %r = $_conf(zip,path)
+      if ($did($dname,803).state) { .remove nicks.zip | if ($findfile(nicks\,*,1)) { write nicks\ruta.txt nicks\ | run %r -min -a -p -ex $mircdirnicks.zip $mircdirnicks\*.* | .timer 1 10 .remove nicks\ruta.txt } }
+      if ($did($dname,804).state) { .remove canales.zip | if ($findfile(canales\,*,1)) { write canales\ruta.txt canales\ | run %r -min -a -ex $mircdircanales.zip $mircdircanales\*.* | .timer 1 10 .remove canales\ruta.txt } }
+      if ($did($dname,805).state) { .remove creg.zip | if ($findfile(creg\,*,1)) { write creg\ruta.txt | run %r -min -a -ex $mircdircreg.zip $mircdircreg\*.* | .timer 1 10 .remove creg\ruta.txt } }
+      if ($did($dname,806).state) { .remove away.zip | if ($findfile(away\,*,1)) { write away\ruta.txt | run %r -min -a -ex $mircdiraway.zip $mircdiraway\*.* | .timer 1 10 .remove away\ruta.txt } }
+      if ($did($dname,807).state) { .remove conf.zip | if ($findfile(conf\,*,1)) { write conf\ruta.txt | run %r -min -a -ex $mircdirconf.zip $mircdirconf\*.* | .timer 1 10 .remove conf\ruta.txt } }
+      var %p = $input(Copia de seguridad de datos realizada con éxito.,oi,Copia terminada)
+    }
+    if ($did == 903) writeini conf\main.conf misc cpanel $did($dname,903).state
+    if ($did == 904) writeini conf\main.conf misc cis $did($dname,904).state
+    if ($did == 905) writeini conf\main.conf misc minimizar $did($dname,905).state
+    if ($did == 906) writeini conf\main.conf misc motd $did($dname,906).state
+    if ($did == 917) {
+      writeini conf\main.conf smtp web $did($dname,917).state
+      if ($did($dname,917).state) did -h $dname 908,909,911,912,913,914,915,916
+      else did -v $dname 908,909,911,912,913,914,915,916
+    }
+    if ($did == 937) {
+      if ($did($dname,921) && $did($dname,923) isnum && $did($dname,925) isnum) { set %w.main.host $did($dname,921) | set %w.main.from $calc($did($dname,923)-1) | set %w.main.to $did($dname,925) | set %w.main.scan 1 | did -b $dname 937 | did -e $dname 938 | scan }
+    }
+    if ($did == 938) { did -b $dname 938 | did -e $dname 937 | .timerscan* off | p STOP Scan interrumpido. | sockclose scan* | did -a $dname 926 ::Scan interrumpido:: }
+    if ($did == 1004) .timer -m 1 1 d.main.page $dname $did 1005
+    if ($did == 1005) s.upd.f
+    if ($did == 1008) writeini conf\main.conf mirrors auto $did($dname,1008).state
+    if ($did == 1011) writeini conf\main.conf def $did($dname,1011,0)
+    if ($did == 1103) writeini conf\main.conf bots autoop $did($dname,1103).state
+    if ($did == 1104) writeini conf\main.conf bots autobop $did($dname,1104).state
+    if ($did == 1105) writeini conf\main.conf bots antideop $did($dname,1105).state
+    if ($did == 1106) writeini conf\main.conf bots rekill $did($dname,1106).state
+    if ($did == 1107) writeini conf\main.conf bots antigline $did($dname,1107).state
+    if ($did == 1108) writeini conf\main.conf bots antiban $did($dname,1108).state
+    if ($regex($did,^(1109|1111)$)) writeini conf\main.conf request bots $iif($did($dname,1109).state,priv,notice)
+  }
+  if ($devent == edit && !%d.open) {
+    if ($regex($did,^(107|109)$)) {
+      if ($did == 107) {
+        if (!$hget($did($dname,$did))) { d.e Este nick no está registrado. }
+        else d.e
+        if ($readini(conf\main.conf,roots,$did($dname,$did))) { d.e Este nick ya es root. }
+        else d.e
+      }
+      if ($did == 109) {
+        if ($did($dname,$did) != $did($dname,$calc($did - 1))) { d.e Los passwords no coinciden. }
+        else d.e
+      }
+      if ($did($dname,107) && $did($dname,990) == $chr(160) && !$hget(+roots,$did($dname,107))) { 
+        writeini -n conf\main.conf roots $did($dname,107) $iif($did($dname,111).state,Administrador,Ajeno)
+        hadd -m +roots $did($dname,107) $iif($did($dname,111).state,Administrador,Ajeno)
+        ; hadd $did($dname,107) root_pass $did($dname,108) 
+        d.main.fr | d.e Root guardado con éxito.
+      }
+    }
+    if ($did == 118) { 
+      if ($did($dname,118)) { hadd $did($dname,117,1).seltext root_pass $did($dname,118) | h $did($dname,117,1).seltext | d.e Contraseña para [ $did($dname,117,1).seltext ] cambiada. }
+      else d.e
+    }
+    if ($regex($did,^(206|208)$)) {
+      if ($did($dname,206) && $did($dname,208)) { writeini conf\main.conf sock retry_values $did($dname,206) $did($dname,208) | d.e Valores guardados. }
+      else d.e
+    }
+    if ($regex($did,^(213|215)$)) {
+      if ($left($did($dname,$did),1) != $chr(35)) d.e Los canales deben empezar por $chr(35)
+      else if ($did($dname,$did)) { writeini conf\main.conf debug $iif($did == 213,ircd,control) $did($dname,$did) | d.e Canal guardado. }
+      else d.e
+    }
+    if ($did == 218) {
+      if ($did($dname,218) !isnum 1-) d.e El número de clones debe ser un número superior a 1.
+      else if ($did($dname,218)) { writeini conf\main.conf clons clons $did($dname,218) | d.e Clones guardados. }
+      else d.e
+    }
+    if ($did == 222) {
+      if ($did($dname,222)) { writeini conf\main.conf clons kill $did($dname,222) | d.e Mensaje kill guardado. }
+      else d.e
+    }
+    if ($did == 225) {
+      if ($did($dname,225)) { writeini conf\main.conf conex host $did($dname,225) | d.e Host guardado. }
+      else d.e
+    }
+    if ($did == 227) {
+      if ($did($dname,227)) { writeini conf\main.conf conex info $did($dname,227) | d.e Información del servidor guardada. }
+      else d.e
+    }
+    if ($did == 229) {
+      if ($did($dname,229)) { writeini conf\main.conf conex red $did($dname,229) | d.e Nombre de la red guardada. }
+      else d.e
+    }
+    if ($did == 232) {
+      if ($did($dname,232)) { writeini conf\main.conf conex lpass $did($dname,232) | d.e Contraseña local guardada. }
+      else d.e
+    }
+    if ($did == 234) {
+      if ($did($dname,234)) { writeini conf\main.conf conex rpass $did($dname,234) | d.e Contraseña remota guardada. }
+      else d.e
+    }
+    if ($did == 236) {
+      if ($did($dname,236)) { writeini conf\main.conf conex ip $did($dname,236) | d.e Ip guardada. }
+      else d.e
+    }
+    if ($did == 238) {
+      if ($did($dname,238) !isnum 1-65536) d.e El puerto debe ser un número entre 1 y 65536.
+      else if ($did($dname,238)) { writeini conf\main.conf conex port $did($dname,238) | d.e Puerto guardado. }
+      else d.e
+    }
+    if ($regex($did,^(251|252|253)$)) {
+      if ($did == 252 && $did($dname,252) !isnum 1-65536) return 
+      if ($did($dname,$did) && !$didwm($dname,$calc($did - 7),$did($dname,$did),1)) { did -e $dname $calc($did + 3) }
+      else did -b $dname $calc($did + 3)
+    }
+    if ($regex($did,^(323|331)$)) {
+      writeini conf\main.conf drop $iif($did == 323,n_time,c_time) $calc($did($dname,$did)*86400)
+      if ($did($dname,$did) isnum) d.main.dp $iif($did == 323,nicks,canales) $did($dname,$did)
+      d.e Vigencia cambiada.
+    } 
+    if ($did == 605) {
+      if ($did($dname,603).sel < 1) d.e Selecciona a un bot.
+      else d.e
+      var %m = $gettok($did($dname,603).seltext,$numtok($did($dname,603).seltext,32),32)
+      hadd +modulos %m $puttok($hget(+modulos,%m),$did($dname,605),3,32) | writeini -n $_.bot($did($dname,605)).path modulo nick $did($dname,605) 
+      .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 607) {
+      if ($did($dname,603).sel < 1) d.e Selecciona a un bot.
+      else d.e
+      writeini -n $_.bot($did($dname,605)).path modulo ident $did($dname,607) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 609) {
+      if ($did($dname,603).sel < 1) d.e Selecciona a un bot.
+      else d.e
+      writeini -n $_.bot($did($dname,605)).path modulo host $did($dname,609) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 612) {
+      if ($did($dname,603).sel < 1) d.e Selecciona a un bot.
+      else d.e
+      writeini -n $_.bot($did($dname,605)).path modulo realname $did($dname,612) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 614) {
+      if ($did($dname,603).sel < 1) d.e Selecciona a un bot.
+      else d.e
+      writeini -n $_.bot($did($dname,605)).path modulo modos $did($dname,614) | .timerBR -m 1 1500 d.main.br
+    }
+    if ($did == 909) {
+      if ($did($dname,909)) { writeini conf\main.conf smtp login $did($dname,909) | d.e Login guardado. }
+      else d.e
+    }
+    if ($did == 912) {
+      if ($did($dname,912)) { writeini conf\main.conf smtp pass $did($dname,912) | d.e Pass guardado. }
+      else d.e
+    }
+    if ($did == 914) {
+      if ($did($dname,914)) { writeini conf\main.conf smtp server $did($dname,914) | d.e Host guardado. }
+      else d.e
+    }
+    if ($did == 916) {
+      if ($did($dname,916)) { writeini conf\main.conf smtp mail $did($dname,916) | d.e E-mail guardado. }
+      else d.e
+    }
+    if ($did == 921 && $did($dname,921)) { writeini conf\main.conf scan host $ifmatch }
+    if ($did == 923 && $did($dname,923)) { writeini conf\main.conf scan desde $ifmatch }
+    if ($did == 925 && $did($dname,925)) { writeini conf\main.conf scan hasta $ifmatch }
+    if ($regex($did,^(932|934|936)$)) {
+      if ($did($dname,932)) writeini conf\main.conf login login $did($dname,932)
+      if ($did($dname,934)) writeini conf\main.conf login pass $did($dname,934)
+      if ($did($dname,936)) {
+        RegDelete HKLM\SOFTWARE\OmEGa\ 
+        .timerVALID 1 3 d.cv $_did($dname,936) | d.e Comprobando clave... Espere.
+      }
+    }
+    if ($did == 1005) s.upd.f
+  }
+}
+alias d.e did -o principal 990 1 $iif($1-,$iif($1 isnum,$2-,$1-),$chr(160)) | if ($1 && $1 !isnum) { halt }
+alias d.main.v {
+  var %p = 100,101,200,201,300,301,400,401,500,501,600,601,700,701,800,801,900,901,1000,1001,1100,1101
+  did -h $1 $remtok($remtok(%p,$2,44),$3,44)
+  if ($2 == 0) || ($3 == 0) return
+  did -v $1 $addtok($2,$3,44)
+}
+alias d.cv {
+  if ($_encrypt($_reg(ComputerName),$1-) == $+($_conf(login,login),-,$_conf(login,pass),-,$_reg(ComputerName))) {
+    RegWrite HKLM\SOFTWARE\OmEGa\\ID $1- REG_SZ
+    d.e Clave correcta! El producto se ha registrado con éxito.
+  }
+  else d.e ERROR: Clave equívoca. Por favor, repase sus datos.
+}
+alias d.main.fr { 
+  did -r principal 114,117 | var %i = $hget(+roots,0).item 
+  while (%i) { did -a principal 114 $+($hget(+roots,%i).item,$chr(9),$hget(+roots,%i).data) | did -a principal 117 $hget(+roots,%i).item | dec %i } 
+  if ($hget(+roots,Administrador).data) did -b principal 111
+  else did -e principal 111
+}
+alias d.main.dp {
+  var %i, %t
+  if ($1 == nicks) {
+    did -r principal 318 | %i = $findfile(nicks\,*,0)
+    while (%i) {
+      %t = $nopath($findfile(nicks\,*,%i))
+      if ($left(%t,1) == +) { dec %i | continue }
+      did -a principal 318 $+($_.32(%t).uncod,$chr(9),$asctime($hget(%t,id)),$chr(9),$iif($calc($hget(%t,id) + $2 * 86400) < $ctime,Caducado,Activo)) 
+      dec %i
+  } }
+  if ($1 == canales) {
+    did -r principal 326 | %i = $findfile(canales\,#*,0)
+    while (%i) {
+      %t = $nopath($findfile(canales\,#*,%i))
+      did -a principal 326 $+($_.32(%t).uncod,$chr(9),$asctime($hget(%t,visit)),$chr(9),$iif($calc($hget(%t,visit) + $2 * 86400) < $ctime,Caducado,Activo)) 
+      dec %i
+} } }
+alias d.main.page {
+  var %i = $did($1,$2,0).lines, %j = 0 | while (%i > 1) { if ($gettok($did($1,$2,%i),5,32) == 2) { inc %j } | dec %i }
+  if (%j) { did -e $1 $3 } | else { did -b $1 $3 }
+}
+alias _.page did -i $1 $2 1 page $3 | return $gettok($did($1,$2,1),3-,32)
+alias d.main.ch {
+  var %i = 2 | while ($did($1,$2,%i)) {       
+    var %f = $_.bot($gettok($gettok($did($1,$2,%i),1,9),6,32)).path
+    .timerCH $+ %i -m 1 1 writeini -n %f modulo activo $!iif($gettok($did( $1 , $2 , %i ),5,32) == 2,1,0)
+    .timerCH2 $+ %i -m 1 1 $!iif($gettok($did($1,$2,%i),5,32) == 1,hdel +bots $!readini( %f ,modulo,serv),hadd -m +bots $readini(%f,modulo,serv) $!readini( %f ,modulo,nick))
+    inc %i
+} }
+alias d.main.br {
+  did -r principal 603
+  var %i = $hfind(+modulos,_*,0,w).item | while (%i) { 
+    var %d = $gettok($hget(+modulos,$hfind(+modulos,_*,%i,w).item),1,32)
+    did -a principal 603 $+(0 0 0 $iif($readini(%d,modulo,activo),2,1) $readini(%d,modulo,nick),$chr(9),$readini(%d,modulo,ident),$chr(9),$readini(%d,modulo,host),$chr(9),$readini(%d,modulo,realname),$chr(9),$readini(%d,modulo,modos),$chr(9),$readini(%d,modulo,nombre))
+    dec %i
+  }
+}
+alias _did var %i = 1, %s | while ($did($1,$2,%i)) { %s = %s $+ $ifmatch | inc %i } | return %s
+alias d.main.rb {
+  var %f = $sfile($mircdir $+ *.zip,Selecciona el fichero a restaurar,Restaurar)
+  if (!%f) { return }
+  mkdir tmp\backup | dll system\dlls\munzip.dll Unzip -o %f $mircdirtmp\backup
+  var %p = $read(tmp\backup\ruta.txt,1) | .remove tmp\backup\ruta.txt
+  var %g = $round($calc(100/$findfile(tmp\backup,*,0)),0), %h = 1 | p %h Restaurando fichero...
+  while ($findfile(tmp\backup,*,1)) { 
+    var %k = $ifmatch | inc %h %g | p %h 
+    if (($isfile(%p $+ $nopath(%k)) && $input($+(El archivo $nopath(%k) ya existe.,$crlf,$crlf,¿Desea sobreescribirlo?),yq,¿Sobreescribir?)) || !$isfile(%p $+ $nopath(%k))) {
+      .copy -o %k %p $+ $nopath(%k)
+    }
+    .remove %k
+  }
+  p STOP Restauración finalizada con éxito. 
+  ;.remove %f
+}

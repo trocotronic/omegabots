@@ -1,0 +1,10 @@
+alias _.mx { 
+  var %i = 1, %c = 71 32 1 0 0 1 0 0 0 0 0 0 3 31 32 37 1 30 1 30 1 31 0 00 7F 0 1
+  bset &bin 1 1
+  while (%i <= $numtok(%c,32)) {
+    bset &bin %i $base($gettok(%c,%i,32),16,10)
+    inc %i
+  }
+  sockudp -k smtp 127.0.0.1 53 &bin
+}
+on 1:upread:smtp: upread %mail | echo -s %mail

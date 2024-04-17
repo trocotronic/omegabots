@@ -1,0 +1,72 @@
+/*
+ * Hago este documento con los cambios que se realizan a partir de la versión 0.9.9 cuando ya llevo casi 8 meses de trabajo. Mi principal cometido era actualizarlo a la versión 3.1 de UDB, pero le agregué unos comandos extras. Pongo los cambios generales que hice a los OmegaBots originales de Trocotronic y seguiré con los que haga a partir de ahora detalladamente.
+ * Este proyecto lo empecé para adaptarlo a UnrealIRCd + UDB3.1, pero a la hora de prepararlos encontré muchos problemas por lo que he cambiado muchas cosas: detalles pequeños y grandes problemas. En la primera parte de este archivo están los grandes problemas de los Bots, los detalles no los recuerdo. 
+ * 15/09/2005 STeaL
+ */
+
+xxxxxx001 - Creo un núcleo UDB y paso a usarlo con los módulos.
+xxxxxx002 - Elimino NickServ2 y paso sus funciones a NickServ.
+xxxxxx003 - Elimino ChanServ2 y paso sus funciones a ChanServ.
+xxxxxx004 - Elimino ClonServ y paso sus funciones a IpServ.
+xxxxxx005 - Elimino PreoServ y paso sus funciones a OperServ.
+xxxxxx006 - Arreglo un fallo importante en el Raw de OperServ, ya que cualquier OPERador se podía poner y quitar modos a su antojo.
+xxxxxx007 - Creo el comando OPT en OperServ para optimizar el tamaño de las bases de datos.
+xxxxxx008 - Cambio el sistema de G/Z-lines.
+xxxxxx009 - Cambio/añado el sistema de añadir OPERadores, Devels y ADMINistradores.
+xxxxxx010 - Tokenizo el núcleo UDB por motivos de versión.
+xxxxxx011 - Cambio el manejo del núcleo UDB.
+xxxxxx012 - Añado el comando SAPART a OperServ.
+xxxxxx013 - Añado el comando VIEWIP a OperServ.
+xxxxxx014 - Varios intentos por arreglar la identificación de NickServ con nick migrados.
+xxxxxx015 - Arreglo un fallo que afectaba a AntispamServ y MemoServ cuando se intentaba entrar al canal ,0 (usado para salir de todos los canales).
+xxxxxx016 - Añado la versión a todos los archivos para hacer posible su actualización.
+xxxxxx017 - Elimino IDENTIFY y DEAUTH de NickServ y de ChanServ.(Sugerencia de MaD)
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+150905018 - Añado el comando SNOMASK en OperServ.
+150905019 - Cambio la ayuda del comando OPT en OperServ.
+150905020 - Arreglado un fallo leve en el comando OPT.
+160905021 - Arreglado el fallo grave de identificación de nicks después de varios meses (Gracias MaD ^^).
+160905022 - Arreglo los cambios de topic mediante ChanServ y mediante el comando /topic.
+160905023 - Arreglo un fallo al registrar canales producido por "Cambio de manejo del núcleo UDB (011)"
+160905024 - Elimino el comando RECOVER de NickServ ya que está obsoleto.
+160905025 - Retoco la estética del ENTRYMSG.
+160905026 - Arreglo un fallo con el que administradores y superiores no podían hacer SET FOUNDER de cualquier canal.
+170905027 - Añado contraseña y encriptación para agregar roots.
+170905028 - Ahora no cambia el nick al darle status de PREOperador o superior, simplemente lo identifica como tal.
+170905029 - Cuando te identificas como OPERador o superior te invita a los respectivos canales, elimino el SVSJOIN.
+170905030 - Agrego el level ADMIN para poder hacer ADMIN/DEADMIN mediante ChanServ.
+170905031 - Añado el comando SWHOIS en NickServ para agregar un swhois a un nick determinado.
+180905032 - Arreglado un fallo en comando JOIN de ChanServ.
+021005033 - Agrego un sistema de aviso de fallos.
+091005034 - Arreglado un fallo en el comando SNOMASK de OperServ.
+091005035 - Arreglo un fallo en el aviso de fallos (Que ironía).
+091005036 - Arreglado un fallo de modos de nick.
+091005037 - Optimizo el comando ADDVHOST de VirtualServ interiormente, ahora está más simplificado.
+091005038 - Arreglo un fallo con el que en las Vhosts se ponían caracteres no permitidos.
+091005039 - Cambio la expresión regular de emails, ya que la anterior no era válida.
+111005040 - Arreglo un fallo al cambiar la password de un canal.
+111005041 - Arreglo un fallo al cambiar el founder de un canal.
+121005042 - Añado los estatus secureadmins y securehalf, hacen lo mismo que secureops pero en sus respectivos rangos.
+121005043 - Ahora manda un notice al nick que es expulsado por la opción secure.
+151005044 - Termino de arreglar los modos de canales y su control.
+151005045 - Arreglo un fallo con el que salía IPVirtual doble al añadirla.
+151005046 - Adapto el desafío al nuevo UnrealIRCd + UDB.
+161005047 - Cambio el sistema de identificación de nicks, para mejorarlo, ahora sólo será compatible con la versión 3.2.4pre2 + UDB 3.2.1.
+161005048 - Cambio un poco el sistema de actualización de archivos.
+161005049 - *** OmegaBots v1.0.1. *** Es una primera versión de prueba, iré mejorándolos poco a poco, estad atentos a actualizaciones.
+191005050 - Arreglado un pequeño despiste que daba error al cambiar modos mediante /mode.
+211005051 - Agrego un sistema de carga/descarga de módulos mediante la línea de comandos a través de OperServ.
+221005052 - Arreglado un fallo al cambiar los modos mediante /mode #canal con el mlock activado, algunos modos no los quitaba correctamente.
+221005053 - Arreglo un fallo con el que se mostraban los parámetro de los modos de canal en el info a ChanServ (podían mostrarse contraseña del +k y límite del +l, por ejemplo).
+231005054 - Añado un nuevo sistema de registro de nicks, para que la contraseña temporal se envíe al e-mail. La activación se hace a través de la configuración de NickServ y es necesario un smtp.
+231005055 - *** OmegaBots v1.0.5. *** Versión de revisión de la anterior.
+281005056 - Arreglado un fallo al quitar todos los modos de canales.
+281005057 - Un ajuste al enviar las contraseñas de registro al e-mail, ahora usa una sintaxis configurable.
+291005058 - Arreglo un fallo en el cual se mostraba como modos de canal los modos de usuario.
+291005059 - Agrego el EXCEPTS a VirtualServ.
+291005060 - Arreglo un pequeño despiste al borrar clones.
+291005061 - Agrego el comando INFO para hosts en VirtualServ.
+291005062 - Arreglo un fallo en la simulación de tablas local.
+291005063 - Arreglado un fallo referente a los cambios de topic.
+301005064 - Arreglado un fallo con el que se podían poner los modos +AO en canales.
+301005065 - *** OmegaBots v.1.0.8. *** Arreglados fallos importantes respecto a la anterior.

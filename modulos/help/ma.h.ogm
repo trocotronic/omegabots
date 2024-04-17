@@ -1,0 +1,71 @@
+[modulo]
+version=1.0.8
+conf=conf\ma.conf
+modulo=ma.ogm
+
+alias ma.help {
+  vc 4
+  var %i = 5, %s = ma.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias ma.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,antispamserv)
+  r
+  r 12 $+ $hget(+bots,antispamserv) se encarga de gestionar la publicidad de toda la red.
+  r Actualmente, está configurado para entrar en canales cuyo número de usuarios es igual o superior a12 $_.conf($script,users) $+ .
+  r Si el número es inferior al establecido saldrá del canal.
+  if ($_.conf($script,resident)) { r Además, existe una lista de canales configurados por el root en los cuales NO saldrá aunque el número de usuarios sea inferior al especificado. }
+  r
+  r Comandos disponibles:
+  r 12ADDCHAN Añade un canal para ser ignorado.
+  r 12DELCHAN Borra un canal de la lista de canales ignorados.
+  r 12ADDWORD Añade una palabra o porción clasificada como spam.
+  r 12DELWORD Borra una palabra o porción clasificada como spam.
+  r 12JOIN Entra el bot en el canal especificado.
+  r 12PART Quita el bot del canal especificado.
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias ma.h.addchan {
+  r 12ADDCHAN
+  r
+  r Añade un canal a la lista de ignorados. Dicho canal será omitido cuando el número de usuarios llegue a su límite.
+  r
+  r Sintaxis: 12ADDCHAN #canal
+}
+alias ma.h.delchan {
+  r 12DELCHAN
+  r
+  r Borra un canal de la lista de ignorados. Pasará a ser controlado cuando llegue al límite establecido.
+  r
+  r Sintaxis:12 DELCHAN #canal
+}
+alias ma.h.addword {
+  r 12ADDWORD
+  r
+  r Añade una palabra clasificada como spam. Si dicha palabra es nombrada por un usuario en un canal, ya sea total o parcialmente, será expulsado de la red durante12 $_conf(blocks,spam_t) segundos.
+  r
+  r Sintaxis:12 ADDWORD palabra
+}
+alias ma.h.delword {
+  r 12DELWORD
+  r
+  r Borra una palabra clasificada como spam.
+  r
+  r Sintaxis:12 DELWORD palabra
+}
+alias ma.h.join {
+  r 12JOIN
+  r
+  r Obliga al bot a entrar en el canal especificado.
+  r
+  r Sintaxis:12 JOIN #canal
+}
+alias ma.h.part {
+  r 12PART
+  r
+  r Obliga al bot a salir del canal especificado.
+  r
+  r Sintaxis:12 PART #canal
+}

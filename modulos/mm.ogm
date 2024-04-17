@@ -1,0 +1,168 @@
+[modulo]
+version=1.0.8
+nombre=_memo
+prefijo=mm
+serv=MemoServ
+archivos=
+ayuda=help\mm.h.ogm
+conf=conf\mm.conf
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=MeMo
+ident=MeMo
+host=servicios.&red
+realname=Servicio de gestión de mensajería privada
+modos=oOaANCdhrtvwBq
+
+[comandos]
+
+help=help
+ayuda=help
+send=send
+read=read
+del=del
+list=list
+set=set
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mm.privmsg | return
+  :NICK | mm.nick | return
+  :ID_OK | mm.ok | return
+  :B_JOIN | mm.join $1- | return
+  :%g | return
+}
+alias mm.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mm.nick { 
+  var %t = $iif(%parv[0] == $_.tok(NICK),%parv[1],%parv[2])
+  if ($_.get(%t).status > 2 && $hfind(%t,+*,0,w).data && ($hget(%t,m_notif) == 1 || $hget(%t,m_notif) == 3)) { k $readini($script,modulo,nick) $_.tok(PRIVMSG) %t : $+ $_.conf($script,msg) }
+}
+alias mm.ok {
+  if ($hfind(%parv[0],+*,0,w).data && ($hget(%parv[0],m_notif) == 1 || $hget(%parv[0],m_notif) == 3)) { k $readini($script,modulo,nick) $_.tok(PRIVMSG) %parv[0] : $+ $_.conf($script,msg) }
+}
+alias mm.send {
+  vu
+  if (!%parv[5]) { e 1 SEND nick/#canal mensaje }
+  if (!$hget(%parv[4])) { e $iif($left(%parv[4] == $chr(35),6,3) }
+  if ($calc($hget(%parv[0],m_flood)+$_.conf($script,flood)) > $ctime) { e 0 Aún no han pasado $_.conf($script,flood) segundos desde el último mensaje. }
+  if ($hfind(%parv[4],m-*,0,w) == $hget(%parv[4],m_lim)) { e 0 Este $iif($left(%parv[4],1) == $chr(35),canal,nick) no acepta más mensajes. }
+  mm.snd %parv[0] %parv[4] $gettok(%parc,6-,32) | hadd %parv[0] m_flood $ctime | r Mensaje enviado a12 %parv[4]
+}
+alias mm.snd { 
+  if ($hget($2)) { 
+    hadd $2 m- $+ $calc($hfind($2,m-*,0,w)+1) + $+ $1 $ctime $3- | h $2 
+    if ($tget(chans,$2,total,0) && $hget($2,m_notif)) { k $readini($script,modulo,nick) $_.tok(NOTICE) @ $+ $2 : $+ $replace($_.conf($script,cmsg),&canal,$2) }
+    if ($hget(+nicks,$2) && $_.get($2).status > 2 && ($hget($2,m_notif) == 2 || $hget($2,m_notif) == 3)) { k $readini($script,modulo,nick) $_.tok(PRIVMSG) $2 : $+ $_.conf($script,msg) } 
+} }
+alias mm.read {
+  vu
+  if (!%parv[4]) { e 1 READ [#canal] número/LAST }
+  if ($left(%parv[4],1) == $chr(35)) {
+    if (!$_.level(%parv[0],%parv[4],memos)) { e 5 }
+    if (%parv[5] == LAST) { set %parv[5] $hfind(%parv[4],m-*,0,w) }
+    var %m = $hget(%parv[4],m- $+ %parv[5])
+    if (!%m) { e 0 Este mensaje no existe. }
+    if ($left(%m,1) == +) { hadd %parv[4] m- $+ %parv[5] $right(%m,-1) | h %parv[4] }
+    var %m = $hget(%parv[4],m- $+ %parv[5])
+    r Mensaje12 %parv[5] de12 $gettok(%m,1,32) (12 $+ $asctime($gettok(%m,2,32)) $+ )
+    r Mensaje:12 $gettok(%m,3-,32)
+  }
+  else {
+    if (%parv[4] == LAST) { set %parv[4] $hfind(%parv[0],m-*,0,w) }
+    var %m = $hget(%parv[0],m- $+ %parv[4])
+    if (!%m) { e 0 Este mensaje no existe. }
+    if ($left(%m,1) == +) { hadd %parv[0] m- $+ %parv[4] $right(%m,-1) | h %parv[0] }
+    var %m = $hget(%parv[0],m- $+ %parv[4])
+    r Mensaje12 %parv[4] de12 $gettok(%m,1,32) (12 $+ $asctime($gettok(%m,2,32)) $+ )
+    r Mensaje:12 $gettok(%m,3-,32)
+} }
+alias mm.del {
+  vu
+  if ($left(%parv[4],1) == $chr(35)) {
+    if (!$_.level(%parv[0],%parv[4],memos)) { e 5 }
+    if (%parv[5] !isnum && %parv[5] != 0) { e 2 DEL #canal número/0 }
+    if (%parv[5] == 0) {
+      while ($hfind(%parv[4],m-*,1,w)) { hdel %parv[4] $ifmatch }
+      r Todos los mensajes de12 %parv[4] han sido borrados.
+    }
+    else {
+      if (!$hget(%parv[4],m- $+ %parv[5])) { e 0 Este mensaje no existe. }
+      hdel %parv[4] m- $+ %parv[5] | var %m = %parv[5]
+      while (%m <= $hfind(%parv[4],m-*,0,w)) {
+        hadd %parv[4] m- $+ %m $hget(%parv[4],m- $+ $calc(1+%m))
+        inc %m
+      }
+      hdel %parv[4] m- $+ %m | r Mensaje12 %parv[5] de12 %parv[4] borrado. | h %parv[4]
+  } }
+  else {
+    if (%parv[4] !isnum && %parv[4] != 0) { e 2 DEL número/0 }
+    if (%parv[4] == 0) {
+      while ($hfind(%parv[0],m-*,1,w)) { hdel %parv[0] $ifmatch }
+      r Todos los mensajes han sido borrados.
+    }
+    else {
+      if (!$hget(%parv[0],m- $+ %parv[4])) { e 0 Este mensaje no existe. }
+      hdel %parv[0] m- $+ %parv[4] | var %m = %parv[4], %t = $hfind(%parv[0],m-*,0,w)
+      while (%m <= %t) {
+        hadd %parv[0] m- $+ %m $hget(%parv[0],m- $+ $calc(1+%m))
+        inc %m
+      }
+      hdel %parv[0] m- $+ %m | r Mensaje12 %parv[4] borrado. | h %parv[0]
+} } }
+alias mm.list {
+  vu
+  if ($left(%parv[4],1) == $chr(35)) {
+    if (!$_.level(%parv[0],%parv[4],memos)) { e 5 }
+    if (!$hget(%parv[4],m-1)) { e 0 El canal %parv[4] no tiene mensajes. }
+    var %i = 1 | while ($hget(%parv[4],m- $+ %i)) { r Mensaje12 %i de12 $iif($left($hget(%parv[4],m- $+ %i),1) == +,$gettok($right($hget(%parv[4],m- $+ %i),-1),1,32),$gettok($hget(%parv[4],m- $+ %i),1,32)) | inc %i }
+  }
+  else {
+    if (!$hget(%parv[0],m-1)) { e 0 No tiene mensajes. }
+    var %i = 1 | while ($hget(%parv[0],m- $+ %i)) { r $iif($left($hget(%parv[0],m- $+ %i),1) == +,*) Mensaje12 %i de12 $iif($left($hget(%parv[0],m- $+ %i),1) == +,$gettok($right($hget(%parv[0],m- $+ %i),-1),1,32),$gettok($hget(%parv[0],m- $+ %i),1,32)) | inc %i }
+} }
+alias mm.set {
+  vu
+  if ($left(%parv[4],1) == $chr(35)) {
+    if (!$_.level(%parv[0],%parv[4],memos)) { e 5 }
+    if (%parv[5] == NOTIFY) {
+      if (!%parv[6]) { e 1 SET #canal NOTIFY on/off }
+      set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal NOTIFY on|off }
+      hadd %parv[4] m_notif $iif(%parv[6] == on,1,0) | r Valor NOTIFY de12 %parv[4] fijado a12 %parv[6] | h %parv[4]
+    }
+    else if (%parv[5] == LIMITE) {
+      if (!%parv[6]) { e 1 SET #canal LIMITE número/0 }
+      if (%parv[6] !isnum 0-) { e 0 El límite debe ser un número mayor o igual que 0 }
+      hadd %parv[4] m_lim %parv[6] | r Valor LIMITE de12 %parv[4] fijado a12 %parv[6] | h %parv[4]
+    }
+    else { e 0 Opción incorrecta. }
+  }
+  else {
+    if (%parv[4] == NOTIFY) {
+      if (!%parv[5]) { e 1 SET NOTIFY connect/new/all }
+      set %parv[5] $upper(%parv[5]) | if (!$regex(%parv[5],^(CONNECT|NEW|ALL)$)) { e 2 SET NOTIFY connect|new|all }
+      if (%parv[5] == connect) { hadd %parv[0] m_notif 1 }
+      if (%parv[5] == new) { hadd %parv[0] m_notif 2 }
+      if (%parv[5] == all) { hadd %parv[0] m_notif 3 }
+      r Valor NOTIFY fijado a12 %parv[5] | h %parv[0]
+    }
+    else if (%parv[4] == LIMITE) {
+      if (!%parv[5]) { e 1 SET LIMITE número/0 }
+      if (%parv[5] !isnum 0-) { e 0 El límite debe ser un número mayor o igual que 0 }
+      hadd %parv[0] m_lim %parv[5] | r Valor LIMITE fijado a12 %parv[5] | h %parv[0]
+    }
+    else { e 0 Opción incorrecta. }
+} }
+alias mm.join {
+  if ($hget($2,m_notif) && $_.level($1,$2,memos) && $hget($2,m-1)) { k $readini($script,modulo,nick) $_.tok(NOTICE) $1 : $+ $replace($_.conf($script,cmsg),&canal,$2) }
+}

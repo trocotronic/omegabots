@@ -1,0 +1,172 @@
+[modulo]
+version=1.0.8
+nombre=_creg
+prefijo=mr
+serv=CregServ
+archivos=
+ayuda=help\mr.h.ogm
+conf=conf\mr.conf
+autor=STeaL
+mail=jkrst_@hotmail.com
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=CReG
+ident=CReG
+host=servicios.&red
+realname=Servicio de registro de canales
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+register=reg
+info=info
+apoya=apoya
+apoyos=apoyos
+list=list
+drop=drop
+aceptar=ok
+apolla=apolla
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mr.privmsg | return
+  :%g | return
+}
+alias mr.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mr.reg {
+  vu
+  if (!%parv[6]) { e 1 REGISTER #canal pass descripción }
+  if ($left(%parv[4],1) != $chr(35)) { e 0 4El canal debe empezar por el carácter 12#4.4 Por ejemplo #canal }
+  if ($_conf(forbid,$_.32(%parv[4]).cod)) { e 0 Este canal está prohibido: $ifmatch }
+  if ($calc($hget(%parv[0],creg)+0) == $_.conf($script,max) && $_.get(%parv[0]).status isnum 3-4) { e 0 No puedes registrar más canales. }
+  if ($hget(+ $+ %parv[4])) { e 0 Este canal ya está en fase de registro. }
+  if ($hget(%parv[4])) { e 0 Este canal ya existe. }
+  if ($calc($hget(%parv[0],fecha)+$_.conf($script,antig)*86400) > $ctime && $_.get(%parv[0]).status < 5) { e 0 No puedes usar este comando. Tu nick aun no tiene $_.conf($script,antig) días de antigüedad. }
+  if ($readini(tmp\ogm.tmp,ng,$_.get(%parv[0]).ip) > $calc($ctime - $_.conf($script,freq)*3600)) { e 0 Debes esperar $_.conf($script,freq) horas antes de efectuar cualquier operación. }
+  hadd -m + $+ %parv[4] founder %parv[0] | hadd + $+ %parv[4] fecha $ctime | hadd + $+ %parv[4] pass %parv[5] | hadd + $+ %parv[4] desc $gettok(%parc,7-,32) | hsave -bo + $+ %parv[4] creg\ $+ $_.32(%parv[4]).cod
+  r El canal12 %parv[4] ha pasado a fase de registro. Necesitas12 $_.conf($script,apoyos) apoyos en12 $_.conf($script,days) días o la fase de registro expirará. Una vez reunas los apoyos, la administración decidirá la aprobación del canal. | do $+(12,%parv[0],1) pone el proceso de registro el canal12 $+(,%parv[4],1.)
+  if ($_.conf($script,apoyos) == 0) { mr.ok } | writeini tmp\ogm.tmp ng $_.get(%parv[0]).ip $ctime | h %parv[0]
+}
+alias mr.apoya {
+  vu
+  if (!%parv[4]) { e 1 APOYA #canal }
+  if (!$hget(+ $+ %parv[4])) { e 0 Este canal no está en fase de registro. }
+  if ($hget(+ $+ %parv[4],+ $+ %parv[0])) { e 0 Tu apoyo ya ha sido anotado. }
+  if (%parv[0] == $hget(+ $+ %parv[4],founder)) { e 0 El founder no puede apoyar. }
+  if ($hfind(+ $+ %parv[4],+*,0,w) == $_.conf($script,apoyos)) { e 0 El canal está pendiente de su aprobación. }
+  if ($calc($hget(%parv[0],fecha)+$_.conf($script,antig)*86400) > $ctime) { e 0 No puedes usar este comando. Tu nick aun no tiene $_.conf($script,antig) días de antigüedad. }
+  if ($readini(tmp\ogm.tmp,ng,$_.get(%parv[0]).ip) > $calc($ctime - $_.conf($script,freq)*3600)) { e 0 Debes esperar $_.conf($script,freq) horas antes de efectuar cualquier operación. }
+  if ($calc($hget(+ $+ %parv[4],fecha)+$_.conf($script,days)*86400) < $ctime) { e 0 El canal no ha podido reunir los apoyos suficientes y ha expiado. }
+  hadd + $+ %parv[4] + $+ %parv[0] $ctime | hadd %parv[0] + $+ %parv[4] $ctime | h %parv[0] | hsave -bo + $+ %parv[4] creg\ $+ $_.32(%parv[4]).cod
+  r Tu apoyo ha sido registrado para el canal12 %parv[4]
+  da El canal12 %parv[4] 1ha sido apoyado por12 $+(,%parv[0],1.)
+  if ($hfind(+ $+ %parv[4],+*,0,w) == $_.conf($script,apoyos)) { r El canal12 %parv[4] ha conseguido todos los apoyos. La administración decidirá su aprobación. | da Canal12 %parv[4] 1con todos los apoyos. Pendiente de aprobación. }
+  writeini tmp\ogm.tmp ng $_.get(%parv[0]).ip $ctime
+}
+alias mr.apoyos {
+  vu
+  if (%parv[4]) { 
+    if (!$hget(%parv[4])) { e 6 }
+    r ***Apoyos de12 %parv[4] *** | var %i = 1 | while ($hfind(%parv[4],·*,%i,w)) { r 12 $+ $right($hfind(%parv[4],·*,%i,w),-1)  - fecha:12 $asctime($hget(%parv[4],$ifmatch)) | inc %i }
+  }
+  else {
+    if (!$hfind(%parv[0],+#*,0,w)) { e 0 No has emitido apoyos. }
+    r ***Apoyos de12 %parv[0] *** | var %i = 1 | while ($hfind(%parv[0],+#*,%i,w)) { r 12 $+ $right($hfind(%parv[0],+#*,%i,w),-1)  - fecha:12 $asctime($hget(%parv[0],$ifmatch)) | inc %i }
+} }
+alias mr.info {
+  if (!%parv[4]) { e 1 INFO #canal }
+  if (!$hget(+ $+ %parv[4])) { e 0 Este canal no está en fase de registro. }
+  r Información del canal12 %parv[4]
+  r Fundador:12 $hget(+ $+ %parv[4],founder)
+  r Descripción:12 $hget(+ $+ %parv[4],desc)
+  r Número de apoyos hasta el momento:12 $hfind(+ $+ %parv[4],+*,0,w)
+  r Registrado el:12 $asctime($hget(+ $+ %parv[4],fecha))
+  r Estado:12 $iif($calc($hget(+ $+ %parv[4],fecha)+$_.conf($script,days)*86400) < $ctime,EXPIRADO,ACTIVO)
+  if (%parv[0] == $hget(+ $+ %parv[4],founder)) {
+    r Apoyos de:
+    var %i = 1 | while ($hfind(+ $+ %parv[4],+*,%i,w)) { r %i -12 $right($ifmatch,-1) Fecha:12 $asctime($hget(+ $+ %parv[4],$ifmatch)) | inc %i }
+} }
+alias mr.drop {
+  vu
+  if (!%parv[4]) { e 1 DROP #canal }
+  if (!$hget(+ $+ %parv[4])) { e 0 Este canal no está en fase de registro. } 
+  if ($_.get(%parv[0]).status < 4) {
+    if (%parv[0] != $hget(+ $+ %parv[4],founder)) { e 0 Sólo el founder puede cancelar un canal en fase de registro. }
+    hdec %parv[0] creg | .remove creg\ $+ $_.32(%parv[4]).cod | hfree + $+ %parv[4]
+  }
+  else {
+    if ($hget(+bots,memoserv) && %parv[5]) { mm.snd %parv[2] $hget(+ $+ %parv[4],founder) $gettok(%parc,6-,32) }
+    .remove creg\ $+ $_.32(%parv[4]).cod | hfree + $+ %parv[4]
+  }
+  r Canal12 %parv[4] ha sido dropeado. | do Cancelado el registro del canal12 %parv[4] 1por12 $+(,%parv[0],1.) 
+}
+alias mr.list {
+  if (!%parv[4]) { e 1 LIST patrón }
+  r *** Listando canales en fase de registro con la máscara12 %parv[4] *** 
+  var %i = 1, %c = 0, %d = 0
+  if ($_.get(%parv[0]).status < 5) {
+    while ($hget(%i)) { 
+      if (!$wildtok($hget(%i),+#*,1,32)) { inc %i | continue }
+      inc %d
+      if ($wildtok($hget(%i),$+(+,%parv[4]),1,32) && %c < $_.conf($script,listflood)) { r %c -12 $right($hget(%i),-1) | inc %c }
+      inc %i
+    }
+    r Resultado:12 %c canales de12 %d
+  }
+  else {
+    while ($hget(%i)) { 
+      if (!$wildtok($hget(%i),+#*,1,32)) { inc %i | continue }
+      inc %d | unset %s
+      if ($calc($hget($hget(%i),fecha)+$_.conf($script,days)*86400) < $ctime) { var %s = 4Expiado. }
+      if ($hfind($hget(%i),+*,0,w) == $_.conf($script,apoyos)) { var %s = 3Listo }
+      if (%parv[5] == -f && !%s) { inc %i | continue }
+      if ($wildtok($hget(%i),$+(+,%parv[4]),1,32) && %c < $_.conf($script,listflood)) { r %d -12 $right($hget(%i),-1) %s | inc %c }
+      inc %i
+    }
+    r Resultado:12 %c canales de12 %d
+} }
+alias mr.apolla r No, que duele mucho (prueba con APOYA)
+alias mr.ok {
+  vc 5
+  if (!%parv[4]) { e 1 ACEPTAR #canal }
+  if (!$hget(+ $+ %parv[4])) { e 0 Este canal no está en fase de registro. }
+  var %c = + $+ %parv[4] | hadd -m %parv[4] founder $hget(%c,founder) | hadd %parv[4] pass $hget(%c,pass) | hadd %parv[4] desc $hget(%c,desc)
+  hadd %parv[4] modos nt | hadd %parv[4] rmodos 0 | hadd %parv[4] topic El canal ha sido registrado. 
+  hadd %parv[4] rtopic 0 | hadd %parv[4] ktopic 0 | hadd %parv[4] secureops 0 | hadd %parv[4] debug 1 | hadd %parv[4] secure 0 | hadd %parv[4] entry El canal ha sido registrado.
+  hadd %parv[4] fecha $ctime | hadd %parv[4] visit $ctime | hadd %parv[4] ntopic $readini($script,modulo,nick) | hadd %parv[4] hide 0 | hadd %parv[4] m_lim 5 | hadd %parv[4] m_notif 1
+  hadd %parv[4] set 500 | hadd %parv[4] acc-edit 450 | hadd %parv[4] acc-list 1 | hadd %parv[4] autoadmin 400 | hadd %parv[4] autoop 300 | hadd %parv[4] autohalf 200 | hadd %parv[4] autovoice 100 
+  hadd %parv[4] opdeop 300 | hadd %parv[4] clear 450 | hadd %parv[4] banunban 300 | hadd %parv[4] akick 450 | hadd %parv[4] invite 300 | hadd %parv[4] join 300 | hadd %parv[4] revenge 400 | hadd %parv[4] memos 400
+  var %e = $hfind(+ $+ %parv[4],+*,0,w) | var %i = $hfind(%c,+*,0,w) | while (%i) { hadd %parv[4] $replace($hfind(%c,+*,%i,w),$chr(43),$chr(183)) $hget(%c,$hfind(%c,+*,%i,w)) | dec %i }
+  k $_.serv $_.tok(MODE) %parv[4] ntro $readini($script,modulo,nick) $ctime | k $readini($script,modulo,nick) $_.tok(TOPIC) %parv[4] $readini($script,modulo,nick) $ctime :El canal ha sido registrado.
+  if ($hget(+bots,memoserv)) { mm.snd %parv[2] $hget(%parv[4],founder) 1Enhorabuena: su canal12 %parv[4] ha sido registrado. Si necesita información consulte a un operador. }
+  if ($_.conf($script,wallchan)) { k $_.serv $_.tok(WALLOPS) :Nuevo canal registrado: %parv[4] }
+  hadd $hget(%c,founder) %parv[4] $_.conf($script,maxreg) | h $hget(%c,founder) | hadd -m +stats lastchan %parv[4] | hsave -bo +stats conf\stats.db
+  { if ($_IsUDB) { mr.a.migrar } }
+  .remove creg\ $+ $_.32(%parv[4]).cod | hfree + $+ %parv[4] | r El canal12 %parv[4] ha sido registrado. 
+  if (%e < $_.conf($script,apoyos)) { do El canal12 %parv[4] 1ha sido aceptado por12 %parv[0] 1sin recibir todos los apoyos. }
+  if (%e ==  $_.conf($script,apoyos)) { do El canal12 %parv[4] 1ha sido aceptado por12 %parv[0] 1tras recibir todos los apoyos necesarios. } 
+  h %parv[4]
+}
+alias mr.a.ref {
+  var %i = $ini(tmp\ogm.tmp,ng,0), %s | while (%i) {
+    if ($calc($ini(tmp\ogm.tmp,ng,%i)+$_.conf($script,freq)*3600) < $ctime) { %s = %s $ini(tmp\ogm.tmp,ng,%i) }
+    dec %i
+  }
+  if (%s) { var %i = $numtok(%s,32) | while (%i) { remini tmp\ogm.tmp ng $gettok(%s,%i,32) | dec %i } }
+}
+alias mr.a.migrar {
+  var %m = $iif($hget(%parv[4],modos),$_.mode($hget(%parv[4],modos)).u $gettok($hget(%parv[4],modos),2-,32),nt), %t = $iif($hget(%parv[4],topic),$ifmatch,Sin Topic)
+  hadd %parv[4] chan2 1 | h %parv[4] | hbdd
+  set %parv[6] $hget(%parv[4],founder) | f.c %parv[4] %parv[6] 
+  pass.c %parv[4] $hget(%parv[4],pass)
+}

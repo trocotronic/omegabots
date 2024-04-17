@@ -1,0 +1,229 @@
+[modulo]
+version=1.0.8
+conf=conf\mn.conf
+modulo=mn.ogm
+
+alias mn.help {
+  var %i = 5, %s = mn.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$ifmatch) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%s,-1,46) | halt }
+  %s
+}
+alias mn.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,nickserv)
+  r
+  r 12 $+ $hget(+bots,nickserv) se encarga de gestionar todos los nicks de la red. Te permite registrar un nick para así evitar que otro lo robe o falseen tu propia identidad.
+  r Para poder usar a12 $hget(+bots,nickserv) debes utilizar /msg $hget(+bots,nickserv) COMANDO para disfrutar de todas sus ventajas.
+  r
+  r Comandos disponibles:
+  r 12REGISTER Registra el nick que estás utilizando.
+  r 12SET Fija las distintas opciones del nick.
+  r 12STATUS Muestra el nivel de un nick.
+  if ($_.get(%parv[0]).status > 4) {
+    r 12DROP Desregistra un nick.
+  }
+  r 12BORRAR Desregistra tu nick.
+  r 12INFO Muestra la información de un nick.
+  r 12LIST Muestra una lista de los nicks conectados en este momento.
+  if ($_.conf($script,sclav)) { r 12VALIDAR Valida tu cuenta e-mail. }
+  if ($_.get(%parv[0]).status > 3) {
+    r 12CHANGE Cambia el nick de un usuario a un nick aleatorio.
+    r 12SWHOIS Cambia o elimina el swhois de un usuario.
+    if ($_.get(%parv[0]).status > 4) {
+      r 12SENDPASS Manda la contraseña de un nick a su email.
+      r 12GETPASS Muestra la contraseña de un nick.
+      r 12SUSPENDER Suspende un nick.
+      r 12LIBERAR Libera un nick de su suspenso.
+      if ($_.get(%parv[0]).status > 5) {
+        r 12RENAME Cambia el nick a otro nick a elegir.  
+  } } }
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mn.h.register {
+  r 12REGISTER
+  r
+  r Este comando permite registrar bajo tu propiedad el nick que estés usando. Para ello, este nick no debe estar registrado.
+  r Una vez te hayas apropiado de tu nick, deberás identificarte como propietario del nick especificando una contraseña.
+  r No revele sus contraseñas a nadie, ya que con ellas podrían acceder como propietario y disponer de todas las opciones que ello implica.
+  r Si su nick es migrado a la BDD tendrá que identificarse con 12/nick su_nick:su_contraseña y ya podrá accceder a todos los servicios.  
+  r
+  if ($_.conf($script,registermail)) { r Sintaxis:12 REGISTER tu@email }
+  if (!$_.conf($script,registermail)) { Sintaxis:12 REGISTER contraseña tu@email }
+  r
+  r La dirección email debe ser válida.
+  r El sistema está configurado para aceptar sólo12 $_.conf($script,ncuenta) nicks bajo una misma cuenta email.
+  if ($_.conf($script,regmail)) { r Una vez registrado, recibirás la contraseña generada aleatoriamente en tu cuenta de correo, la cual deberás usar para identificarte con tu nick. }
+}
+alias mn.h.set {
+  r 12SET
+  r
+  r Permite fijar las diferentes opciones de tu nick.
+  r
+  r Opciones:
+  r 12EMAIL Cambia tu dirección e-mail.
+  r 12URL Asocia una dirección web a tu nick.
+  r 12REALNAME Cambia el realname de tu info.
+  r 12PASS Cambia tu contraseña de identificación.
+  r 12KILL Fija un tiempo de autentificación. Si en este tiempo no te identificas, serás desconectado.
+  r 12HIDE Fija las distintas opciones de ocultación.
+  r
+  r Sintaxis:12 SET opcion valor
+  r Para más información, /msg $hget(+bots,nickserv) $upper(%parv[3]) SET opcion
+}
+alias mn.h.set.email {
+  r 12SET EMAIL
+  r
+  r Cambia tu dirección email.
+}
+alias mn.h.set.url {
+  r 12SET URL
+  r
+  r Asocia a tu nick una dirección web. Esta dirección será mostrada en el INFO de tu nick.
+}
+alias mn.h.set.realname {
+  r 12SET REALNAME
+  r
+  r Cambia el realname del INFO de tu nick.
+}
+alias mn.h.set.pass {
+  r 12SET PASS
+  r
+  r Cambia la contraseña de identificación. Si utilizas este comando, deberás usar la contraseña especificada para poder identificarte para las futuras veces.
+}
+alias mn.h.set.kill {
+  r 12SET KILL
+  r
+  r Fija un tiempo de autentificación para un nick. Si en este tiempo no te identificas serás desconectado.
+  r Actualmente, el método de desconexión se hace mediante:12 $iif($_.conf($script,protkill) == kill,DESCONEXIÓN DE LA RED,CAMBIO DE NICK)
+  r Además, el tiempo debe expresarse en segundos y debe estar comprendido entre los valores12 $_.conf($script,killrange) (ambos incluídos)
+  r Si se especifica12 OFF para el valor, la protección kill se desactiva.
+}
+alias mn.h.set.hide {
+  r 12SET HIDE
+  r 
+  r Fija las distintas opciones de ocultación de tu nick y que no serán mostradas al hacer un INFO de tu nick.
+  r Estas opciones son:
+  r 12EMAIL Muestra u oculta tu e-mail.
+  r 12URL Muestra u oculta tu URL.
+  r 12REALNAME Muestra u oculta tu realname.
+  r 12MASK Muestra u oculta tu mask.
+  r 12TIME Muestra u oculta si estás conectado u desconectado.
+  r 12QUIT Muestra u oculta tu último mensaje de salida.
+  r
+  r Sintaxis: SET HIDE opcion ON|OFF
+}
+alias mn.h.status {
+  r 12STATUS
+  r
+  r Muestra el status o nivel de un nick.
+  r Actualmente existen estos status:
+  r 12 0 No está registrado.
+  r 12 1 Nick registrado, no conectado.
+  r 12 2 Nick conectado, no identificado.
+  r 12 3 Nick identificado (+r).
+  r 12 4 Preoper.
+  r 12 5 Oper (+h).
+  r 12 6 IRCop (+o).
+  r 12 7 Admin (+a).
+  r 12 8 Root (+N).
+  r 12 9 Bot de servicios (+B).
+  r
+  r Sintaxis:12 STATUS nick
+}
+alias mn.h.drop {
+  r 12DROP
+  r
+  r Desregistra un nick de la base de datos de12 $hget(+bots,nickserv) . Una vez dropeado, un nick no puede volverse a undropear, todos los datos se pierden.
+  if ($_.get(%parv[0]).status > 3) { r Eres preoper o superior: puedes dropear cualquier nick a excepción de preopers o superiores. }
+  r
+  r Sintaxis:12 DROP nick
+}
+alias mn.h.borrar {
+  r 12BORRAR
+  r
+  r Desregistra tu nick de la base de datos de12 $hget(+bots,nickserv) . Una vez dropeado, un nick no puede volverse a undropear, todos los datos se pierden.
+  r
+  r Sintaxis:12 BORRAR 
+}
+alias mn.h.info {
+  r 12INFO
+  r
+  r Muestra la distinta información de un nick.
+  r Si especificas como nick el tuyo, verás todas las opciones aunque estén ocultas y tu lista de registros en los distintos canales.
+  r
+  r Sintaxis:12 INFO nick
+}
+alias mn.h.list {
+  r 12LIST
+  r 
+  r Lista todos los nicks conectados en este momento que coinciden con el patrón definido.
+  r Para evitar flood, sólo se mostrará un máximo de12 $_.conf($script,listflood) entradas.
+  r El patrón definido puede usar comodines. Por ejemplo /msg $hget(+bots,nickserv) LIST a* listará todos los nicks conectados que empiezan por 'a'.
+  r
+  r Sintaxis:12 LIST patrón
+}
+alias mn.h.ghost {
+  r 12GHOST
+  r
+  r Al igual que12 RECOVER, un nick puede quedarse enganchado. Pero a diferencia de12 RECOVER, este comando no le cambia el nick sino que lo desconecta de la red.
+  r
+  r Sintaxis:12 GHOST nick contraseña
+}
+alias mn.h.change {
+  vc 4
+  r 12CHANGE
+  r
+  r Le cambia el nick a un usuario a uno aleatorio.
+  r
+  r Sintaxis:12 CHANGE <nick>
+}
+alias mn.h.rename {
+  vc 5
+  r 12RENAME
+  r
+  r Le cambia el nick a un usuario a otro a elegir. Dicho nick no puede estar siendo usado.
+  r
+  r Sintaxis:12 RENAME <nick> <nuevo_nick>
+}
+alias mn.h.swhois {
+  vc 4
+  r 12SWHOIS
+  r
+  r Añade o cambia el Swhois de un nick determinado. El Swhois se le dará cuando se identifique correctamente y obtenga el +r.
+  r
+  r Sintaxis:12 SWHOIS <nick> <swhois>
+  r Nota: Si no se especifica el swhois se eliminará el existente.
+}
+alias mn.h.suspender {
+  vc 5
+  r 12SUSPENDER
+  r
+  r Suspende un nick previamente registrado.
+  r Cuando un nick es suspendido, éste no puede identificarse como propietario y consecuentemente no puede utilizar los servicios.
+  r
+  r Sintaxis:12 SUSPENDER nick motivo
+}
+alias mn.h.liberar {
+  vc 5
+  r 12LIBERAR
+  r
+  r Quita el suspenso a un nick suspendido.
+  r
+  r Sintaxis:12 LIBERAR nick
+}
+alias mn.h.sendpass {
+  vc 5
+  r 12SENDPASS
+  r
+  r Manda la contraseña de identificación de un nick a su cuenta email.
+  r
+  r Sintaxis:12 SENDPASS nick
+}
+alias mn.h.getpass {
+  vc 5
+  r 12GETPASS
+  r
+  r Muestra la contraseña de identificación de un nick.
+  r
+  r Sintaxis:12 GETPASS nick
+}

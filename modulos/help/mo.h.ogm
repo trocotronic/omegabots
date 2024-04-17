@@ -1,0 +1,312 @@
+[modulo]
+version=1.0.8
+modulo=mo.ogm
+
+alias mo.help {
+  vc 5
+  var %i = 5, %s = mo.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$iif($len($ifmatch) == 1,$asc($gettok(%parc,%i,32)),$gettok(%parc,%i,32))) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $gettok(%parc,5-,32) | halt }
+  %s
+}
+alias mo.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,operserv)
+  r
+  r 12 $+ $hget(+bots,operserv) es de uso exclusivo para preopers, opers, ircops, admins y roots. Se encarga de gestionar aspectos globales como la gestión de blocks, joins y demás.
+  r
+  r Comandos disponibles:
+  if ($_.get(%parv[0]).status > 6) { r 12ROOT comandos para roots. }
+  r 12JOIN Introduce bots a los canales de forma temporal.
+  if ($_.get(%parv[0]).status > 6) { r 12RAW Propaga un raw. }
+  r 12CLEAR Ejecuta clear en todos los canales.  
+  r 12VIEWIP Ver la IP de un usuario.  
+  r 12KILL Desconecta a un usuario de la red.
+  r 12BLOCK Expulsa a un usuario 5 minutos de la red. 
+  r 12GLINE Expulsa a un usuario por un tiempo.
+  r 12UNGLINE Retira el GLINE de una IP.
+  if ($_.get(%parv[0]).status > 6) { r 12ZLINE Expulsa a una IP por un tiempo. }
+  if ($_.get(%parv[0]).status > 6) { r 12UNZLINE Retira el ZLINE de una IP. }
+  if ($_.get(%parv[0]).status > 6) { r 12OPT OPTimiza las BDDs }
+  r 12SAJOIN Obliga a un usuario a entrar en un canal.
+  r 12SAPART Obliga a un usuario a salir de un canal.
+  if ($_.get(%parv[0]).status > 6) { r 12MODULOS Administra los módulos de los bots } 
+  r 12PREOPERS Gestiona los preoperadores de la red.
+  if ($_.get(%parv[0]).status > 6) { r 12OPERS Gestiona los opers de la red. }
+  if ($_.get(%parv[0]).status > 6) { r 12DEVELS Gestiona los devels de la red. }
+  if ($_.get(%parv[0]).status > 6) { r 12ADMINS Gestiona los admins de la red. }
+  if ($_.get(%parv[0]).status > 6) { r 12ROOTS Gestiona los roots de la red. }
+  if ($_.get(%parv[0]).status > 6) { r 12SNOMASK Añade/quita snomasks a un operador. }
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mo.h.root {
+  vc 7
+  r 12ROOT
+  r
+  r Comando exclusivo para roots. Un root se identifica cuando se otorga asímismo el modo de usuario +N y figura en el panel de control como root.
+  r Es necesario que se cumplan estos dos requisitos simultáneamente.
+  r
+  r Comandos disponibles:
+  if ($_.get(%parv[0]).status > 6) {
+    r 12DEBUG Activa/Desactiva debugging.
+    r 12REHASH Refresca los servicios.
+    r 12RESTART Restea los servicios.
+    r 12STOP Detiene los servicios.
+  }
+  r
+  r Para más información, /msg $hget(+bots,operserv) $upper(%parv[3]) ROOT comando
+}
+alias mo.h.root.identify {
+  r 12ROOT IDENTIFY
+  r
+  r Te identifica como root. Para ser root debes tener el status de oper/ircop o superior.
+  r Sólo el root administrador puede dar nuevos estados de root a nicks registrados.
+  r
+  r Sintaxis:12 ROOT IDENTIFY pass
+}
+alias mo.h.root.debug {
+  vc 7
+  r 12ROOT DEBUG
+  r
+  r Activa/Desactiva debugging. Con esta opción activada todos los datos entrantes serán mostrados en el canal para administradores12 $_conf(debug,ircd) $+ .
+  r
+  r Sintaxis:12 ROOT DEBUG ON|OFF
+}
+alias mo.h.root.restart {
+  vc 7
+  r 12ROOT RESTART
+  r
+  r Resetea los servicios. Cuando se ejecuta este comando, los servicios se reinician en 5 segundos.
+  r
+  r Sintaxis:12 ROOT RESTART
+}
+alias mo.h.root.rehash {
+  vc 7
+  r 12ROOT REHASH
+  r
+  r Refresca los servicios. Cuando se ejecuta este comando, los servicios se refrescan en 5 segundos.
+  r
+  r Sintaxis:12 ROOT REHASH
+}
+alias mo.h.root.stop {
+  vc 7
+  r 12ROOT STOP
+  r
+  r Detiene los servicios. Una vez detenidos, deberán ponerse en marcha de forma manual.
+  r
+  r Sintaxis:12 ROOT STOP
+}
+alias mo.h.modulos {
+  vc 7
+  r 12MODULOS
+  r
+  r Carga y descarga módulos de la red. Dichos módulos deben ser un fichero .ogm (fichero de módulo).
+  r Para cargarlo debe especificarse la ruta del módulos. Por defecto 12modulos/.
+  r
+  r Sintaxis:12 MODULOS LOAD/UNLOAD/LIST [modulos/modulo.ogm]
+}
+alias mo.h.modulos.load {
+  vc 7
+  r 12MODULOS LOAD
+  r
+  r Carga un módulo. Dicho módulo debe ser un fichero .ogm (fichero de módulo).
+  r Para cargarlo debe especificarse la ruta 12modulos/ por defecto.
+  r
+  r Sintaxis:12 MODULOS LOAD modulos\modulo.ogm
+}
+alias mo.h.modulos.unload {
+  vc 7
+  r 12MODULOS UNLOAD
+  r
+  r Descarga un módulo. Dicho módulo debe estar cargado. 
+  r
+  r Sintaxis:12 MODULOS UNLOAD modulo.ogm
+}
+alias mo.h.modulos.list {
+  r  Nick 4|1 Servicio 4|1 Archivo 4|1 Versión 4|1 Estado
+  var %i = $findfile(modulos\,*.ogm,0), %s | while (%i) {
+    if (%i == 0) { r No existe ningún módulo }
+    var %f = $_.32($nopath($findfile(modulos\,*,%i))).uncod 
+    if (conf !isin %f) && (h !isin %f) && (log !isin %f) { 
+      if ( $script(%f) != $null) { set %ec 1 }
+      if ($readini(modulos/ $+ %f,modulo,activo) == 1) { set %ac 1 } 
+      if (%ec) && (%ac) { set %m 12(Cargado y activado)1 }
+      if (%ec) && (!%ac) { set %m 12(Cargado)1 }
+      if (!%ec) { set %m 12(No cargado)1 }
+      r 12 $readini(modulos/ $+ %f,modulo,nick) 4|12 $readini(modulos/ $+ %f,modulo,serv) 4|12 %f 4|12 $readini(modulos/ $+ %f,modulo,version) 4|12 %m
+    unset %m | unset %nick | unset %serv | unset %ac | unset %ec | dec %i | continue } 
+    dec %i
+  }
+  if (%s) { %i = $numtok(%s,32) | while (%i) { dec %i } }
+  r  Fin del listado.
+}
+alias mo.h.join {
+  r 12JOIN
+  r
+  r Su sintaxis es la misma que12 JOIN de12 $hget(+bots,chanserv) con la salvedad que actúa en canales registrados y no registrados.
+}
+alias mo.h.raw {
+  vc 7
+  r 12RAW
+  r
+  r Manda un RAW a través del servidor de los servicios para toda la red.
+  r
+  r Sintaxis:12 RAW parámetros
+}
+alias mo.h.opt {
+  r 12OPT
+  r
+  r Este comando sirve para compactar los bloques de la base de datos 
+  r de tal forma que se eliminen los registros repetidos.
+  r Este comando es útil hacerlo por lo menos una vez al día, puesto que reduce 
+  r considerablemente el tamaño de los archivos.
+  r Los bloques disponibles son12 N1, 12C1 ,12I1,12 S1, aunque si deseas 
+  r hacerlos todos a la vez cuentas con 12ALL.
+  r
+  r Sintaxis:12 OPT N|C|I|S|ALL
+}
+alias mo.h.clear {
+  r 12CLEAR
+  r
+  r Su sintaxis es la misma que12 CLEAR de12 $hget(+bots,chanserv) con la salvedad que actúa en canales registrados y no registrados.
+}
+alias mo.h.opers {
+  vc 7
+  r 12OPERS
+  r
+  r Administra los opers de la red. Un oper se identifica con el modo +h, mientras que un ircop lo hace por el +o. 
+  r Los opers no disponen de O:Line propia, mientras que los ircops sí.
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un nick como oper.
+  r 12DEL Borra un nick como oper.
+  r 12LIST Muestra la lista de OPERS.
+  r
+  r Sintaxis:12 OPERS ADD|DEL|LIST nick
+}
+alias mo.h.kill {
+  r 12KILL
+  r
+  r Desconecta a un usuario de la red. El usuario puede volver a entrar posteriormente.
+  r
+  r Sintaxis:12 KILL usuario [motivo]
+}
+alias mo.h.gline {
+  r 12GLINE
+  r
+  r Desconecta a un usuario de la red por un tiempo determinado.
+  r El tiempo debe especificarse en segundos.
+  r Para una GLINE permanente especificar en tiempo12 01.
+  r
+  r Sintaxis:12 GLINE <IP|nick> <tiempo> <motivo>
+}
+alias mo.h.ungline {
+  r 12UNGLINE
+  r
+  r Retira el GLINE de una IP.
+  r
+  r Sintaxis:12 UNGLINE <IP>
+}
+alias mo.h.block {
+  r 12BLOCK
+  r
+  r Expulsa a un usuario durante 5 minutos de la red.
+  r
+  r Sintaxis:12 BLOCK <IP> <motivo>
+}
+
+alias mo.h.sajoin {
+  r 12SAJOIN
+  r
+  r Fuerza a un usuario a entrar en un canal.
+  r
+  r Sintaxis:12 SAJOIN usuario #canal
+}
+alias mo.h.sapart {
+  r 12SAPART
+  r
+  r Fuerza a un usuario a salir de un canal.
+  r
+  r Sintaxis:12 SAPART usuario #canal
+}
+alias mo.h.preopers {
+  vc 5
+  r 12PREOPERS
+  r
+  r Administra los preopers de la red. Un preoper adquiere dicho estado cuando se identifica como propietario de su nick. Inmediatamente queda reconocido como tal. 
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un nick como preoper.
+  r 12DEL Borra un nick como preoper.
+  r 12LIST Muestra la lista de preoperadores.  
+  r
+  r Sintaxis:12 PREOPERS ADD|DEL|LIST nick
+}
+alias mo.h.devels {
+  vc 7
+  r 12DEVELS
+  r
+  r Administra los devels de la red. Un devel adquiere dicho estado cuando se identifica como propietario de su nick. Inmediatamente queda reconocido como tal. 
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un nick como devel.
+  r 12DEL Borra un nick como devel.
+  r 12LIST Muestra la lista de devels.
+  r
+  r Sintaxis:12 DEVELS ADD|DEL|LIST nick
+}
+
+alias mo.h.admins {
+  vc 7
+  r 12ADMINS
+  r
+  r Administra los administradores de la red. Un admin adquiere dicho estado cuando se identifica como propietario de su nick. Inmediatamente queda reconocido como tal. 
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un nick como admin.
+  r 12DEL Borra un nick como admin.
+  r 12LIST Muestra la lista de admins. 
+  r
+  r Sintaxis:12 ADMINS ADD|DEL|LIST <nick>
+}
+alias mo.h.snomask {
+  vc 7
+  r 12SNOMASK
+  r Administra las snomask de OPERadores, Devels, ADMINistradores y Roots.
+  r
+  r Comandos disponibles:
+  r 12LIST Lista las snomask y sus funciones.
+  r 12ADD Modifica las snomask de un operador.
+  r 12DEL Borra las snomask de un operador.
+  r
+  r Sintaxis:12 SNOMASK LIST|ADD|DEL <nick> 
+}
+alias mo.h.snomask.list {
+  vc 7
+  r 12SNOMASK LIST
+  r
+  r 12c Muestra las conexiones locales. 
+  r 12F Muestra las conexiones remotas (menos de servidores de servicios).
+  r 12f Muestra las notificaciones de flood. 
+  r 12e Muestra las notificaciones de información. 
+  r 12j Muestra las notificaciones de medidas. 
+  r 12v Muestra las notificaciones de hosts virtuales.
+  r 12G Muestra las notificaciones de gline/shun.
+  r 12n Muestra las notificaciones de cambios de nicks locales.
+  r 12N Muestra las notificaciones de cambios de nicks remotos.
+  r 12q Muestra las notificaciones de denegación de nicksdeny nick (Q:line).
+  r 12S Muestra las notificaciones del filtro de spam.
+}
+alias mo.h.roots {
+  vc 7
+  r 12ROOTS
+  r
+  r Administra los roots de la red. Un root adquiere dicho estado cuando se identifica como propietario de su nick. Inmediatamente queda reconocido como tal. 
+  r El nick identificado como tal, aparte de quedar identificado como root, recibe todos los privilegios (/rehash, /restart, etc.) 
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un nick como root.
+  r 12DEL Borra un nick como root.
+  r 12LIST Muestra la lista de roots. 
+  r
+  r Sintaxis:12 ROOTS ADD|DEL|LIST [nick] [contraseña]
+}

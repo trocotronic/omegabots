@@ -1,0 +1,154 @@
+alias p.cw.debug {
+if ($_IsBadOs) return
+  %w.debug.font = Tahoma
+  %w.debug.size = 13
+  %W.debug.w = 400
+  %w.debug.h = 200
+  %w.debug.x = $round($calc($window(-1).w / 2 - %w.debug.w / 2),0)
+  %w.debug.y = $round($calc($window(-1).h / 2 - %w.debug.h / 2),0)
+  %w.debug.name = @debug
+  window -Bfhkpz +d %w.debug.name $calc(%w.debug.x - 475) $calc(%w.debug.y - 475) %w.debug.w %w.debug.h %w.debug.name %w.debug.font %w.debug.size
+  dll system\dlls\ontop.dll Attach $window(%w.debug.name).hwnd | dll system\dlls\ontop.dll PutOnTop $window(%w.debug.name).hwnd true
+  dll system\dlls\ontop.dll PutOnTop $window(%w.debug.name).hwnd false
+  _.wr wrSelectWindow $window(%w.debug.name).hwnd | _.wr wrSetMode rmRect | _.wr wrSetRegion 0 0 %w.debug.w %w.debug.h 
+  if ($dialog(debug)) { dialog -v debug } | else { dialog -m debug debug }
+  dll system\dlls\hide.dll WinPar $window(%w.debug.name).hwnd $dialog(debug).hwnd
+  drawpic -ms %w.debug.name 0 0 %w.debug.w %w.debug.h 0 0 1 299 $_.png(base)
+  drawpic %w.debug.name $calc(%w.debug.w - 115) 0 19 2 115 25 $_.png(base)
+  drawpic -s %w.debug.name 0 0 $calc(%w.debug.w - 115) 25 4 2 14 25 $_.png(base)
+  drawtext -or %w.debug.name 16777215 "Tebruchet MS" 13 30 5 Debug
+  drawpic -mst %w.debug.name 65280 5 5 20 20 $_.png(file)
+  drawpic -mnst %w.debug.name 65280 30 30 15 15 $_.png(flecha)
+  drawpic -mnst %w.debug.name 65280 130 30 15 15 $_.png(flecha)
+  drawpic -mnst %w.debug.name 65280 230 30 15 15 $_.png(flecha)
+  drawpic -mnst %w.debug.name 65280 330 30 15 15 $_.png(flecha)
+  drawtext -nr %w.debug.name 16777215 %w.debug.font %w.debug.size 50 30 ircd
+  drawtext -nr %w.debug.name 16777215 %w.debug.font %w.debug.size 150 30 80 (http)
+  drawtext -nr %w.debug.name 16777215 %w.debug.font %w.debug.size 250 30 25 (smtp)
+  drawtext -nr %w.debug.name 16777215 %w.debug.font %w.debug.size 350 30 sms
+  drawdot %w.debug.name | window -a %w.debug.name
+}
+menu @debug {
+  mouse: {
+    if ($inrect($mouse.x,$mouse.y,30,30,$calc($width(ircd,%w.debug.font,%w.debug.size,0,0)+20),15)) {
+      _.crs SetStdMouseCursor hand | if (%w.debug.zona == 1)  { return }
+      set %w.debug.zona 1
+      drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 50 30 ircd
+      drawdot %w.debug.name | return
+    }
+    else { 
+      if (%w.debug.zona == 1) {
+        drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 50 30 ircd 
+        drawdot %w.debug.name | set %w.debug.zona 0 | _.crs RestoreCursor none
+    } }
+    if ($inrect($mouse.x,$mouse.y,130,30,$calc($width(80 (http),%w.debug.font,%w.debug.size,0,0)+20),15)) {
+      _.crs SetStdMouseCursor hand | if (%w.debug.zona == 2)  { return }
+      set %w.debug.zona 2
+      drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 150 30 80 (http)
+      drawdot %w.debug.name | return
+    }
+    else { 
+      if (%w.debug.zona == 2) {
+        drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 150 30 80 (http) 
+        drawdot %w.debug.name | set %w.debug.zona 0 | _.crs RestoreCursor none
+    } }
+    if ($inrect($mouse.x,$mouse.y,230,30,$calc($width(25 (smtp),%w.debug.font,%w.debug.size,0,0)+20),15)) {
+      _.crs SetStdMouseCursor hand | if (%w.debug.zona == 3)  { return }
+      set %w.debug.zona 3
+      drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 250 30 25 (smtp)
+      drawdot %w.debug.name | return
+    }
+    else { 
+      if (%w.debug.zona == 3) {
+        drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 250 30 25 (smtp) 
+        drawdot %w.debug.name | set %w.debug.zona 0 | _.crs RestoreCursor none
+    } }
+    if ($inrect($mouse.x,$mouse.y,330,30,$calc($width(sms,%w.debug.font,%w.debug.size,0,0)+20),15)) {
+      _.crs SetStdMouseCursor hand | if (%w.debug.zona == 4)  { return }
+      set %w.debug.zona 4
+      drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 350 30 sms
+      drawdot %w.debug.name | return
+    }
+    else { 
+      if (%w.debug.zona == 4) {
+        drawtext -bnpr %w.debug.name 16777215 4729385 %w.debug.font %w.debug.size 350 30 sms
+        drawdot %w.debug.name | set %w.debug.zona 0 | _.crs RestoreCursor none
+    } }
+  }
+  sclick: {
+    if ($inrect($mouse.x,$mouse.y,$calc(%w.debug.w - 23),5,15,15)) { window -c %w.debug.name | dialog -x debug | unset %w.debug.* }
+    if ($inrect($mouse.x,$mouse.y,30,30,$calc($width(ircd,%w.debug.font,%w.debug.size,0,0)+20),15)) { _.wrs %w.debug.name | _.wrd 5 50 390 130 | did -h debug 2,3,4 | did -v debug 1 }
+    if ($inrect($mouse.x,$mouse.y,130,30,$calc($width(80 (http),%w.debug.font,%w.debug.size,0,0)+20),15)) { _.wrs %w.debug.name | _.wrd 5 50 390 130 | did -h debug 1,3,4 | did -v debug 2 }
+    if ($inrect($mouse.x,$mouse.y,230,30,$calc($width(25 (smtp),%w.debug.font,%w.debug.size,0,0)+20),15)) { _.wrs %w.debug.name | _.wrd 5 50 390 130 | did -h debug 1,2,4 | did -v debug 3 }
+    if ($inrect($mouse.x,$mouse.y,330,30,$calc($width(sms,%w.debug.font,%w.debug.size,0,0)+20),15)) { _.wrs %w.debug.name | _.wrd 5 50 390 130 | did -h debug 1,2,3 | did -v debug 4 }
+  }
+}
+dialog debug {
+  title "lala"
+  size %w.debug.x %w.debug.y $calc(%w.debug.w - 6) $calc(%w.debug.h - 50)
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  edit "",1,5 50 390 130,autohs multi
+  edit "",2,5 50 390 130,autohs multi
+  edit "",3,5 50 390 130,autohs multi
+  edit "",4,5 50 390 130,autohs multi
+}
+on 1:dialog:debug:*:*: {
+  if ($devent == init) {
+    did -t $dname 998 | did -h $dname 1,2,3,4
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname style
+    _.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetFont $dname 1,2,3,4 11 0 Verdana
+    _.mdx SetControlMDX $dname 1,2,3,4 richedit nohidesel read autohs multi return vsbar hsbar > system\dlls\ctl_gen.mdx
+  }
+}
+alias p.cw.motd {
+if ($_IsBadOs) return
+  %w.motd.font = Tahoma
+  %w.motd.size = 13
+  %W.motd.w = 300
+  %w.motd.h = 200
+  %w.motd.x = $round($calc($window(-1).w / 2 - %w.motd.w / 2),0)
+  %w.motd.y = $round($calc($window(-1).h / 2 - %w.motd.h / 2),0)
+  %w.motd.name = @motd
+  window -Bfhkpz +d %w.motd.name $calc(%w.motd.x - 475) $calc(%w.motd.y - 475) %w.motd.w %w.motd.h %w.motd.name %w.motd.font %w.motd.size
+  dll system\dlls\ontop.dll Attach $window(%w.motd.name).hwnd | dll system\dlls\ontop.dll PutOnTop $window(%w.motd.name).hwnd true
+  dll system\dlls\ontop.dll PutOnTop $window(%w.motd.name).hwnd false
+  _.wr wrSelectWindow $window(%w.motd.name).hwnd | _.wr wrSetMode rmRect | _.wr wrSetRegion 0 0 %w.motd.w %w.motd.h 
+  if ($dialog(motd)) { dialog -v motd } | else { dialog -m motd motd }
+  dll system\dlls\hide.dll WinPar $window(%w.motd.name).hwnd $dialog(motd).hwnd
+  drawpic -ms %w.motd.name 0 0 %w.motd.w %w.motd.h 0 0 1 299 $_.png(base)
+  drawpic %w.motd.name $calc(%w.motd.w - 115) 0 19 2 115 25 $_.png(base)
+  drawpic -s %w.motd.name 0 0 $calc(%w.motd.w - 115) 25 4 2 14 25 $_.png(base)
+  drawtext -or %w.motd.name 16777215 "Tebruchet MS" 13 30 5 MOTD
+  drawpic -mst %w.motd.name 65280 5 5 20 20 $_.png(butter)
+  drawtext -nr %w.motd.name 16777215 %w.motd.font %w.motd.size 10 30 Fecha:
+  drawdot %w.motd.name | window -a %w.motd.name
+}
+menu @motd {
+  sclick: {
+    if ($inrect($mouse.x,$mouse.y,$calc(%w.motd.w - 23),5,15,15)) { window -c %w.motd.name | dialog -x motd | unset %w.motd.* }
+} }
+dialog motd {
+  title "lala"
+  size %w.motd.x %w.motd.y $calc(%w.motd.w - 6) $calc(%w.motd.h - 50)
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  combo 1,60 30 200 25,drop
+  edit "",2,10 60 280 115,multi read sort
+}
+on 1:dialog:motd:*:*: {
+  if ($devent == init) {
+    did -t $dname 998 
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname style
+    _.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetFont $dname 1,2 15 0 Verdana
+    _.wrs %w.motd.name | _.wrd 60 30 200 25,10 60 280 115
+  } 
+  if ($devent == sclick) {
+    if ($did == 1) { did -ra $dname 2 $eval($hget(+motd,$ctime($did($dname,1,$did($dname,1,0)))),2) }
+} }

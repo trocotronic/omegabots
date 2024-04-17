@@ -1,0 +1,15 @@
+%w.pop.a 7
+%parc :pruebas.sytes.net 443 CHaN STeaL #admin :ya está en el canal
+%_chanmodes qaohvbeIkfLljpsmntirRcOAQKVCuzNSMTG
+%c 0
+%h mew.admin.sytes.net
+%parv[9] canal
+%parv[8] el
+%parv[7] en
+%parv[6] está
+%parv[5] :ya
+%parv[4] #admin
+%parv[3] STeaL
+%parv[2] CHaN
+%parv[1] 443
+%parv[0] pruebas.sytes.net

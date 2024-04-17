@@ -1,0 +1,27 @@
+alias p.cw.pb dialog -m pb pb
+dialog pb {
+  title "Progreso"
+  option dbu
+  size -1 -1 100 30
+  button OCU,999,999 999 999 999,ok
+  button defect,998,999 999 999 999
+  text "",1,5 18 90 7
+  text "",2,5 5 100 10
+}
+on 1:dialog:pb:*:*: {
+  if ($devent == init) {
+    _.mdx SetMircVersion $version
+    _.mdx MarkDialog $dname
+    _.mdx SetDialog $dname icon $mircdirsystem\icons\logo.ico
+    ;_.mdx SetDialog $dname style
+    ;_.mdx SetDialog $dname bgcolor 4729385
+    _.mdx SetFont $dname 2 12 0 Verdana
+    _.mdx SetControlMDX $dname 1 ProgressBar > system\dlls\ctl_gen.mdx
+  }
+}
+alias p {
+  if (!$dialog(pb)) { p.cw.pb }
+  if ($2-) { did -o pb 2 1 $ifmatch }
+  if ($1 == STOP) { .timer 1 2 dialog -x pb | return }
+  did -a pb 1 $1
+}

@@ -1,0 +1,118 @@
+[modulo]
+version=1.0.8
+nombre=_global
+prefijo=mg
+serv=GlobalServ
+archivos=
+ayuda=help\mg.h.ogm
+conf=conf\mg.conf
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=GLoBaL
+ident=GLoBaL
+host=servicios.&red
+realname=Servicio de mensajes masivos
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+send=send
+notd=notd
+;regular=regular
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mg.privmsg | return
+  ; :AUTH_OK | mg.sockop | return
+  :NICK | mg.nick | return
+  :WHOIS | mg.whois | return
+  :%g | return
+}
+alias mg.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+
+alias mg.send {
+  vc 5
+  if (!%parv[5]) { e 1 SEND -propiedades parámetros }
+  if (m isin %parv[4]) {
+    if (!$hget(+bots,memoserv)) { e 0 El bot MemoServ no está cargado. }
+    var %i = $findfile(nicks\,*,0), %n | while (%i) {
+      %n = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ((p isin %parv[4] || o isin %parv[4]) && !$hget(%n,oper)) { dec %i | continue }
+      if (p isin %parv[4] && o !isin %parv[4] && $hget(%n,oper) != preoper) { dec %i | continue }
+      if (o isin %parv[4] && p !isin %parv[4] && $hget(%n,oper) == preoper) { dec %i | continue }
+      mm.snd $iif(b isin %parv[4],%parv[5],%parv[2]) %n $gettok(%parc,$iif(b isin %parv[4],7-,6-),32)
+      dec %i
+    }
+    r Mensaje global enviado vía memo.
+  }
+  else {
+    if (n isin %parv[4]) { var %t = NOTICE }
+    else { var %t = PRIVMSG }
+    if (b isin %parv[4]) { 
+      sockwrite -nt ircd $_.tok(NICK) %parv[5] 1 $ctime $readini($script,modulo,ident) $replace($readini($script,modulo,host),&red,$_.net) $_.serv 0 : $+ $readini($script,modulo,realname)
+      k %parv[5] $_.tok(UMODE2) $readini($script,modulo,modos)
+      var %n = %parv[5], %c = $gettok(%parc,7-,32)
+    }
+    else { var %n = %parv[2], %c = $gettok(%parc,6-,32) }
+    var %i = 1 | while ($hget(+nicks,%i).item) {
+      if ($_.get($ifmatch).status < 4 && p isin %parv[4]) { inc %i | continue }
+      if ($_.get($hget(+nicks,%i).item).status < 5 && o isin %parv[4] && p !isin %parv[4]) { inc %i | continue }
+      k %n $_.tok(%t) $hget(+nicks,%i).item : $+ %c
+      inc %i
+    }
+    if (b isin %parv[4]) { k %parv[5] $_.tok(QUIT) :Mensajería global $_.net }
+    r Mensaje global enviado.
+} }
+alias k.j { 
+  sockwrite -nt ircd NICK $_.conf($script,botname) 1 $ctime $readini($script,modulo,ident) $_.serv $_.serv 0 : $+ $readini($script,modulo,realname)
+  k $_.conf($script,botname) UMODE2 $readini($script,modulo,modos)
+  k $_.conf($script,botname) join $readini($script,modulo,residente)
+}
+alias mg.notd {
+  vc 7
+  var %p = modulos/ $+ $readini($script,modulo,conf)
+  if (%parv[5]) { 
+    if ($hget(+nicks,%parv[4])) { e 0 Este nick está en uso. }
+    if ($_.bot(%parv[4]).nick) { e 0 Este nick es de un bot. }
+    writeini -n %p misc new $gettok(%parc,6-,32)
+    if ($_.conf($script,botname) != %parv[4]) { k $_.conf($script,botname) QUIT :Bot de noticias $_.net | writeini -n %p misc botname %parv[4] | mg.sockop }
+    r NOTD activado. | writeini -n %p misc state 1 | mg.sockop
+  }
+  else { writeini -n %p misc state 0 | r NOTD desactivado. | k $_.conf($script,botname) QUIT Servidor de noticias desactivado.  }
+}
+alias mg.nick {
+  if (%parv[0] == $_.tok(NICK) && $_.conf($script,state)) { 
+    k $_.conf($script,botname) PRIVMSG %parv[1] :Noticia del día ( $+ $date - NOTD)
+    k $_.conf($script,botname) PRIVMSG %parv[1] : $+ $_.conf($script,new) 
+} }
+alias mg.sockop {
+  hadd -m +pseudo $_.conf($script,botname) $readini($script,modulo,nick) | k.nick $_.conf($script,botname) $script
+} 
+alias mg.regular {
+  vc 7
+  if (!%parv[5]) { .timer $+ $_.conf($script,botname) off | r Regular12 OFF }
+  else { .timer $+ $_.conf($script,botname) 0 $calc(60*%parv[4]) mg.rgl $gettok(%parc,6-,32) | r Regular12 ON }
+}
+alias mg.rgl { var %i = $hget(+nicks,0).item, %n = $_.conf($script,botname), %t = $_.tok(PRIVMSG) | while (%i) { k %n %t $hget(+nicks,%i).item : $+ $1- | dec %i } }
+alias mg.whois {
+  if (%parv[2] != $_.conf($script,botname)) return
+  k $_.serv 311 %parv[0] $_.conf($script,botname) $readini($script,modulo,ident) $replace($readini($script,modulo,host),&red,$_.net) * : $+ $readini($script,modulo,realname) (PSEUDObot)
+  k $_.serv 312 %parv[0] $_.conf($script,botname) $_conf(conex,host) : $+ $_conf(conex,info)
+  k $_.serv 307 %parv[0] $_.conf($script,botname) :Tiene el nick Registrado y Protegido
+  k $_.serv 310 %parv[0] $_.conf($script,botname) :Es un OPERador de los servicios de red
+  k $_.serv 316 %parv[0] $_.conf($script,botname) :es un PSEUDOroBOT oficial de la Red
+  k $_.serv 313 %parv[0] $_.conf($script,botname) :es un IRCop
+  k $_.serv 318 %parv[0] $_.conf($script,botname) :Fin del /WHOIS
+}

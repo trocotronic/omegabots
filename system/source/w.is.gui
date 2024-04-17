@@ -1,0 +1,42 @@
+alias p.cw.is {
+  if ($window(@is)) { return }
+  var %w.is.name = @is, %w.is.w = 300, %w.is.h = 170, %w.is.x = $calc($window(-3).w - %w.is.w), $&
+    %w.is.y = $calc($window(-1).h - $window(-2).h) , %w.is.font = Tahoma, %w.is.size = 11
+  window -Bfhkpz +d %w.is.name %w.is.x %w.is.y %w.is.w %w.is.h %w.is.name %w.is.font %w.is.size
+  drawpic -ms %w.is.name 0 0 %w.is.w %w.is.h 0 0 1 299 $_.png(base)
+  drawpic -ms %w.is.name $calc(%w.is.w - 70) 0 70 15 19 2 115 25 $_.png(base)
+  drawpic -ms %w.is.name 0 0 $calc(%w.is.w - 70) 15 4 2 14 25 $_.png(base)
+  drawtext -or %w.is.name 16777215 "Tebruchet MS" 10 20 3 Información del sistema
+  drawpic -mst %w.is.name 0 5 5 10 10 0 0 94 94 $_.png(omega)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 20 Sistema operativo: $gettok($dll(system\dlls\moo.dll,osinfo,-),1,40)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 35 Versión: $gettok($gettok($dll(system\dlls\moo.dll,osinfo,-),2,40),1,41)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 50 CPU: $gettok($gettok($dll(system\dlls\moo.dll,cpuinfo,-),2,45),1,44)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 65 Velocidad: $gettok($dll(system\dlls\moo.dll,cpuinfo,-),2,44)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 80 Resolución de pantalla: $gettok($dll(system\dlls\moo.dll,screeninfo,-),1,32)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 95 Nº de colores: $gettok($dll(system\dlls\moo.dll,screeninfo,-),2,32)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 110 Frecuencia de refresco: $gettok($dll(system\dlls\moo.dll,screeninfo,-),3,32)
+  drawtext -r %w.is.name 16777215 %w.is.font %w.is.size 5 125 Memoria RAM usada: $gettok($dll(system\dlls\moo.dll,meminfo,-),2,32)
+  drawrect -rd %w.is.name 16777215 1 5 145 $calc(%w.is.w - 10) 20 10 10
+  dll system\dlls\ontop.dll Attach $window(%w.is.name).hwnd | dll system\dlls\ontop.dll PutOnTop $window(%w.is.name).hwnd true
+  is.r | window -a %w.is.name | .timerIS 0 1 is.r
+}
+alias is.r {
+  var %w.is.name = @is, %w.is.w = 300, %w.is.h = 170, %w.is.x = $calc($window(-3).w - %w.is.w), $&
+    %w.is.y = $calc($window(-1).h - $window(-2).h) , %w.is.font = Tahoma, %w.is.size = 11, %w.is.m = $dll(system\dlls\moo.dll,rambar,-)
+  if (%w.is.m < 50) { var %w.is.r = $round($calc(%w.is.m * (254 / 49)),0), %w.is.g = 255 }
+  if (%w.is.m == 50) { var %w.is.r = 255, %w.is.g = 255 }
+  if (%w.is.m > 50) { var %w.is.r = 255, %w.is.g = $round($calc(255 - (%w.is.m * (254 / 49) - 255)),0) }
+  drawrect -fdnr %w.is.name 9721923 1 6 146 $calc(%w.is.w - 12) 18 10 10
+  drawrect -fnr %w.is.name 8933438 1 5 125 %w.is.w 20 
+  drawtext -nr %w.is.name 16777215 %w.is.font %w.is.size 5 125 Memoria RAM usada: $gettok($dll(system\dlls\moo.dll,meminfo,-),2,32)
+  drawrect -fdnr %w.is.name $rgb($iif(%w.is.r > 255,255,%w.is.r),$iif(%w.is.g < 0,0,%w.is.g),0) 1 6 146 $round($calc(%w.is.m / 100 * (%w.is.w - 12)),0) 18 10 10
+  drawtext -nr %w.is.name 16777215 %w.is.font %w.is.size $calc((%w.is.w - 10)/2-$width(%w.is.m $+ $chr(37),%w.is.font,%w.is.size,0,0)/2) $&
+    $calc(155-$height(%w.is.m,%w.is.font,%w.is.size)/2) %w.is.m $+ $chr(37)
+  drawdot %w.is.name
+}
+menu @is {
+  sclick: {
+    ;echo -s $mouse.x $mouse.y
+    if ($inrect($mouse.x,$mouse.y,285,2,10,10)) { window -c @is | .timerIS off }
+  }
+}

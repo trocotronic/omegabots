@@ -1,0 +1,10 @@
+{cpanel}Configuración:p.cw.main
+-
+{world}Conectar:conex
+-
+{butter}Solicitar MOTD:motd
+-
+{eject}Refrescar:carga
+{prompt}Limpiar pantalla:clear
+-
+{file}Debug:p.cw.debug

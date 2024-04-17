@@ -1,0 +1,419 @@
+[modulo]
+version=1.0.8
+nombre=_oper
+prefijo=mo
+serv=OperServ
+archivos=
+conf=conf\mo.conf
+ayuda=help\mo.h.ogm
+autor=STeaL
+mail=jkrst_@hotmail.com
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=oPeR
+ident=oPeR
+host=servicios.&red
+realname=Servicio de gestión de red
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+root=root
+join=jb
+blocks=blocks
+raw=raw
+gline=gline
+ungline=ungline
+zline=zline
+unzline=unzline
+modulos=modulos
+opers=opers
+roots=roots
+devels=devels
+viewip=viewip
+admins=admins
+clear=clear
+opt=opt
+kill=kill2
+preopers=preos
+sajoin=sajoin
+sapart=sapart
+snomask=snomask
+
+[fin]
+
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mo.privmsg | return
+  :B_JOIN | mo.join $1- | return
+  :KILL | mo.kill | return
+  :SVSKILL | mo.kill | return
+  :TKL | mo.tkl | return
+  :%g | return
+}
+alias mo.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mo.join {
+  if ($_conf(bots,autoop) && $_.get($1).status > 4 && !$tget(chans,$2,o,$1)) {
+    if ($_conf(debug,ircd) == $2 || $_conf(debug,control) == $2 || $hget($2)) { return }
+    _mode $readini($script,modulo,nick) $2 o $1
+  }
+}
+alias mo.kill { echo -s 4Se ejecuta el comando kill de OPER
+if ($_conf(bots,rekill) && $readini($_.bot(%parv[2]).path,modulo,activo)) { k.nick %parv[2] $_.bot(%parv[2]).path } }
+alias mo.tkl {
+  if ($_conf(bots,antigline) && %parv[2] == + && ($ulist($+(*,!,%parv[4],@,%parv[5])) || $readini(conf\prox.conf,allow,%parv[5]))) { _tkl - %parv[3] %parv[4] %parv[5] }
+}
+alias mo.root {
+  vc 5
+  if ($_.get(%parv[0]).status < 6) { e 5 }
+  if (!%parv[4]) { e 1 ROOT comando [parámetros] }
+  goto %parv[4]
+  :debug | if (!%parv[5]) { e 1 ROOT DEBUG on/off } | set %parv[5] $upper(%parv[5]) | if (!$regex(%parv[5],^(ON|OFF)$)) { e 2 ROOT DEBUG on|off }
+  writeini conf\main.conf debug activo $iif(%parv[5] == on,1,0) | r Debugging12 %parv[5] | return
+  :rehash | r Refrescando servicios en 5 segundos... | .timerREHASH 1 5 sockclose ircd | .timerREHASH2 1 6 sockopen ircd $_conf(conex,ip) $_conf(conex,port) | return
+  :restart | r Reiniciando servicios en 5 segundos... | .timerRESTART 1 5 carga | return
+  :stop | r Parando servicios en 5 segundos... | .timerSTOP 1 5 sockclose ircd | return
+  :load | if (!%parv[5]) { e 1 ROOT LOAD ruta\modulo.ogm } | if (!$isfile(%parv[5])) { e 0 Este fichero no existe. } | if ($hfind(+modulos,$+(*,%parv[5],*),0,w).data) { e 0 Este módulo ya está cargado. } | m.cm %parv[5] NOT_STOP | r Módulo12 $nopath(%parv[5]) cargado con éxito. | return
+  :unload | if (!%parv[5]) { e 1 ROOT UNLOAD módulo } | if (!$hget(%parv[5])) { e 0 Este módulo no está cargado. } | if ($istok(nickserv*chanserv*cregserv*operserv,$readini($gettok($hget(+modulos,%parv[5]),1,32),modulo,serv),42)) { e 0 Este módulo no puede ser descargado. } | m.dm %parv[5] | r Módulo12 %parv[5] descargado con éxito. | return
+  :%parv[4] | e 0 Opción incorrecta.
+}
+alias mo.jb {
+  vc $iif(%parv[2] == $readini($script,modulo,nick),5,4)
+  if (!%parv[4]) { e 1 JOIN #canal [bots] }
+  var %i = 6 | while ($gettok(%parc,%i,32)) { if (!$hfind(+bots,$ifmatch).data) { e 0 $gettok(%parc,%i,32) no es un bot de servicios. } | inc %i }
+  var %i = $hget(+bots,0).item | while (%i) { if ($hget(+residente,$hget(+bots,%i).item)) { dec %i | continue } | k $hget(+bots,%i).data $_.tok(PART) %parv[4] :Cambiando bots del canal. | dec %i }
+  var %i = 6 | while ($gettok(%parc,%i,32)) { k $ifmatch $_.tok(JOIN) %parv[4] | if ($_conf(bots,autobop) && !$_.conf($_.bot($gettok(%parc,%i,32)).path,noop)) { k $hget(+bots,chanserv) $_.tok(MODE) %parv[4] h $gettok(%parc,%i,32) } | inc %i }
+  if (%parv[5]) { r Bots fijados para12 %parv[4] en12 $gettok(%parc,6-,32) }
+  else { r Bots fijados para12 %parv[4] a12 0 }
+}
+alias mo.modulos {
+  vc 5 
+  if (%parv[4] == list) { mo.h.modulos.list }
+  if (%parv[4] != list) && (!%parv[5]) { e 1 MODULOS load/unload <parámetros> } 
+  if (%parv[4] == load) { 
+  if (!%parv[5]) { e 1 MODULOS LOAD ruta\modulo.ogm } | if (!$isfile(%parv[5])) { e 0 Este módulo no existe. } | if ($hfind(+modulos,$+(*,%parv[5],*),0,w).data) { e 0 Este módulo ya está cargado. } | m.cm %parv[5] NOT_STOP | r Módulo12 $nopath(%parv[5]) cargado con éxito.  }
+  if (%parv[4] == unload) {
+    if (!%parv[5]) { e 1 MODULOS UNLOAD módulo } | if (!$script(%parv[5])) { e 0 Este módulo no está cargado. } 
+    if ($readini(modulos/ $+ %parv[5],modulo,serv) == nickserv) || ($readini(modulos/ $+ %parv[5],modulo,serv) == chanserv) || ($readini(modulos/ $+ %parv[5],modulo,serv) == cregserv) || ($readini(modulos/ $+ %parv[5],modulo,serv) == operserv) { e 0 Este módulo no puede ser descargado. } 
+  m.dm $readini($ruta(%parv[5]) $+ %parv[5],modulo,nombre) | r Módulo12 %parv[5] descargado con éxito. }
+}
+alias mo.gline {
+  vc 5
+  if (!%parv[6]) { e 1 GLINE <IP|nick> <duración> <motivo> }
+  if (. isin %parv[4]) { 
+  _tkl + G * %parv[4] %parv[5] $gettok(%parc,7-,32) }
+  else {
+    _tkl + G * $_.get(%parv[4]).ip %parv[5] $gettok(%parc,7-,32) 
+  }
+}
+alias mo.ungline {
+  vc 5
+  if (!%parv[4]) { e 1 UNGLINE IP }
+  if (. !isin %parv[4]) { e 1 UNGLINE IP }
+  else { _tkl - G * %parv[4] }
+}
+alias mo.zline {
+  vc 5
+  if (!%parv[6]) { e 1 ZLINE <IP|nick> <duración> <motivo> }
+  if (. isin %parv[4]) { 
+  _tkl + Z * %parv[4] %parv[5] $gettok(%parc,7-,32) }
+  else {
+    _tkl + Z * $_.get(%parv[4]).ip %parv[5] $gettok(%parc,7-,32) 
+  }
+}
+alias mo.unzline {
+  vc 5
+  if (!%parv[4]) { e 1 UNZLINE IP }
+  if (. !isin %parv[4]) { e 1 UNZLINE IP }
+  else { _tkl - Z * %parv[4] }
+}
+alias mo.block {
+  vc 5
+  if (!%parv[5]) { e 1 BLOCK <IP|nick> <motivo> }
+  if (. isin %parv[4]) { 
+  _tkl + G * %parv[4] 300 $gettok(%parc,6-,32) }
+  else {
+    _tkl + G * $_.get(%parv[4]).ip 300 $gettok(%parc,6-,32) 
+  }
+}
+alias mo.raw {
+  vc 7
+  if (!%parv[5]) { e 1 RAW raw parámetros }
+  ;if ($hget(+nicks,%var)
+  r Ejecutando12 $gettok(%parc,5-,32) | da $+(12,%parv[0]) ejecuta el raw12 $+($gettok(%parc,5-,32),1). | k $_.serv $gettok(%parc,5-,32)
+}
+alias mo.opers {
+  vc 7
+  if (%parv[4] != list) && (!%parv[5]) { e 1 OPERS add/del nick }
+  if (%parv[4] != list) && (!$hget(%parv[5])) { e 3 }
+  if (%parv[4] == add) {
+    if ($hget(%parv[5],Oper)) { e 0 El nick %parv[5] ya es oper. }
+    hdel %parv[5] oper | hadd %parv[5] oper Oper | h %parv[5] | r Nick12 %parv[5] añadido como oper.
+    if ($_IsUDB) { 
+      add.stat %parv[5] *2 | add.mod %parv[5] kgwr
+    }
+    hbdd | hadd %parv[5] modos hkgw
+    if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 5 | continue } 
+    h %parv[5]
+    if ($hget(+nicks,%parv[5])) { var %u = $+($hget(%parv[5],modos),$hget(%parv[5],oline)) |  _umode %parv[5] $+(+,%u) }
+  }
+  if (%parv[4] == del) {
+    if ($hget(%parv[5],oper) != Oper) { e 0 El nick %parv[5] no figura como oper. }
+    if ($_IsUDB) {
+      del.stat %parv[5] | del.mod %parv[5] | hbdd
+      h %parv[5]
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 3 | .timer 1 3 opt.n }
+    }
+    hdel %parv[5] oper | hadd %parv[5] modos r
+    h %parv[5] | r Nick12 %parv[5] borrado como oper. | k $_.serv $_.tok(SVSNICK) %parv[5] $_.clav($replace($_.conf(modulos\mn.ogm,recovnick),&nick,%parv[5])) $ctime 
+  } 
+  if (%parv[4] == list) { r *** Lista de OPERadores ***
+    var %i = $findfile(nicks\,*,0), %s | while (%i) { 
+      var %f = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ($hget(%f,oper) == Oper) { r %f }
+      if (%i == 1) { r *** Fin de lista *** }
+    dec %i 1 }
+} }
+alias mo.devels {
+  vc 7
+  if (%parv[4] != list) && (!%parv[5]) { e 1 DEVELS add/del nick }
+  if (%parv[4] != list) && (!$hget(%parv[5])) { e 3 }
+  if (%parv[4] == add) { 
+    if ($hget(%parv[5],oper) == Devel) { e 0 El nick %parv[5] ya es devel. }
+    if ($_IsUDB) {  
+      add.stat %parv[5] *4 | add.mod %parv[5] kgwr
+      hbdd | hadd %parv[5] modos kgw
+      h %parv[5]
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 7 }
+    }
+    hdel %parv[5] oper | hadd %parv[5] oper Devel | if ($hget(+nicks,%nick)) { k %parv[2] $_.tok(SVS2MODE) %parv[5] h $ctime } | h %parv[5] | r Nick12 %parv[5] añadido como devel.
+    if ($hget(+nicks,%parv[5])) { var %u = $+($hget(%parv[5],modos),$hget(%parv[5],oline)) |  _umode %parv[5] $+(+,%u) }
+  }
+  if (%parv[4] == del) {
+    if ($hget(%parv[5],oper) != Devel) { e 0 El nick %parv[5] no figura como devel. }
+    if ($_IsUDB) {
+      del.stat %parv[5] | del.mod %parv[5] | hbdd
+      h %parv[5] | hadd %parv[5] modos r
+      if ($hget(+bots,ipserv)) { mv.bdd %nick 3 | .timer 1 3 opt.n }
+    }
+  hdel %parv[5] oper | h %parv[5] | r Nick12 %parv[5] borrado como devel. | k $_.serv $_.tok(SVSNICK) %parv[5] $_.clav($replace($_.conf(modulos\mn.ogm,recovnick),&nick,%parv[5])) $ctime } 
+  if (%parv[4] == list) { r *** Lista de DEVELS ***
+    var %i = $findfile(nicks\,*,0), %s | while (%i) { 
+      var %f = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ($hget(%f,oper) == Devel) { r %f }
+      if (%i == 1) { r *** Fin de lista *** }
+    dec %i 1 }
+  }
+} 
+alias mo.admins {
+  vc 7
+  if (%parv[4] != list) && (!%parv[5]) { e 1 ADMINS add/del nick }
+  if (%parv[4] != list) && (!$hget(%parv[5])) { e 3 }
+  if (%parv[4] == add) {
+    if ($hget(%parv[5],oper) == Admin) { e 0 El nick %parv[5] ya es admin. }
+    if ($_IsUDB) {
+      add.stat %parv[5] *8 | add.mod %parv[5] kgw
+      hbdd | hadd %parv[5] modos kgwoar
+    }
+    hdel %parv[5] oper | hadd %parv[5] oper Admin | h %parv[5] | r Nick12 %parv[5] añadido como admin.
+    if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 7 }
+    if ($hget(+nicks,%parv[5])) { var %u = $+($hget(%parv[5],modos),$hget(%parv[5],oline)) |  _umode %parv[5] $+(+,%u) }
+  }
+  if (%parv[4] == del) {
+    if ($hget(%parv[5],oper) != Admin) { e 0 El nick %parv[5] no figura como admin. }
+    if ($_IsUDB) { 
+      del.stat %parv[5] | del.mod %parv[5] | hbdd
+      h %parv[5] | hadd %parv[5] modos r
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 3 | 
+        ;.timer 1 3 opt.n 
+      }
+    }
+    hdel %parv[5] oper | h %parv[5] | r Nick12 %parv[5] borrado como admin. | k $_.serv $_.tok(SVSNICK) %parv[5] $_.clav($replace($_.conf(modulos\mn.ogm,recovnick),&nick,%parv[5])) $ctime
+  }
+  if (%parv[4] == list) { r *** Lista de ADMINistradores ***
+    var %i = $findfile(nicks\,*,0), %s | while (%i) { 
+      var %f = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ($hget(%f,oper) == Admin) { r %f }
+      if (%i == 1) { r *** Fin de lista *** }
+    dec %i 1 }
+  }
+} 
+alias mo.roots {
+  vc 7
+  if (%parv[4] != list) && (!%parv[6]) { e 1 ROOTS add/del nick password }
+  if (%parv[4] != list) && (!$hget(%parv[5])) { e 3 }
+  if (%parv[4] != list) {
+    if ($_.conf($script,md5) == 1) { 
+    if ($md5(%parv[6]) != $_.conf($script,passaddroot)) { e 0 Contraseña incorrecta. } }
+    else {
+      if (%parv[6] != $_.conf($script,passaddroot)) { e 0 Contraseña incorrecta. }
+    }
+  }
+  if (%parv[4] == add) {
+    if ($hget(%parv[5],oper) == Root) { e 0 El nick %parv[5] ya es root. }
+    if ($_IsUDB) { add.stat %parv[5] *16 | add.mod %parv[5] wghaAskWtX
+      hbdd | h %parv[5] | hadd %parv[5] modos wghaAskWtXoNr
+    }
+    hadd %parv[5] oper Root | h %parv[5] | r Nick12 %parv[5] añadido como root.
+    if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 10 | .timer 1 3 opt.n }
+    if ($hget(+nicks,%parv[5])) { var %u = $+($hget(%parv[5],modos),$hget(%parv[5],oline)) |  _umode %parv[5] $+(+,%u) }
+  }
+  if (%parv[4] == del) {
+    if ($hget(%parv[5],oper) != Root) { e 0 El nick %parv[5] no figura como root. }
+    if ($_IsUDB) { 
+      del.stat %parv[5] | del.mod %parv[5] | hbdd
+      h %parv[5] | hadd %parv[5] modos r
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 3 | .timer 1 3 opt.n }
+    }
+    hdel %parv[5] oper | h %parv[5] | r Nick12 %parv[5] borrado como root. | k $_.serv $_.tok(SVSNICK) %parv[5] $_.clav($replace($_.conf(modulos\mn.ogm,recovnick),&nick,%parv[5])) $ctime | inf.n
+  }
+  if (%parv[4] == list) { r *** Lista de Roots ***
+    var %i = $findfile(nicks\,*,0), %s | while (%i) { 
+      var %f = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ($hget(%f,oper) == Root) { r %f }
+      if (%i == 1) { r *** Fin de lista *** }
+    dec %i 1 }
+  }
+} 
+alias mo.preos {
+  vc 7
+  if (%parv[4] != list) && (!%parv[5]) { e 1 PREOS add/del nick }
+  if (%parv[4] != list) && (!$hget(%parv[5])) { e 3 }
+  if (%parv[4] == add) {
+    if (!%parv[5]) { e 1 PREOPERS ADD nick }
+    if (!$hget(%parv[5])) { e 3 }
+    r Usuario12 %parv[5] añadido como PreOper.
+    if ($_IsUDB) { add.stat %parv[5] *1 | add.mod %parv[5] gwk | hbdd | hadd %parv[4] modos gwkr
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 4 | .timer 1 3 opt.n }
+      hdel %parv[5] oper | hadd %parv[5] oper PreOper
+    }
+    h %parv[5]
+    if ($hget(+nicks,%parv[5])) { var %u = $+($hget(%parv[5],modos),$hget(%parv[5],oline)) |  _umode %parv[5] $+(+,%u) }
+  }
+  if (%parv[4] == del) {
+    if (!%parv[5]) { e 1 PREOPERS DEL nick }
+    if (!$hget(%parv[5])) { e 3 }
+    if ($_IsUDB) { del.stat %parv[5] | del.mod %parv[5] | hbdd
+      if ($hget(+bots,ipserv)) { mv.bdd %parv[5] 3 | .timer 1 3 opt.n }
+    }
+    hdel %parv[5] oper | hadd %parv[5] modos r | r Usuario12 %parv[5] borrado como PreOper. | k $_.serv $_.tok(SVSNICK) %parv[5] $_.clav($replace($_.conf(modulos\mn.ogm,recovnick),&nick,%parv[5])) $ctime
+    h %parv[5]
+  }
+  if (%parv[4] == list) { r *** Lista de PREOperadores ***
+    var %i = $findfile(nicks\,*,0), %s | while (%i) { 
+      var %f = $_.32($nopath($findfile(nicks\,*,%i))).uncod 
+      if ($hget(%f,oper) == PreOper) { r %f }
+      if (%i == 1) { r *** Fin de lista *** }
+    dec %i 1 }
+  }
+}
+alias mo.clear { mc.clear }
+alias _tkl { if ($readini(conf\prox.conf,allow,$4) && $1 == +) { return } | k $_.serv $_.tok(TKL) $1 $2 $3 $4 $+($readini($script,modulo,nick),$chr(33),$readini($script,modulo,ident),$chr(64),$replace($readini($script,modulo,host),&red,$_.net)) $iif($1 == +,$iif($5 == 0,0,$calc($5 + $ctime)) $ctime : $+ $6-) } 
+alias _kill { k $1 $_.tok(KILL) $2 : $+ $3- | .signal -n QUIT $2 | k.free $2 }
+alias _kick { k $1 $_.tok(KICK) $2 $3 $4- | .signal -n PART $2 $3 | k.part $2 $3 }
+
+alias mo.kill2 { 
+  vc 4
+  if ($_.get(%parv[0]).status <= $_.get(%parv[4]).status) { r 4Acceso denegado. No puedes killear a usuarios con nivel superior o igual al tuyo | do $(12,%parv[0]) 1intenta killear a12 $+(%parv[4],1). | goto e }
+  if (!%parv[4]) { e 1 KILL nick [motivo] }
+  if (!$hget(+nicks,%parv[4])) { e 0 Este nick no está conectado. | goto e }
+  if (%parv[5]) { _kill $readini($script,modulo,nick) %parv[4] $+($gettok(%parc,6-,32)) ( $+ %parv[0] $+ ) | goto e }
+  if (!%parv[5]) { _kill $readini($script,modulo,nick) %parv[4] $iif($gettok(%parc,6-,32),$ifmatch,%parv[0]) }
+  :e  
+  r Usuario12 %parv[4] killeado. | do Usuario12 %parv[4] 1killeado por12 $+(%parv[0],1.)
+} }
+alias mo.viewip { 
+  vc 4
+  if (!%parv[4]) { e 1 VIEWIP nick }
+  else { 
+    set %nicke %parv[0]
+    set %nicki %parv[4]
+  k $readini($script,modulo,nick) userip : $+ %parv[4] }
+}
+alias userip { 
+  if ($gettok(%parv[3],2,64) == <unknown>) { sockwrite -nt ircd : $+ $readini($script,modulo,nick) PRIVMSG %nicke :El nick12 %nicki 1no tiene IP. | do $+(12,%nicke,1) hace VIEWIP sobre12 $+(,%nicki,1.) | goto m }
+  if ($gettok(%parv[3],2,64) == $null) { sockwrite -nt ircd : $+ $readini($script,modulo,nick) PRIVMSG %nicke :El nick12 %nicki 1no está conectado. | do $+(12,%nicke,1) hace VIEWIP sobre12 $+(,%nicki,1.) | goto m }
+  if (%nicke == %nicki) { sockwrite -nt ircd : $+ $readini($script,modulo,nick) PRIVMSG %nicke :Tu IP es12 $+($gettok(%parv[3],2,64),1). | do $+(12,%nicke,1) hace VIEWIP sobre12 $+(,%nicki,1.) | goto m }
+  else { sockwrite -nt ircd : $+ $readini($script,modulo,nick) PRIVMSG %nicke :La IP de12 %nicki 1es12 $+($gettok(%parv[3],2,64),1). | do $+(12,%nicke,1) hace VIEWIP sobre12 $+(,%nicki,1.) | goto m }
+  :m
+  unset %nicke | unset %nicki
+}
+alias mo.opt {
+  vc 7
+  if (!%parv[4]) { e 1 OPT <bloque> }
+  if (%parv[4] != N) && (%parv[4] != S) && (%parv[4] != I) && (%parv[4] != C) && (%parv[4] != all) { r 4ERROR: Los bloques sólo pueden ser12 N1, 12S1, 12I1, 12C1 o12 ALL1 | halt }
+  if (%parv[4] == n) { opt.n }
+  if (%parv[4] == s) { opt.s }
+  if (%parv[4] == i) { opt.i }
+  if (%parv[4] == c) { opt.c }
+  if (%parv[4] == all) { opt.n | opt.i | opt.s | opt.c
+  r Comando ejecutado exitosamente en todos los bloques:12 N1, 12S1, 12I1 y 12C | halt }
+  r Comando ejecutado exitosamente en el bloque12 $+($upper(%parv[4]))1.
+}
+alias mo.snomask {
+  vc 7
+  if (!%parv[4]) { e 1 SNOMASK add/del/list nick snomasks }
+
+  if (%parv[4] == list) { mo.h.snomask.list | halt }
+
+  if (%parv[4] == add) { e 1 SNOMASK add/del/list nick snomasks }
+  if (!$hget(%parv[5])) { e 3 }
+  if (!$hget(%parv[5],oper)) { e 0 Este nick no es operador. }
+  if (!%parv[6]) { e 1 SNOMASK add/del/list nick snomasks }
+  var %e = 1
+  while ($mid(%parv[6],%e,1)) {
+    if ($mid(%parv[6],%e,1) != $chr(43)) && ($mid(%parv[6],%e,1) != $chr(45)) {
+      if ($mid(%parv[6],%e,1) !isincs cfFjveGnNqS) { var %w = $+(%w,$mid(%parv[6],%e,1)) }
+    }
+  inc %e }
+  if (%w) {
+  e 0 SNOMASK12 %w 4no permitidas. }
+  var %u = 1
+  while ($mid($_.mode(%parv[6]).u,%u,1)) { 
+    if ($mid($_.mode(%parv[6]).u,%u,1) !isincs $hget(%parv[5],snomask)) { set %h $+(%h,$mid($_.mode(%parv[6]).u,%u,1)) }
+  inc %u 1 }
+  var %l = 1 
+  while ($mid(%h,%l,1)) { 
+    if ($mid(%h,%l,1) !isincs $mid($_.mode(%parv[6]).d,%l,1)) { 
+    var %t = $+(%t,$mid(%h,%l,1)) } 
+  inc %l 1 }
+  if (%parv[6]) { r SNOMASK de12 %parv[5] cambiadas a12 $+(%parv[6],.) }
+  hadd %parv[5] snomask %t
+  if (%t) { r Las actuales SNOMASKs de12 %parv[5] son $+(12+,%t,.) }
+  if (!%t) { r SNOMASKs de12 %parv[5] eliminadas. }
+  snomask %parv[5] %t | unset %h
+
+  if (%parv[4] == del) { 
+    if (!%parv[5]) { e 1 SNOMASK add/del/list nick snomasks }
+    if (!$hget(%parv[5])) { e 3 }
+    if (!$hget(%parv[5],oper)) { e 0 Este nick no es operador. }
+    hadd %parv[5] snomask
+    r SNOMASKs de12 %parv[5] eliminadas.
+    snomask %parv[5]
+  }
+}
+alias mo.sajoin {
+  vc 4
+  if (!%parv[5]) { e 1 SAJOIN nick #canal }
+  if (!$hget(+nicks,%parv[4])) { e 0 Este nick no está conectado. }
+  if ($tget(chans,%parv[5],total,%parv[4])) { r Este nick ya se encuentra en %parv[5] }
+  k $_.serv $_.tok(SAJOIN) %parv[4] %parv[5] | r Usuario12 %parv[4] obligado a entrar en12 %parv[5] | do Usuario12 %parv[4] obligado a entrar en12 %parv[5] 1por12 $+(%parv[0],1.)
+}
+alias mo.sapart {
+  vc 4
+  if (!%parv[5]) { e 1 SAPART nick #canal }
+  if (!$hget(+nicks,%parv[4])) && (!$_.get(%parv[4]).bot) { e 0 Este nick no está conectado. }
+  if (!$tget(chans,%parv[5],total,%parv[4])) { r Este nick no se encuentra en12 %parv[5] $+ . | halt }
+  if (!$_.get(%parv[4]).bot) { k $_.serv $_.tok(SAPART) %parv[4] %parv[5] | r Usuario12 %parv[4] obligado a salir de12 %parv[5] | do Usuario12 %parv[4] obligado a salir de12 %parv[5] 1por12 $+(%parv[0],1.) }
+  if ($_.get(%parv[4]).bot) { k %parv[4] PART %parv[5] | r BOT12 %parv[4] obligado a salir de12 %parv[5] | do Robot12 %parv[4] obligado a salir de12 %parv[5] 1por12 $+(%parv[0],1.) }
+
+} 

@@ -1,0 +1,246 @@
+[modulo]
+version=1.0.8
+nombre=_virtual
+prefijo=mv
+serv=IpServ
+archivos=
+ayuda=help\mv.h.ogm
+conf=conf\mv.conf
+autor=STeaL
+mail=jkrst_@hotmail.com
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=ViRTuaL
+ident=ViRTuaL
+host=servicios.&red
+realname=Servicio de gestión de IPs
+modos=oOaANCdhrtvwBq
+
+[comandos]
+ayuda=help
+help=help
+info=info
+addvhost=addvhost
+delvhost=delvhost
+sufijo=sufijo
+addclones=addclones
+delclones=delclones
+addexcepts=addexcepts
+delexcepts=delexcepts
+set=set
+
+[fin]
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mv.privmsg | return
+  :ID_OK | mv.ok | return
+  :B_MODE | mv.bmd $1- | return
+  :AUTH_OK | mv.sockop | mu.sockop | return
+  :%g | return
+}
+alias mu.sockop remini conf\main.conf clons clons
+
+alias mv.sockop { var %virth = $+($readini($script,modulo,nick),$chr(33),$readini($script,modulo,ident),$chr(64),$replace($readini($script,modulo,host),&red,$_.net))
+  if (%virth != $readini(tmp/ogm.tmp,services,virtualserv)) { s.v %virth | inf.s | hbdd } 
+  writeini -n tmp/ogm.tmp services virtualserv %virth
+}
+
+alias mv.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mv.nick {
+  if (%parv[0] == $_.tok(NICK)) {
+    if ($calc($hget(+virt,_st)+$_.conf($script,duration)*3600) < $ctime) { 
+      hfree +virt | hadd -m +virt _st $ctime
+      cif.v
+    hbdd }      
+    else { hadd +virt %parv[5] $_.clav($replace($_.conf($script,form),&afijo,$_.conf($script,afijo))) }
+} } 
+alias mv.bmd {
+  if (x isincs $_.mode($2).u || x isincs $_.get($1).modes) {
+    if ($_.get($1).status < 3) {
+      if ($_.conf($script,only_id)) { k $hget(+bots,nickserv) $_.tok(SVS2MODE) $1 -x $ctime | _umode $1 -x }
+      else { _virt $1 $hget(+virt,$_.get($1).ip) }
+    }
+    if ($_.get($1).status > 2) {
+      if ($hget($1,vhost)) { _virt $1 $ifmatch }
+      else {
+        var %p = $_.get($1).status | goto %p
+        :3 | _virt $1 $hget(+virt,$_.get($1).ip) | return
+        :4 | _virt $1 $iif($_.conf($script,pvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | return
+        :5 | _virt $1 $iif($_.conf($script,hvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | return
+        :6 | _virt $1 $iif($_.conf($script,ovhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | return
+        :7 | _virt $1 $iif($_.conf($script,avhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | return
+        :8 | _virt $1 $iif($_.conf($script,rvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | return
+        :%p | return
+  } } }
+  if (x isincs $_.mode($2).d) { hadd +nicks $1 $puttok($hget(+nicks,$1),$_.get($1).ip,3,32) }
+}
+alias _virt { 
+  if ($_IsUDB) return
+  if (!$hget(+virt,$_.get($1).ip)) { hadd -m +virt $_.get($1).ip $_.clav($replace($_.conf($script,form),&afijo,$_.conf($script,afijo))) }
+  var %v = $_.v($replace($iif($2,$2,$hget(+virt,$_.get($1).ip)),&ipvirt,$remove($hget(+virt,$_.get($1).ip),$_.conf($script,afijo))))
+  if ($_.get($1).ipv != %v) { hadd -m +nicks $1 $puttok($hget(+nicks,$1),%v,3,32) | k $readini($script,modulo,nick) $_.tok(CHGHOST) $1 %v 
+    if (!$_IsUDB) { k $readini($script,modulo,nick) $_.tok(NOTICE) $1 :Tu dirección virtual es: %v }
+  } 
+}
+alias mv.ok { if ($hget(%parv[0],vhost)) { _virt %parv[0] $ifmatch } }
+alias mv.info {
+  vc 5
+  if (!%parv[4]) { e 1 INFO host }
+  if (!$hget(%parv[4])) { e 0 Esta host no tiene ni número de clones ni excepts fijados. }
+  r *** Información del host12 %parv[4] $+ . ***
+  if ($hget(%parv[4],clones)) { r Clones:12 $hget(%parv[4],clones) }
+  if ($hget(%parv[4],excepts)) { r Excepts:12 $hget(%parv[4],excepts) }
+  r *** Fin de la información. ***
+}
+alias mv.addvhost {
+  vc 5
+  if (!%parv[5]) { e 1 ADDVHOST nick vhost }
+  if (!$hget(%parv[4])) { e 3 }
+  hbdd 
+  var %len = 1
+  while ($mid(%parv[5],%len,1)) {
+    if ($mid(%parv[5],%len,1) isin abcdefghijklmnopqrstuvwxyz-.0123456789) { var %v = $+(%v,$mid(%parv[5],%len,1)) }
+    else { var %n = %n $mid(%parv[5],%len,1) }
+    inc %len = 1 
+  }
+  if ($hget(%parv[4],vhost) != %v) { hadd %parv[4] vhost %v | h %parv[4] | vhost.v %parv[4] %v | continue }
+  r Vhost para12 %parv[4] añadido:12 %v | if ($_.get(%parv[4]).status > 2) { _virt %parv[4] %v | continue }
+  if (%n) { r Los caracteres12 %n no han podido ser agregados a la vhost porque no son válidos. }
+}
+alias mv.delvhost {
+  vc 5
+  if (!%parv[4]) { e 1 DELVHOST nick }
+  if (!$hget(%parv[4])) { e 3 }
+  delvhost.v %parv[4]
+  hbdd 
+  hdel %parv[4] vhost | h %parv[4] | r Vhost para12 %parv[4] borrado.
+}
+alias mv.sufijo {
+  vc 7
+  if (!%parv[4]) { e 1 SUFIJO sufijo }
+  suf.v %parv[4]
+  r Sufijo12 %parv[4] 1añadido.
+}
+alias _.v {
+  var %i = 1, %r, %c
+  while (%i <= $len($1)) {
+    %c = $asc($mid($1,%i,1))
+    if (%c isnum 48-57 || %c isnum 65-90 || %c isnum 97-122 || %c isnum 45-46 || %c == 95) { %r = %r $+ $chr(%c) }
+    inc %i
+  }
+  return %r
+}
+alias mv.bdd {
+  var %p = $2, %v | goto %p
+  :3 | delvhost.v $1 | return
+  :4 | %h = $iif($_.conf($script,pvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :5 | %h = $iif($_.conf($script,hvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :6 | %h = $iif($_.conf($script,ovhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :7 | %h = $iif($_.conf($script,avhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :8 | %h = $iif($_.conf($script,rvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :9 | %h = $iif($_.conf($script,dvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :10 | %h = $iif($_.conf($script,rvhost),$replace($ifmatch,&nick,$iif($_.conf($script,lower),$lower($1),$1),&red,$_.net),$hget(+virt,$_.get($1).ip)) | goto V
+  :%p | return
+  :V 
+  var %len = 1
+  while ($mid(%h,%len,1)) {
+    if ($mid(%h,%len,1) isin abcdefghijklmnopqrstuvwxyz-.0123456789) { var %v = $+(%v,$mid(%h,%len,1)) }
+    else { var %n = %n $mid(%h,%len,1) }
+    inc %len = 1
+  }
+  if ($_IsUDB) { vhost.v $1 %v }
+
+
+  else { k $readini($script,modulo,nick) $_.tok(CHGHOST) $1 %v | k $readini($script,modulo,nick) $_.tok(NOTICE) $1 :*** Protección IP: tu dirección virtual es %v }
+}
+alias mv.addclones {
+  vc 7
+  if (!%parv[5]) { e 1 ADDCLONES host nºclones }
+  if (%parv[5] !isnum 1-) { e 2 El número de clones debe ser un número superior a 0. }
+  if ($_IsUDB) { 
+    if ($hget(%parv[4],clones) != %parv[5]) { add.host.v %parv[4] %parv[5] } 
+  }
+  if ($hget(%parv[4])) { hadd %parv[4] clones %parv[5] | hi %parv[4] }
+  if (!$hget(%parv[4])) { hadd -m %parv[4] clones %parv[5] | hi %parv[4] }
+  r El host12 %parv[4] tiene acceso para12 %parv[5] clones.
+}
+alias mv.delclones {
+  vc 7
+  if (!%parv[4]) { e 1 DELCLONES host }
+  hdel %parv[4] clones | hi %parv[4]
+  if ($_IsUDB) { 
+    if ($hget(%parv[4],excepts)) { del.host.v %parv[4] }
+    if (!$hget(%parv[4],excepts)) { clear.i %parv[4] | hfree %parv[4] }
+  }
+  else { 
+    if (!$hget(%parv[4],excepts)) { hfree %parv[4] }
+  }
+
+  r Los clones del host12 %parv[4] han sido borrados de la base de datos.
+}
+alias mv.addexcepts {
+  vc 7
+  if (!%parv[5]) { e 1 ADDEXCEPTS host excepts }
+  set %parv[5] $upper(%parv[5])
+  var %len = 1
+  while ($mid(%parv[5],%len,1)) {
+    if ($mid(%parv[5],%len,1) !isin GZQST) { var %n = %n $+ $mid(%parv[5],%len,1) }
+    else { var %s = %s $+ $mid(%parv[5],%len,1) }
+    inc %len 1
+  }
+  if (%n) { e 0 Los excepts %n no se puede especificar. }
+  if (%s) {
+    if ($_IsUDB) { 
+      if ($hget(%parv[4],excepts) != %s) { excepts %parv[4] %s } 
+    }
+    if ($hget(%parv[4])) { hadd %parv[4] excepts %s | hi %parv[4] }
+    if (!$hget(%parv[4])) { hadd -m %parv[4] excepts %s | hi %parv[4] }
+    r El host12 %parv[4] tiene las excepts12 %s $+ .
+  } 
+}
+alias mv.delexcepts {
+  vc 7
+  if (!%parv[4]) { e 1 DELEXCEPTS host }
+  hdel %parv[4] excepts | hi %parv[4]
+  if ($_IsUDB) { 
+    if ($hget(%parv[4],clones)) { excepts %parv[4] }
+    if (!$hget(%parv[4],clones)) { clear.i %parv[4] | hfree %parv[4] }
+  }
+  else { 
+    if (!$hget(%parv[4],clones)) { hfree %parv[4] }
+  }
+  r Los excepts del host12 %parv[4] han sido borrados de la base de datos.
+}
+alias mv.set {
+  vc 7
+  if (!%parv[5]) { e 1 SET parámetro valor }
+  if (%parv[4] == CLONS) {
+    if (%parv[5] !isnum 1-) { e 2 El número de clones debe ser mayor a 0. }
+    if ($_IsUDB) { 
+      clon.v %parv[5]
+      writeini -n modulos/ $+ $readini($script,modulo,conf) misc clon %parv[5]
+
+    hbdd }
+    r El número de clones para la red se ha fijado en12 %parv[5] | inf.s
+  }
+  else if (%parv[4] == DEFMSG) {   
+    set %bmsgquit $len($gettok(%parc,6-,32))
+    msg.clon.stan.v $gettok(%parc,6-,32)
+    hbdd 
+    r Mensaje predefinido por sobrepasar el número de clones estándard fijado a12 $gettok(%parc,6-,32) | inf.s
+  }
+  else if (%parv[4] == IPMSG) {
+
+    msg.clon.especial.v $gettok(%parc,6-,32)
+    hbdd 
+    r Mensaje al superar el número de clones por un host especial fijado a12 $gettok(%parc,6-,32) 
+  inf.s }
+  else { e 2 SET CLONS|DEFMSG|IPMSG valor }
+}

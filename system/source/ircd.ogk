@@ -1,0 +1,418 @@
+[modulo]
+version=1.0.8
+[fin]
+
+alias conex {
+  var %h = $input(Introduce la ip que quieres conectar.,eoq,Conectar a...,$_conf(conex,ip)), %p = $input(Introduce el puerto al que quieres conectar.,eoq,Conectar en...,$_conf(conex,port))
+  if ($sock(ircd)) sockclose ircd
+  if (%h && %p) { sockopen ircd %h %p }
+}
+on 1:sockopen:ircd: {
+  if ($sockerr) { .signal -n AUTH_FAILED | return }
+  hfree +nicks +ips | tfree chans | tfree nicks
+  sockwrite -nt $sockname PROTOCTL $_conf(conex,prot) | if ($_IsUDB) { udb } | sockwrite -nt $sockname PASS $_conf(conex,lpass) | sockwrite -nt $sockname SERVER $_.serv 1 : $+ $_conf(conex,info)
+  .signal -n SOCK_OP
+  if ($_conf(drop,n_auto)) { .timerND 0 600 mn.a.drop }
+  if ($_conf(drop,c_auto)) { .timerCD 0 600 mc.a.drop }
+  .timer 1 5 mn.a.ref | .timerNR 0 600 mn.a.ref | .timer 1 5 mr.a.ref | .timerRR 0 600 mr.a.ref
+}
+on 1:sockread:ircd: {
+  sockread %parc | unset %parv*
+  ;if (%parc) { echo -s 3<= %parc }
+  var %i = $calc($numtok(%parc,32)-1) | while (%i > -1) { set %parv[ $+ %i $+ $chr(93) $iif($left($gettok(%parc,$calc(1+%i),32),1) == $chr(58) && %i < 4,$right($gettok(%parc,$calc(1+%i),32),-1),$gettok(%parc,$calc(1+%i),32)) | dec %i }
+  if (%parv[2]) set %parv[2] $gettok($ifmatch,1,64)
+  if (%parv[0] !isnum && $hget(%parv[0])) { set %parv[0] $ifmatch }
+  if ($hfind(+bots,%parv[2],1).data) set %parv[2] $hget(+bots,$ifmatch)
+  if (%parv[0] == $_.tok(PING)) { sockwrite -nt $sockname $_.tok(PONG) : $+ %parv[1] | halt }
+  if (%parc) { 
+    if ($dialog(debug)) { did -a debug 1 text +m %parc $+ $lf }
+    if ($_conf(sock,log)) { write ircd.log $asctime(dd/mm/yy HH:nn:ss) <= %parc }
+    if ($_conf(debug,activo)) { k $hget(+bots,operserv) $_.tok(PRIVMSG) $_conf(debug,ircd) : $+ %parc }
+  } 
+
+  if (%parv[0] === SQUIT) { do El servidor12 %parv[1] 1se ha deslinkado | k $_.serv TSCTL SVSTIME $ctime } 
+  if (%parv[1] ==  ') { do El servidor12 %parv[2] 1ha establecido link | k $_.serv TSCTL SVSTIME $ctime }
+  if (%parv[1] == 340) { userip } 
+  if (%parv[0] == PASS) { 
+    if (%parv[1] != $_conf(conex,rpass)) { sockclose $sockname | .signal -n AUTH_FAILED | halt } 
+    else {
+      unset %r_k | tdel chans * | tdel nicks *
+      if ($_conf(sock,prox_state)) { var %i = $ini(conf\prox.conf,prox,0) | while (%i) { _tkl + G * $ini(conf\prox.conf,prox,%i) 0 :IP Proxy | dec %i } }
+      var %i = $hget(+blines,0).item | while (%i) { k $_.serv $_.tok(SQLINE) $hget(+blines,%i).item : $+ $hget(+blines,%i).data | dec %i }
+      .rlevel service
+      var %i = 1 | while ($hget(+modulos,%i).item) {
+        var %p = $gettok($hget(+modulos,%i).data,1,32), %n = $gettok($hget(+modulos,%i).data,3,32)
+        if ($readini(%p,modulo,activo)) {
+          .auser service $+(%n,!,$readini(%p,modulo,ident),@,$replace($readini(%p,modulo,host),&red,$_.net)) 
+          k.nick %n %p
+        }
+        inc %i
+      } 
+      k $hget(+bots,operserv) $_.tok(JOIN) $+($_conf(debug,ircd),$chr(44),$_conf(debug,control))
+      k $hget(+bots,operserv) $_.tok(MODE) $_conf(debug,ircd) imnsthA $hget(+bots,operserv)
+      k $hget(+bots,operserv) $_.tok(MODE) $_conf(debug,control) imnsthA $hget(+bots,operserv)
+      k $hget(+bots,operserv) $_.tok(JOIN) $_conf(autos,operschat)
+      k $hget(+bots,operserv) $_.tok(MODE) $_conf(autos,operschat) nstOh $hget(+bots,operserv)
+      k $hget(+bots,operserv) $_.tok(JOIN) $_conf(autos,opers)
+      k $hget(+bots,operserv) $_.tok(MODE) $_conf(autos,opers) ntmh $hget(+bots,operserv)
+      k $hget(+bots,operserv) $_.tok(JOIN) $_conf(autos,admins)
+      k $hget(+bots,operserv) $_.tok(MODE) $_conf(autos,admins) nstAh $hget(+bots,operserv)
+      k $_.serv TSCTL SVSTIME $ctime
+      if ($_.conf(modulos/mg.ogm,state) == 1) && ($hget(+bots,globalserv)) { k.j }
+  } }
+  if (%parv[1] == $_.tok(TOPIC)) { mc.topic }
+  if (%parv[3] == RES) && (%parv[1] == DB)  { res }
+  if (%parv[3] == ERR) && (%parv[5] == 2) { wr %parv[6] %parv[7] | k $hget(+bots,operserv) PRIVMSG $_conf(autos,admins) :4ERROR FATAL Error de bytes en la tabla $+(%parv[6],.) 12Reportar inmediatamente el error. 
+    if (!%core) { set %core 1 | timer 1 4 bugs } 
+  }
+  if (%parv[1] == DB) && (%parv[3] == INF) { k $_.serv DB * INF %parv[4] %parv[5] %parv[6] }
+  if (%parv[1] == ES) { .signal -n AUTH_OK }
+  if (%parv[1] == $_.tok(DB) && %parv[4] == J) { hadd -m +bdds %parv[6] %parv[5] }
+  if ($hget(+ignores,%parv[0])) return
+  if ($left(%parv[3],1) == $chr(1) && *ACTION !iswm %parv[3]) { 
+    inc -u10 %c_ [ $+ [ %parv[0] ] ] 
+    if (*PING iswm %parv[3]) { k %parv[2] %parv[1] %parv[0] : $+ %parv[3] %parv[4] | return }
+  }
+  if (%c_ [ $+ [ %parv[0] ] ] == 3) { _tkl + G * $_.get(%parv[0]).ip $_conf(blocks,spam_t) $_conf(blocks,ataques) | unset %c_ [ $+ [ %parv[0] ] ] }
+  if ($_conf(flood,activo) && $_.get(%parv[0]).status < 4) {
+    if ((%parv[1] == $_.tok(PRIVMSG) || %parv[1] == $_.tok(NOTICE)) && $hfind(+bots,%parv[2]).data) {
+      if (!$tget(flood,%parv[0],veces,total)) { .timerFLOOD $+ %parv[0] 1 $_conf(flood,in) tdel flood %parv[0] veces total }
+      tinc flood %parv[0] veces total
+      if ($tget(flood,%parv[0],veces,total) == $_conf(flood,reps)) {
+        if (!$_conf(flood,$tget(flood,%parv[0],veces,kill))) { tdel flood %parv[0] veces kill }
+        tinc flood %parv[0] veces kill | tdel flood %parv[0] veces total
+        var %l = $_conf(flood,$tget(flood,%parv[0],veces,kill)) | goto $gettok(%l,1,32)
+        :ignore | hadd -m +ignores %parv[0] $ctime | if ($gettok(%l,2,32) != 0) { .timerUNFLOOD $+ %parv[0] 1 $ifmatch hdel +ignores %parv[0] } | k %parv[2] $_.tok(NOTICE) %parv[0] :Tus mensajes han sido ignorados $iif($gettok(%l,2,32) == 0,permanentemente.,durante12 $gettok(%l,2,32) segundos.) | return
+        :kill | _kill $_.serv %parv[0] Protección anti-flood | tdel flood %parv[0] veces total,time | return
+        :block | _tkl + G * $_.get(%parv[0]).ip $gettok(%l,2,32) Protección anti-flood | return
+  } } }
+  if (%parv[1] == 249 && $_IsUDB) {
+    if (%parv[5] == 'n') { hadd +stats nicksdb $int($gettok(%parv[7],2,61)) }
+    if (%parv[5] == 'c') { hadd +stats chansdb $int($gettok(%parv[7],2,61)) }
+    hsave -bo +stats conf\stats.db
+  }
+  if (%parv[1] == $_.tok(JOIN)) && (%parv[2] == 0) { halt }
+  if (%parv[1] == 105) { set %_chanmodes $gettok($gettok($matchtok(%parc,PREFIX,1,32),1,41),2,40) $+ $remove($gettok($matchtok(%parc,CHANMODES,1,32),2,61),$chr(44)) }
+  if (%parv[1] == $_.tok(VERSION)) { k $_.serv 351 %parv[0] :OmEGa BoTs v $+ $_.ver . $+ $_.net $+ . started on $asctime($calc($ctime - $sock(ircd).to)) }
+  if (%parv[1] == $_.tok(PRIVMSG) && credit* iswm %parv[3]) {
+    var %m = $hfind(+modulos,* $+ %parv[2],1,w).data
+    if (!%m) %m = $hfind(+modulos,* $+ $hget(+pseudo,%parv[2]),1,w).data
+    r 12OmEGa BoTs v $+ $_.ver
+    r Servicios para IRC. 
+    r Base original de 12Omega Bots1 hecha por12 Trocotronic1 URL: 12http://www.rallados.net (Versión 0.9.3)
+    r Adaptados a UDB3.2.1 por STeaL
+    r URL de descarga actual: 12http://www.rallados.net
+    r Gracias a todos los testers y demás gente que han ayudado que este programa siga adelante.
+    r
+    r Módulo:12 $readini($gettok($hget(+modulos,%m),1,32),modulo,serv) v $+ $hget(%m,_version)
+    r Autor del módulo:12 $hget(%m,_autor) $+($chr(40),$hget(%m,_mail),$chr(41))
+    r URL de descarga del módulo:12 $hget(%m,_url)
+    var %i = 1 | while ($gettok($hget(%m,_creditos),%i,124)) { r $ifmatch | inc %i } | halt
+  }
+  if (%parv[1] == $_.tok(MODE) && !$hget(+nicks,%parv[0])) { 
+    if ($hget(%parv[2])) {
+    mc.mode $hget(+bots,chanserv) %parv[2] $gettok(%parc,4-,32) }
+  }
+  if (%parv[1] == $_.tok(WHOIS)) {
+    var %f = $hfind(+bots,%parv[2]).data, %r = $_.bot(%parv[2]).path
+    if (!%r) goto SIGN
+    k $_.serv 311 %parv[0] $hget(+bots,%f) $readini(%r,modulo,ident) $replace($readini(%r,modulo,host),&red,$_.net) * : $+ $readini(%r,modulo,realname)
+    k $_.serv 312 %parv[0] $hget(+bots,%f) $_conf(conex,host) : $+ $_conf(conex,info)
+    k $_.serv 307 %parv[0] $hget(+bots,%f) :Tiene el nick Registrado y Protegido
+    k $_.serv 310 %parv[0] $hget(+bots,%f) :Es un OPERador de los servicios de red
+    k $_.serv 316 %parv[0] $hget(+bots,%f) :es un roBOT oficial de la Red
+    k $_.serv 313 %parv[0] $hget(+bots,%f) :es un IRCop
+    k $_.serv 318 %parv[0] $hget(+bots,%f) :Fin del /WHOIS
+  }
+  :SIGN
+  if (($hget(+ulines,%parv[0]) || $hfind(+ulines,%parv[0],1,w).data) && $left(%parc,1) == :) { return }
+  if (%parv[0] == $_.tok(NICK)) {
+    if ($_IsULine(%parv[6])) { hadd -m +ulines %parv[1] %parv[6] | return }
+    hadd -m +nicks %parv[1] %parv[4] %parv[5] %parv[9] %parv[6] + $right($gettok(%parc,11-,32),-1) | hinc +ips %parv[5]
+    if ($hget(+ips,%parv[5]) > $_conf(clons,clons) && $_conf(clons,clons)) { _kill $_.serv %parv[1] $replace($_conf(clons,kill),&n,$_conf(clons,clons)) | return }
+    if ($_conf(modes,auto)) { 
+      var %i = 1, %c = $ifmatch | while (%i <= $len(%c)) { if ($mid(%c,%i,1) !isincs %parv[8]) { var %s = %s $+ $ifmatch } | inc %i }
+      k $iif($hget(+bots,nickserv),$ifmatch,$_.serv) $_.tok(SVS2MODE) %parv[1] %s $ctime | _umode %parv[1] %parv[8] $+ %s 
+    }
+    else { _umode %parv[1] %parv[8] }
+    if ($_conf(sock,prox_state)) { k.proxy %parv[5] %parv[1] }
+    if ($hget(+nicks,0).item > $hget(+stats,nicksmax)) { hadd +stats nicksmax $ifmatch | hsave -bo +stats conf\stats.db }
+    if ($_conf(autos,users)) { k $_.serv SVSJOIN %parv[1] $_conf(autos,users) } 
+  }
+  if (%parv[1] == $_.tok(NICK)) {
+    hadd -m +nicks %parv[2] $_.get(%parv[0]).ident $_.get(%parv[0]).ip $_.get(%parv[0]).ipv $_.get(%parv[0]).serv + $_.get(%parv[0]).realname
+    if ($hget(%parv[0])) { var %u = $hget(%parv[0],amodos) | hdel %parv[0] amodos | continue }
+    if (!$hget(%parv[0])) { var %u = $readini(tmp/nicks,tmp,%parv[0]) | remini tmp/nicks tmp %parv[0] | continue }
+    if ($hget(%parv[2])) { var %c = $+(%u,$_conf(modes,auto)) | hadd %parv[2] amodos %c | continue }
+    if (!$hget(%parv[2])) { var %c = $+(%u,$_conf(modes,auto)) | writeini -n tmp/nicks tmp %parv[2] %c | continue }
+    writeini tmp/nicks set %parv[2] 1
+    if ($hget(+nicks,0).item > $hget(+stats,nicksmax)) { hadd +stats nicksmax $ifmatch | hsave -bo +stats conf\stats.db }
+  }
+  if (%parv[1] == $_.tok(MODOS)) { 
+    if ($hget(%parv[0])) { hadd %parv[0] amodos $+($hget(%parv[0],amodos),%parv[3]) | var %t = $hget(%parv[0],modos) | continue }
+    if (!$hget(%parv[0])) { writeini -n tmp/nicks tmp %parv[0] %parv[2] | var %t = $readini(tmp/nicks,tmp,%parv[0]) | continue }
+    if ($readini(tmp/nicks,set,%parv[0])) { _umode %parv[0] %t | remini tmp/nicks set %parv[0] }
+  }
+  if (%parv[1] == $_.tok(JOIN)) {
+    var %i = 1 | while (%i <= $numtok(%parv[2],44)) {
+      var %c = $gettok(%parv[2],%i,44)
+      if ($_conf(forbid,$_.32(%c).cod)) { k $_.serv $_.tok(SVSPART) %parv[0] %c | k $iif($hget(+bots,chanserv),$ifmatch,$_.serv)) $_.tok(NOTICE) %parv[0] :Canal prohibido: $_conf(forbid,$_.32(%c)) $+ ) | inc %i | continue }
+      k.chan %parv[0] +total %c
+      .signal -n B_JOIN %parv[0] %c
+      inc %i
+    } 
+  }
+  if ($chr(46) isin %parv[0]) return
+  .signal -n $_.tok($iif($left(%parc,1) == $chr(58),%parv[1],%parv[0]))
+  .signal -n $iif($left(%parc,1) == $chr(58),%parv[1],%parv[0])
+  if (%parv[1] == $_.tok(KICK)) { k.part %parv[3] %parv[2] }
+  if (%parv[1] == $_.tok(PART)) { k.part %parv[0] %parv[2] }
+  if (%parv[1] == $_.tok(QUIT)) { k.free %parv[0] }
+}
+on 1:sockclose:ircd:{ .timerND off | .timerCD off | echo -s 12La conexión con el servidor se ha4 perdido12. | .signal -n AUTH_FAILED }
+on 1:socklisten:ircd_listen: {
+  sockaccept ircd
+}
+on 1:signal:auth_failed: {
+  sockclose link.*
+  if ($_conf(sock,retry)) {
+    inc %r_k
+    if (%r_k <= $gettok($_conf(sock,retry_values),1,32)) { .timerRECON 1 $gettok($_conf(sock,retry_values),2,32) sockopen ircd $_conf(conex,ip) $_conf(conex,port) }
+    else { var %p = $input(Se han efectuado $gettok($_conf(sock,retry_values),1,32) en $gettok($_conf(sock,retry_values),2,32) segundos y la conexión ha fallado. $crlf $crlf Compruebe su configuración e inténtelo de nuevo.,oi,Conexión fallida) }
+} }
+
+alias k.nick {
+  sockwrite -nt ircd NICK $1 1 $ctime $readini($2,modulo,ident) $_.serv $_.serv 0 : $+ $readini($2,modulo,realname)
+  k $1 UMODE2 $readini($2,modulo,modos)
+  k $1 join $readini($2,modulo,residente)
+  if ($_conf(bots,autobop)) { var %j = $numtok($readini($2,modulo,residente),44) | while (%j) { k $_.serv $_.tok(MODE) $gettok($readini($2,modulo,residente),%j,44) o $1 | dec %j } }
+  var %i = $findfile(canales\,#*,0) | while (%i) { 
+    var %c = $nopath($findfile(canales\,#*,%i))
+    if ($istok($hget(%c,bjoins),$hfind(+bots,$1).data,32)) { k $1 $_.tok(JOIN) %c | if ($_conf(bots,autobop)) { k $_.serv $_.tok(MODE) %c o $1 } }
+    dec %i
+} }
+alias k.debug { if ($_conf(debug,activo)) { k $hget(+bots,operserv) $_.tok(PRIVMSG) $_conf(debug,control) : $+ $1- } }
+alias k.free {
+  if ($_.get($1).status > 4) { hadd +stats ircops $remtok($hget(+stats,ircops),$1,32) | hsave -bo +stats conf\stats.db }
+  hdec +ips $_.get($1).ip | hdel +nicks $1 | hdel $1 amodos
+  while ($tget(nicks,$1,total,1)) { k.part $1 $ifmatch }
+}
+alias k.part {
+  k.chan $1 -total $2 | k.chan $1 -o $2 | k.chan $1 -h $2 | k.chan $1 -v $2 | k.chan $1 -q $2 
+  if (!$tget(chans,$2,total,0)) tdel chans $2
+}
+alias k.chan { 
+  if ($left($2,1) == +) { tadd chans $3 $right($2,-1) $1 $ctime | tadd nicks $1 $right($2,-1) $3 $ctime }
+  if ($left($2,1) == -) { tdel chans $3 $right($2,-1) $1 | tdel nicks $1 $right($2,-1) $3 }
+}
+alias k if ($sock(ircd)) sockwrite -nt ircd : $+ $1-
+alias r k %parv[2] $iif($_conf(bots,request) == priv,$_.tok(PRIVMSG),$_.tok(NOTICE)) %parv[0] : $+ $iif($1,$1-,$chr(160))
+alias do { if ($_conf(debug,activdebug) == 1) { k $hget(+bots,operserv) PRIVMSG $_conf(autos,operschat) : $+ $1- | da $1- } }
+alias da { if ($_conf(debug,activdebug) == 1) { k $hget(+bots,operserv) PRIVMSG $_conf(autos,admins) : $+ $1- } }
+alias e {
+  goto $1 
+  :0 | r 4 $+ $2- | halt
+  :1 | r 4ERROR: parámetros insuficientes: $2- | halt
+  :2 | r 4ERROR: sintaxis incorrecta: $2- | halt
+  :3 | r 4ERROR: este nick no está registrado. | halt
+  :4 | r 4ERROR: comando desconocido. /msg %parv[2] HELP para más información. | halt
+  :5 | r 4Acceso denegado. | halt
+  :6 | r 4ERROR: este canal no está registrado. | halt
+}
+alias _.32 {
+  if ($prop == cod) return $replace($1,$chr(92),$chr(141),$chr(47),$chr(144),$chr(124),$chr(157),$chr(58),$chr(38),$chr(42),$chr(36),$chr(63),$chr(127),$chr(34),$chr(129),$chr(62),$chr(135),$chr(60),$chr(143))
+  if ($prop == uncod) return $replace($1,$chr(141),$chr(92),$chr(144),$chr(47),$chr(157),$chr(124),$chr(38),$chr(58),$chr(36),$chr(42),$chr(127),$chr(63),$chr(129),$chr(34),$chr(135),$chr(62),$chr(143),$chr(60))
+  return $1
+}
+alias _.tok {
+  var %t = $1, %s = $asc($1)
+  if (!$istok($_conf(conex,prot),TOKEN,32)) { return $upper($1) }
+  ;var %c = PRIVMSG·WHOIS·NICK·SERVER·TOPIC·INVITE·QUIT·SQUIT·KILL·AWAY·PING·PONG·PASS·NOTICE·JOIN·PART·MODE·KICK·GNOTICE·PROTOCTL·NETINFO·UMODE2·SVSJOIN·SAJOIN·SVSPART·SVS2MODE·SVsNICK·WALLOPS·SQLINE·UNSQLINE
+  goto $iif($len(%t) == 1,%s,%t)
+  :PRIVMSG | return !
+  :WHOIS | return $chr(35)
+  :NICK | return &
+  :SERVER | return '
+  :TOPIC | return )
+  :INVITE | return *
+  :QUIT | return ,
+  :SQUIT | return -
+  :KILL | return .
+  :AWAY | return 6
+  :PING | return 8
+  :PONG | return 9
+  :PASS | return <
+  :NOTICE | return B
+  :JOIN | return C
+  :PART | return D
+  :MODE | return G
+  :KICK | return H
+  :GNOTICE | return Z
+  :PROTOCTL | return _
+  :NETINFO | return AO
+  :UMODE2 | return $chr(124)
+  :SVSJOIN | return BR
+  :SAJOIN | return AX
+  :SVSPART | return BT
+  :SVS2MODE | return v
+  :SVSNICK | return e
+  :SVSKILL | return h
+  :WALLOPS | return =
+  :SQLINE | return c
+  :UNSQLINE | return d
+  :CHGHOST | return AL
+  :VERSION | return +
+  :TKL | return BD
+  :MODOS | return $chr(124)
+
+  :33 | return PRIVMSG
+  :35 | return WHOIS
+  :38 | return NICK
+  :39 | return SERVER
+  :41 | return TOPIC
+  :42 | return INVITE
+  :44 | return QUIT
+  :45 | return SQUIT
+  :46 | return KILL
+  :54 | return AWAY
+  :56 | return PING
+  :57 | return PONG
+  :60 | return PASS
+  :66 | return NOTICE
+  :67 | return JOIN
+  :68 | return PART
+  :71 | return MODE
+  :72 | return KICK
+  :90 | return GNOTICE
+  :95 | return PROTOCTL
+  :AO | return NETINFO
+  :124 | return UMODE2
+  :BR | return SVSJOIN
+  :AX | return SAJOIN
+  :BT | return SVSPART
+  :118 | return SVS2MODE
+  :101 | return SVSNICK
+  :61 | return WALLOPS
+  :99 | return SQLINE
+  :100 | return UNSQLINE
+  :AL | return CHGHOST
+  :43 | return VERSION
+  :BD | return TKL
+  :104 | return SVSKILL
+  :%t | return $1
+  :%s | return $1
+}
+alias _.net return $_conf(conex,red)
+alias _.serv return $_conf(conex,host)
+alias _.ver return 1.0.5
+alias _.mod return $readini(modulos/$1,modulo,activo)
+alias _.bot {
+  var %p = $prop, %r = $hget(+modulos,$hfind(+modulos,* $+ $1,1,w).data) | goto %p
+  :path | return $gettok(%r,1,32)
+  :nick | return $gettok(%r,3,32)
+  :%p | return
+}
+alias _.tran { var %l = $1
+  while (%l) { var %w = $+(%w,$2) | dec %l 1 }
+  return %w
+}
+alias _IsUDB return $iif($istok($_conf(conex,udb),1,32),$ifmatch)
+alias _IsULine return $findtok(services.omega*services.omega2,$1,42)
+
+alias _.wr dll system\dlls\winrgn.dll $1-
+alias _.wrs { _.wr wrResetWindow NOT_USED | _.wr wrSelectWindow $window($1).hwnd | _.wr wrSetMode rmRect | _.wr wrSetRegion 0 0 900 600 }
+alias _.wrd { var %i = $numtok($1-,44) | while (%i) { _.wr wrDeleteRegion $gettok($gettok($1-,%i,44),1,32) $gettok($gettok($1-,%i,44),2,32) $calc($gettok($gettok($1-,%i,44),3,32)+$gettok($gettok($1-,%i,44),1,32)) $calc($gettok($gettok($1-,%i,44),4,32)+$gettok($gettok($1-,%i,44),2,32)) | dec %i } }
+alias _.mdx dll system\dlls\mdx.dll $1-
+alias _.correc return $replace($1,[,¥,],¬,$chr(124),½)
+alias _.crs dll system\dlls\cursor.dll $1-
+alias _prox return $true
+alias _.bmp return $+(system\bmps\,$1,.bmp)
+alias _.png return $+(system\bmps\,$1,.png)
+alias _conf return $readini(conf\main.conf,$1,$2-)
+
+
+alias _IsBadOs {
+  if ($regex((98|me|95),$lower($os))) return 1
+  else return 0
+}
+alias hfree {
+  var %i = 1 
+  while ($ [ $+ [ %i ] ]) {
+    if ($chr(42) isin $ifmatch) {
+      var %t = 1 | while ($hget(%t)) {
+        var %w = 1 | while ($wildtok($hget(%t),$ [ $+ [ %i ] ],%w,32)) { hfree $ifmatch | inc %w }
+        inc %t
+    } }
+    else { if ($hget($ [ $+ [ %i ] ])) { hfree $ [ $+ [ %i ] ] } }
+    inc %i
+} }
+alias hmake var %i = 1 | while ($ [ $+ [ %i ] ]) { if (!$hget($ifmatch)) { hmake $ [ $+ [ %i ] ] } | inc %i }
+alias hinc var %i = 1 | while ($ [ $+ [ %i ] ]) { if (!$hget($ifmatch)) { hmake $ [ $+ [ %i ] ] } | hinc $ [ $+ [ %i ] ] $ [ $+ [ $calc(1+%i) ] ] | inc %i 2 }
+alias hdec hdec $$1 $$2
+alias hdel if ($hfind($1,$2,1)) hdel $1 $2
+alias enchr { var %i = 1, %s = $+($chr(36),$chr(43),$chr(40)) | while (%i <= $len($1-)) { var %s = $+(%s,$chr(36),chr,$chr(40),$asc($mid($1-,%i,1)),$chr(41),$chr(44)) | inc %i } | return $+(%s,$chr(41)) }
+alias hbdd hsave -bo +bdds conf\bdd.db
+
+alias a dll system\dlls\aircdll.dll $1-
+alias tmake a OptTableAdd $1
+alias tfree a OptTableDelMatch $1
+alias tcount return $iif($1,$gettok($dll(system\dlls\aircdll.dll,OptCount,$1),2-,32),$gettok($dll(system\dlls\aircdll.dll,OptTableCount,-),2-,32))
+alias tclear a OptTableClear -
+alias tload a OptTableLoad $1-
+alias tsave a OptTableSave $1-
+alias tadd {
+  if (-TABLE* iswm $dll(system\dlls\aircdll.dll,OptSet,$1 +nc $2 $3 $4 $5)) tmake $1
+  a OptSet $1 +nc $2 $3 $4 $5
+}
+alias tinc tadd $1 $2 $3 $4 $calc($tget($1,$2,$3,$4)+1)
+alias tdec tadd $1 $2 $3 $4 $calc($tget($1,$2,$3,$4)-1)
+alias tget {
+  var %s, %p = system\dlls\aircdll.dll
+  if ($4 || $4 == 0) {
+    if (-* iswm $dll(%p,OptNetchan,$1 0)) return
+    if ($4 isnum) {
+      %s = $dll(%p,OptGetMatch,$1 +nc $replace($2,\,\\) $3 * $4)
+      if (-* !iswm %s) { return $gettok(%s,$iif($prop == data,6-,2),32) }
+    }
+    else {
+      %s = $dll(%p,OptGet,$1 +nc $replace($2,\,\\) $3 $4)
+      if (-* !iswm %s) return $gettok(%s,2-,32)
+  } }
+  else if ($3 || $3 == 0) {
+    if (-* iswm $dll(%p,OptNetchan,$1 0)) return
+    if ($3 isnum) {
+      var %i = 1, %c = 0 | while (%i <= $gettok($dll(%p,OptNetchan,$1 0),2,32)) {
+        if ($gettok($dll(%p,OptNetchan,$1 %i),3,32) != $2) { inc %i | continue }
+        inc %c
+        if (%c == $3) return $gettok($dll(%p,OptNetchan,$1 %i),4,32)
+        inc %i
+      }
+      if ($3 == 0) return %c
+    }
+    else { if ($gettok($dll(%p,OptGetMatch,$1 +nc $2 $3 * 0),2,32)) return $true }
+  }
+  else if ($2 || $2 == 0) {
+    if (-* iswm $dll(%p,OptNetchan,$1 0)) return
+    if ($2 isnum) {
+      var %i = 1, %c = 0, %s | while (%i <= $gettok($dll(%p,OptNetchan,$1 0),2,32)) {
+        if ($istok(%s,$gettok($dll(%p,OptNetchan,$1 %i),3,32),32)) { inc %i | continue }
+        inc %c | %s = $addtok(%s,$gettok($dll(%p,OptNetchan,$1 %i),3,32),32)
+        if (%c == $2) return $gettok(%s,$2,32)
+        inc %i
+      }
+      if ($2 == 0) return %c
+    }
+    else { if ($gettok($dll(%p,OptGetMatch,$1 +nc $2 * * 0),2,32)) return $true }
+  }
+  else if ($1) {
+    if (-* !iswm $dll(%p,OptGetMatch,$1 +nc * * * 0)) return $true 
+} }
+alias tdel {
+  if ($2) { var %t = $numtok($2,44) }
+  if ($3) { var %t = $numtok($3,44) }
+  if ($4) { var %t = $numtok($4,44) }
+  while (%t) {
+    if ($4) { a OptDelMatch $1 +nc $2 $3 $replace($gettok($4,%t,44),\,\\) | dec %t | continue }
+    if ($3) { a OptDelMatch $1 +nc $2 $replace($gettok($3,%t,44),\,\\) * | dec %t | continue }
+    if ($2) { a OptDelMatch $1 +nc $replace($gettok($2,%t,44),\,\\) * * | dec %t | continue }
+} }

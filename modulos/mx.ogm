@@ -1,0 +1,67 @@
+[modulo]
+version=1.0.8
+nombre=_proxy
+prefijo=mx
+serv=ScanServ
+ayuda=help\mx.h.ogm
+autor=Trocotronic
+mail=trocotronic@telefonica.net
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=PrOxY
+ident=PrOxY
+host=servicios.&red
+realname=Servicio de scan de puertos proxy.
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+ip=ip
+port=port
+set=set
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mx.privmsg | return
+  :NICK | mx.nick | return
+  :%g | return
+}
+alias mx.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mx.nick {
+  if (%parv[0] == $_.tok(NICK) && $_conf(sock,prox_state) && !$readini(conf\prox.conf,allow,%parv[5])) { 
+    var %i = $ini(conf\prox.conf,port,0), %s | while (%i) { %s = %s $ini(conf\prox.conf,port,%i) | dec %i }
+    k $readini($script,modulo,nick) $_.tok(NOTICE) %parv[1] :Tu host (12 $+ %parv[5] $+ 5) está siendo escaneado para detectar posible proxy.
+    ;Efectuando scan de puertos12 %s de la máquina12 %parv[5]
+} }
+alias mx.ip {
+  vc 5
+  if (!%parv[5]) { e 1 IP add/del ip }
+  if (%parv[4] == add) { writeini conf\prox.conf prox %parv[5] $!_PROX | _tkl + G * %parv[5] 0 IP Proxy | r IP12 %parv[5] añadida como proxy. }
+  else if (%parv[4] == del) { remini conf\prox.conf prox %parv[5] | _tkl - G * %parv[5] | r IP12 %parv[5] borrada como proxy. }
+  else { e 2 IP ADD|DEL ip }
+}
+alias mx.port {
+  vc 5
+  if (!%parv[5]) { e 1 PORT add/del puerto }
+  if (%parv[5] !isnum) { e 0 El puerto debe ser un número }
+  if (%parv[4] == add) { writeini conf\prox.conf port %parv[5] $!_PROX | r Puerto12 %parv[5] añadido como proxy. }
+  else if (%parv[4] == del) { remini conf\prox.conf port %parv[5] | r Puerto12 %parv[5] borrado como proxy. }
+  else { e 2 PORT ADD|DEL puerto }
+}
+alias mx.set {
+  vc 8
+  if (!%parv[5]) { e 1 SET opción valor }
+  if (%parv[4] == msg) { writeini conf\main.conf blocks proxy $gettok(%parc,6-,32) | r Mensaje PROXY fijado a12 $gettok(%parc,6-,32) }
+  else if (%parv[4] == time) { writeini conf\main.conf blocks proxy_t %parv[5] | r Tiempo de expulsión PROXY fijado a12 %parv[5] }
+  else { e 2 SET MSG|TIME valor }
+}

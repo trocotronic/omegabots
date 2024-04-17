@@ -1,0 +1,47 @@
+[modulo]
+version=1.0.8
+modulo=mx.ogm
+
+alias mx.help {
+  vc 5
+  var %i = 5, %s = mx.h | while ($gettok(%parc,%i,32)) { var %s = $+(%s,.,$iif($len($ifmatch) == 1,$asc($gettok(%parc,%i,32)),$gettok(%parc,%i,32))) | inc %i }
+  if (!$isalias(%s)) { r No existe ayuda para12 $iif($gettok(%s,-1,46) isnum,$chr($ifmatch),$ifmatch) | halt }
+  %s
+}
+alias mx.h {
+  r 12OmEGa BoTs v $+ $_.ver $+  - Módulo:12 $hget(+bots,scanserv)
+  r
+  r 12 $+ $hget(+bots,scanserv) es de uso exclusivo para opers, ircops, admins y roots. Su función es de puente entre la red y el proxy scan de los servicios.
+  r Todos los comandos del bot pueden ser cambiados desde el panel de control general. El scan SÓLO se desactiva desde el panel. La descarga de este módulo no implica que deje de funcionar el scan.
+  r
+  r Comandos disponibles:
+  r 12IP Gestiona las ips proxy.
+  r 12PORT Gestiona los puertos proxy.
+  if ($_.get(%parv[0]).status > 7) { r 12SET Fija las distintas opciones. }
+  r
+  r Para más información, /msg %parv[2] $upper(%parv[3]) comando
+}
+alias mx.h.ip {
+  r 12IP
+  r
+  r Gestiona las ips consideradas como proxies. Cada vez que se inicien los servicios se mandará una lista de blocks correspondientes a dichas ips para que no puedan conectarse.
+  r
+  r Comandos disponibles:
+  r 12ADD Añade una ip calificada como proxy.
+  r 12DEL Borra una ip proxy.
+  r
+  r Sintaxis:12 IP ADD|DEL ip
+}
+alias mx.h.port {
+  r 12PORT
+  r
+  r Gestiona los puertos considerados como proxies. Cada vez que se conecte un usuario se le hará un scan de puertos.
+  r si el usuario tiene un puerto de la lista abierto, será immediatamente expulsado de la red durante12 $_conf(blocks,proxy_t) segundos.
+  r Cabe mencionar que no se recomienda poner una lista con bastantes puertos, ya que consumen bastantes recursos de la máquina.
+  r
+  r Comandos disponibles:
+  r 12ADD Añade un puerto.
+  r 12DEL Borra un puerto.
+  r
+  r sintaxis:12 PORT ADD|DEL puerto
+}

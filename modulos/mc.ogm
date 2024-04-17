@@ -1,0 +1,654 @@
+[modulo]
+version=1.0.8
+nombre=_chan
+prefijo=mc
+serv=ChanServ
+archivos=
+ayuda=help\mc.h.ogm
+conf=conf\mc.conf
+autor=STeaL
+mail=jkrst_@hotmail.com
+url=http://www.rallados.net
+creditos=Estos son los créditos específicos.
+residente=#bots
+activo=1
+nick=CHaN
+ident=CHaN
+host=servicios.&red
+realname=Servicio de gestión de canales
+modos=oOaANCdhrtvwBq
+
+[comandos]
+help=help
+ayuda=help
+drop=drop
+info=info
+invite=invite
+admin=mod
+deadmin=mod
+op=mod
+deop=mod
+kick=mod
+voice=mod
+devoice=mod
+half=mod
+dehalf=mod
+ban=mod
+unban=mod
+clear=clear
+set=set
+oficial=oficial
+akick=akick
+levels=levels
+access=access
+list=list
+join=jb
+getpass=get
+sendpass=send
+suspender=susp
+liberar=susp
+forbid=forb
+unforbid=forb
+
+
+[fin]
+
+on 1:signal:*: {
+  if (!$readini($script,modulo,activo)) return
+  var %g = $signal | goto %g
+  :PRIVMSG | mc.privmsg | return
+  :MODE | mc.mode %parv[0] %parv[2] $gettok(%parc,4-,32) | return
+  :B_JOIN | mc.join $1- | return
+  :KICK | mc.kick | return
+  :NICK | mc.nick | return
+  :AUTH_OK | mc.sockop | return
+  :%g | return
+}
+alias mc.sockop { var %chanh = $+($readini($script,modulo,nick),$chr(33),$readini($script,modulo,ident),$chr(64),$replace($readini($script,modulo,host),&red,$_.net)) 
+  if (%chanh != $readini(tmp/ogm.tmp,services,chanserv)) { s.c %chanh | hbdd }
+  writeini -n tmp/ogm.tmp services chanserv %chanh
+}
+alias mc.privmsg {
+  if (%parv[2] != $readini($script,modulo,nick)) return
+  if ($readini($script,comandos,%parv[3])) { $+($readini($script,modulo,prefijo),.,$readini($script,comandos,%parv[3])) | halt } 
+  else { e 4 } 
+}
+alias mc.drop {
+  vu
+  if (!%parv[4]) { e 1 DROP #canal }
+  if (!$hget(%parv[4])) && ($_.get(%parv[0]).status < 8) { e 6 }
+  if ($_.level(%parv[0],%parv[4]) < $_.conf($script,maxreg)) { e 5 }
+  mc.drp %parv[4] | r El canal12 %parv[4] ha sido dropeado | da El canal12 %parv[4] 1ha sido dropeado por12 $+(%parv[0],1).
+}
+alias mc.drp {
+  var %i = $hfind($1,+*,0,w), %n | while (%i) { 
+    %n = $right($hfind($1,+*,%i,w),-1)
+    hdel %n $1 | h %n | dec %i 
+  }
+  if (!$_IsUDB) && ($tget(chans,$1)) { _mode $_.serv $1 -r }
+  if ($_IsUDB) { d.c $1 | hbdd }
+  .remove canales\ $+ $_.32($1).cod | hfree $1
+}
+alias mc.info {
+  if (!%parv[4]) { e 1 INFO #canal }
+  if (!$hget(%parv[4])) { e 6 }
+  r *** Información del canal12 %parv[4] ***
+  r Estado:12 $iif($hget(%parv[4],suspend),SUSPENDIDO: $ifmatch,ACTIVO)
+  r Fundador:12 $hget(%parv[4],founder)
+  if ($hget(%parv[4],privi) == oficial) { r Es un canal OFICIAL. }
+  r Descripción:12 $hget(%parv[4],desc)
+  r Registrado el:12 $asctime($hget(%parv[4],fecha))
+  if ($hget(%parv[4],entry)) { r Mensaje de bienvenida:12 $hget(%parv[4],entry) }
+  if ($hget(%parv[4],url)) { r Url:12 $ifmatch }
+  if ($hget(%parv[4],mail)) { r E-mail:12 $ifmatch }
+  if ($hget(%parv[4],modos)) { r Modos:12 + $+ $gettok($hget(%parv[4],modos),1,32)  }
+  r Candado de modos:12 $iif($hget(%parv[4],mlock),ON,OFF)
+  r Topic:12 $hget(%parv[4],topic) Retención de topic:12 $iif($hget(%parv[4],rtopic),ON,OFF) Candado de topic:12 $iif($hget(%parv[4],ktopic),ON,OFF)
+  r SecureAdmins:12 $iif($hget(%parv[4],secureadmins),ON,OFF) SecureOps:12 $iif($hget(%parv[4],secureops),ON,OFF) SecureHalfs:12 $iif($hget(%parv[4],securehalfs),ON,OFF)
+  r Canal seguro:12 $iif($hget(%parv[4],secure),ON,OFF)
+  r Último acceso:12 $asctime($hget(%parv[4],visit))
+}
+alias mc.invite {
+  vu
+  if (!%parv[4]) { e 1 INVITE #canal [nick] }
+  if (!$hget(%parv[4])) { e 6 }
+  if (!$_.level(%parv[0],%parv[4],invite)) { e 5 }
+  if (%parv[5] && !$hget(+nicks,%parv[5])) { e 0 No existe este nick }
+  if ($tget(chans,%parv[4],total,$iif(%parv[5],$ifmatch,%parv[0]))) { e 0 $iif(%parv[5],Este nick ya se encuentra en %parv[4],Ya estás en %parv[4]) }
+  k %parv[2] $_.tok(INVITE) $iif(%parv[5],$ifmatch,%parv[0]) %parv[4] | r El nick12 $iif(%parv[5],$ifmatch,%parv[0]) ha sido invitado a12 %parv[4]
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] se invita al canal }
+}
+alias mc.mod {
+  vu
+  if (!%parv[5]) { e 1 $upper(%parv[3]) #canal parámetros }
+  if (!$hget(%parv[4])) { e 6 }
+  goto %parv[3]
+  :OP | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if ($tget(chans,%parv[4],o,%s)) { inc %i | continue }
+    if (!$_.level(%s,%parv[4],autoop) && $hget(%parv[4],secureops)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] +o %s | inc %i
+  }
+  return
+  :DEOP | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if (!$tget(chans,%parv[4],o,%s)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] -o %s | inc %i 
+  } 
+  return
+  :ADMIN | if (!$_.level(%parv[0],%parv[4],admin)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if ($tget(chans,%parv[4],a,%s)) { inc %i | continue }
+    if (!$_.level(%s,%parv[4],autoadmin) && $hget(%parv[4],secureadmins)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] +a %s | inc %i
+  }
+  return
+  :DEADMIN | if (!$_.level(%parv[0],%parv[4],admin)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if (!$tget(chans,%parv[4],a,%s)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] -a %s | inc %i 
+  } 
+  return 
+  :HALF | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) {    
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if ($tget(chans,%parv[4],h,%s)) { inc %i | continue }
+    if (!$_.level(%s,%parv[4],autohalf) && $hget(%parv[4],securehalfs)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] +h %s | inc %i
+  }
+  return
+  :DEHALF | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 }
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if (!$tget(chans,%parv[4],h,%s)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] -h %s | inc %i 
+  } 
+  return
+  :VOICE | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if ($tget(chans,%parv[4],v,%s)) { inc %i | continue }
+    if (!$_.level(%s,%parv[4],autovoice)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] +v %s | inc %i
+  }
+  return
+  :DEVOICE | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$hget(+nicks,%s)) { inc %i | continue } 
+    if (!$tget(chans,%parv[4],v,%s)) { inc %i | continue }
+    _mode $readini($script,modulo,nick) %parv[4] -v %s | inc %i 
+  } 
+  return
+  :BAN | if (!$_.level(%parv[0],%parv[4],banunban)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    _mode $readini($script,modulo,nick) %parv[4] +b $_.mask($gettok(%parc,%i,32)) | inc %i
+  }
+  return
+  :UNBAN | if (!$_.level(%parv[0],%parv[4],banunban)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } | var %i = 6 | while (%i <= $numtok(%parc,32)) { 
+    var %s = $gettok(%parc,%i,32)
+    if (!$tget(chans,%parv[4],b,%s)) { inc %i | continue } 
+    _mode $readini($script,modulo,nick) %parv[4] -b %s | inc %i 
+  } 
+  return
+  :KICK | if (!$_.level(%parv[0],%parv[4],opdeop)) { e 5 } 
+  if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] hace $upper(%parv[3]) a $gettok(%parc,6-,32) } 
+  if ($tget(chans,%parv[4],total,%parv[5])) { _kick %parv[2] %parv[4] %parv[5] $iif($gettok(%parc,7-,32),$ifmatch,%parv[0]) } | return
+  :%parv[3] | e 2 ADMIN|DEADMIN|OP|DEOP|HALF|DEHALF|VOICE|DEVOICE|BAN|UNBAN|KICK #canal parámetros
+}
+alias mc.clear {
+  vu
+  if (!%parv[5]) { e 1 CLEAR #canal parametros }
+  if (!$hget(%parv[4]) && %parv[2] == $hget(+bots,chanserv)) { e 6 }
+  if (!$_.level(%parv[0],%parv[4],clear)) { e 5 }
+  goto %parv[5]
+  :users | while ($tget(chans,%parv[4],total,1)) { k %parv[2] $_.tok(KICK) %parv[4] $tget(chans,%parv[4],total,1) :Comando Clear USERS | .signal -n PART $tget(chans,%parv[4],total,1) %parv[4] | k.part $tget(chans,%parv[4],total,1) %parv[4] } | return
+  :admins | while ($tget(chans,%parv[4],a,1)) { _mode $readini($script,modulo,nick) %parv[4] -a $ifmatch } | return  
+  :ops | while ($tget(chans,%parv[4],o,1)) { _mode $readini($script,modulo,nick) %parv[4] -o $ifmatch } | return
+  :halfs | while ($tget(chans,%parv[4],h,1)) { _mode $readini($script,modulo,nick) %parv[4] -h $ifmatch } | return
+  :voices | while ($tget(chans,%parv[4],v,1)) { _mode $readini($script,modulo,nick) %parv[4] -v $ifmatch } | return
+  :regs | if ($_.level(%parv[0],%parv[4]) < $_.conf($script,maxreg)) { e 5 } | var %i = $hfind(%parv[4],+*,0,w) | while (%i) { hdel $right($hfind(%parv[4],+*,%i,w),-1) %parv[4] | h $right($hfind(%parv[4],+*,%i,w),-1) | dec %i } 
+  while ($hfind(%parv[4],+*,1,w)) { hdel %parv[4] $ifmatch } | r Todos los registros borrados. | h %parv[4] | return
+  :modos | _mode $readini($script,modulo,nick) %parv[4] $+(-,$tget(chans,%parv[4],modes,gen),$iif(%parv[2] == $hget(+bots,chanserv),+ntr,+nt)) | set %mu nt | r Todos los modos resteados a 12+nt. | h %parv[4] | hadd %parv[4] modos +nt | m.c | timer 1 4 unset %mu | return
+  :levels | hadd %parv[4] set 500 | hadd %parv[4] acc-edit %parv[4] 450 | hadd %parv[4] acc-list 1 | hadd %parv[4] autoop 300 | hadd %parv[4] autohalf 200 | hadd %parv[4] autovoice 100 
+  hadd %parv[4] opdeop 300 | hadd %parv[4] clear 450 | hadd %parv[4] banunban 300 | hadd %parv[4] akick 450 | hadd %parv[4] invite 300 | hadd %parv[4] join 300 | hadd %parv[4] revenge 400 | hadd %parv[4] memos 400 | r Todos los levels reseteados. | h %parv[4] | return
+  :bans | while ($tget(chans,%parv[4],b,1)) { _mode $readini($script,modulo,nick) %parv[4] -b $ifmatch } | r Todos los bans elminiados. | return
+  :kill | vc 5 | while ($tget(chans,%parv[4],total,1)) { _kill %parv[2] $tget(chans,%parv[4],total,1) KILL users de %parv[4] } | return
+  :gline | vc 5 | if (!%parv[6] || %parv[6] !isnum) { e 1 CLEAR #canal GLINE tiempo } | var %i = 1 | while ($tget(chans,%parv[4],total,%i)) { _tkl + G $_.get($ifmatch).ident $_.get($ifmatch).ip %parv[6] GLINE users de %parv[4] | inc %i } | return
+  :%parv[5] | e 2 CLEAR #canal users|admins|ops|halfs|voices|regs|modos|levels|bans
+}
+alias mc.set {
+  if (!%parv[5]) { e 1 SET #canal opcion [valor] }
+  if (!$hget(%parv[4])) { e 6 }
+  if (!$_.level(%parv[0],%parv[4],set))  { e 5 }
+  goto %parv[5]
+  :desc | if ($gettok(%parc,7-,32)) { hadd %parv[4] desc $ifmatch | r Descripción fijada a12 $ifmatch } | else { hdel %parv[4] desc | r Descripción eliminada. } | h %parv[4] | return
+  :url | if (%parv[6]) { hadd %parv[4] url %parv[6] | r URL fijada a12 $ifmatch } | else { hdel %parv[4] url | r URL eliminada. } |  h %parv[4] | return
+  :email | if (%parv[6] && $regex(%parv[6],$_.conf($script,regmail))) { hadd %parv[4] mail %parv[6] | r E-mail fijado a12 %parv[6] } | else { hdel %parv[4] mail | r E-mail eliminado. } |  h %parv[4] | return
+  :topic 
+  if ($gettok(%parc,7-,32)) {
+    hadd %parv[4] topic $gettok(%parc,7-,32) 
+  h %parv[4] | r Topic de12 %parv[4] fijado a12 $gettok(%parc,7-,32) | k $hget(+bots,chanserv) $_.tok(TOPIC) %parv[4] : $+ $gettok(%parc,7-,32) }
+  else { hdel %parv[4] topic | r Topic del canal12 %parv[4] eliminado. } 
+  return 
+  :entry | if ($gettok(%parc,7-,32)) { hadd %parv[4] entry $ifmatch | r Mensaje de bienvenida fijado a12 $ifmatch } | else { hdel %parv[4] entry | r Mensaje de bienvenida eliminado. } |  h %parv[4] | return
+  :modos
+  if (%parv[6]) {
+    var %i = 1, %m | while ($mid($_.removecs(%parv[6],+-),%i,1)) { 
+      var %m = $ifmatch
+      ;echo -s %m
+      if (%m !isincs %_chanmodes) { var %s = %s $+ %m }
+      inc %i
+    }
+    if (%s) { e 0 Los modos %s no existen en esta red. }
+    if ($_conf(modes,chans)) { 
+      var %i = $len($_.mode(%parv[6]).u) | while (%i) { if ($mid($_.mode(%parv[6]).u,%i,1) isincs $_conf(modes,chans)) { var %s = %s $+ $ifmatch } | dec %i }
+      if (%s) { e 0 Los modos %s no están permitidos. }
+    }
+    if (%s) { e 0 Los modos %s no existen en esta red. }
+    var %i = $len(%parv[6]) | while (%i) { if ($poscs(%parv[6],$mid(%parv[6],%i,1),0) > 1) { e 0 El modo $mid(%parv[6],%i,1) se encuentra repetido. } | dec %i }
+    var %i = $len(%parv[6]), %n = OohvbeqAar | while (%i) { if ($mid(%parv[6],%i,1) isincs %n) { e 0 No puedes especificar los modos %n } | dec %i }
+    if (L isincs $_.mode(%parv[6]).u && l !isincs $_.mode(%parv[6]).u) { e 0 Si especificas +L, debes especificar +l. }
+    if ($poscs($_.mode(%parv[6]).u,L) < $poscs($_.mode(%parv[6]).u,l)) { e 0 Debes especificar el +l antes de +L (+lL limite #canal2) }
+    if (s isincs $_.mode(%parv[6]).u && p isincs $_.mode(%parv[6]).u) { e 0 Los modos +s y +p no pueden usarse a la vez en el lado positivo. }
+    if (k isincs $_.mode(%parv[6]).u && $_.mode($gettok(%parc,7-,32),k,1).u !isalnum) { e 0 La contraseña debe ser un número o palabra. }
+    if (l isincs $_.mode(%parv[6]).u && $_.mode($gettok(%parc,7-,32),l,1).u !isnum) { e 0 El límite debe ser un número. }
+    if (L isincs $_.mode(%parv[6]).u && $left($_.mode($gettok(%parc,7-,32),L,1).u,1) != $chr(35)) { e 0 Canal +L inválido. }
+    if (f isincs $_.mode(%parv[6]).u && !$regex($_.mode($gettok(%parc,7-,32),f,1).u,^(\**)[0-9]+:[0-9]+$)) { e 0 El flood debe especificarse en [*]lines:segs }
+    var %m2 = $+($chr(43),$gettok($hget(%parv[4],modos),1,32),%parv[6],$chr(32),$gettok($hget(%parv[4],modos),2-,32),$chr(32),$gettok(%parc,8-,32))
+    var %m5 = $gettok(%m2,1,32)    
+    var %len = 1
+    while ($mid($_.mode(%m5).u,%len,1)) {
+      if ($mid($_.mode(%m5).u,%len,1) !isincs $_.mode(%m5).d) { set %m3 $+(%m3,$mid($_.mode(%m5).u,%len,1)) }
+      inc %len 1
+    }
+    var %m = $+($chr(43),%m3)
+    unset %m3
+    var %len = 1
+    while ($mid($_.mode(%m).u,%len,1)) {
+      if ($mid($_.mode(%m).u,%len,1) isincs klLIf) { set %param $+(%param,$chr(32),$_.mode(%m2,$mid($_.mode(%m).u,%len,1)).u) }
+      inc %len 1 
+    }
+    var %m4 = $_.mode(%m).u %param
+    var %len = 1
+    while ($mid(%m4,%len,1)) {
+      if ($mid(%m4,%len,1) isincs klLI) { set %par $+($gettok(%par,1,32),$mid(%m4,%len,1)) $gettok(%par,2-,32) $_.mode(%m4,$mid(%m4,%len,1)).u }
+      inc %len 1
+    }
+    unset %param
+    var %len = 1
+    while ($mid(%par,%len,1)) { set %param $+(%param,$_.mode($+($chr(43),%m4),$mid(%par,%len,1)).u,$chr(32)) | inc %len 1 }
+    set %par $+(%par,$chr(32),%param)
+    unset %param
+    ;  if ($_.level(%parv[0],%parv[4]) < $_.conf($script,maxreg)) { e 5 }
+    if (k isincs $_.mode(%parv[6]).d) { _mode $readini($script,modulo,nick) %parv[4] -k $_.mode($+($chr(43),$hget(%parv[4],modos)),k).u }
+    hadd %parv[4] modos %m4 | hadd %parv[4] modpar %par
+    if (%m4) { r Los modos actuales son12 + $+ %m4 }
+    r Modos del canal12 %parv[4] 1fijados a12 $gettok(%parc,7-,32)
+    _mode $readini($script,modulo,nick) %parv[4] $gettok(%parc,7-,32) | unset %par | h %parv[4]
+  }
+  else { _mode $readini($script,modulo,nick) %parv[4] $chr(45) $+ $gettok($hget(%parv[4],modos),1,32)
+    hdel %parv[4] modos
+  r Modos del canal12 %parv[4] 1eliminados. | h %parv[4] }
+  return
+  :pass
+  if (!%parv[6]) { e 1 SET #canal pass clave }
+  if ($hget(%parv[4],founder) != %parv[0]) || (!$hget(%parv[0],Oper)) { e 5 }
+  else { 
+    if ($hget(%parv[4],pass) != %parv[6]) && ($_IsUDB) { pass.c %parv[4] %parv[6] }
+  hadd %parv[4] pass %parv[6] | r Clave fijada12 %parv[6] | h %parv[4] | return }
+  :founder
+  if (!%parv[6]) { e 1 SET #canal founder nick }
+  if (!$hget(%parv[6])) { e 3 }
+  if ($hget(%parv[4],founder) != %parv[0]) && ($hget(%parv[0],oper) != Admin) && ($hget(%parv[0],oper) != Root) { e 5 }
+  if ($hget(%parv[4],founder) != %parv[6]) && ($_IsUDB) { f.c %parv[4] %parv[6] }
+  hdel $hget(%parv[4],founder) %parv[4] | h $hget(%parv[4],founder) | hadd %parv[4] founder %parv[6]
+  hadd %parv[6] %parv[4] $_.conf($script,maxreg) | r Fundador de12 %parv[4] cambiado a12 %parv[6] | h %parv[6] | h %parv[4] | return
+  :levels
+  if (!%parv[7] && %parv[7] != 0) { e 1 SET #canal levels nivel valor }
+  if (%parv[7] !isnum || %parv[7] < -1 || %parv[7] > $_.conf($script,maxreg)) { e 0 El valor debe ser un número comprendido entre -1 y $_.conf($script,maxreg) }
+  if (!$istok(set*acc-edit*acc-list*admin*autohalf*autoop*autovoice*opdeop*banunban*clear*akick*invite*join*revenge*memos,%parv[6],42)) { e 2 SET #canal levels set|acc-edit|acc-list|admin|autoadmin|autoop|autohalf|autovoice|opdeop|banunban|clear|akick|invite|join|revenge valor }
+  hadd %parv[4] %parv[6] %parv[7] | r Level para12 $upper(%parv[6]) fijado a12 %parv[7] | h %parv[4] | return
+  :rtopic | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal rtopic on/off } | hadd %parv[4] rtopic $iif(%parv[6] == on,1,0) | if (!$hget(%parv[4],rtopic)) { t.c.c %parv[4] } | if ($hget(%parv[4],rtopic)) { t.c %parv[4] $hget(%parv[4],topic) } | r Valor retención de topic fijado a12 %parv[6] | h %parv[4] | return
+  :ktopic | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal ktopic on/off } | hadd %parv[4] ktopic $iif(%parv[6] == on,1,0) | r Valor candado de topic fijado a12 %parv[6] | h %parv[4] | return
+  :mlock | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal mlock on/off } | hadd %parv[4] mlock $iif(%parv[6] == on,1,0) | r Valor candado de modos fijado a12 %parv[6] | h %parv[4] | return
+  :hide | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal hide on/off } | hadd %parv[4] hide $iif(%parv[6] == on,1,0) | r Valor hide fijado a12 %parv[6] | h %parv[4] | return
+  :secure | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal secure on/off } | hadd %parv[4] secure $iif(%parv[6] == on,1,0) | r Valor canal seguro fijado a12 %parv[6] | h %parv[4] | return
+  :secureadmins | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal secureadmins on/off } | hadd %parv[4] secureadmins $iif(%parv[6] == on,1,0) | r Valor secureadmins fijado a12 %parv[6] | h %parv[4] | return
+  :secureops | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal secureops on/off } | hadd %parv[4] secureops $iif(%parv[6] == on,1,0) | r Valor secureops fijado a12 %parv[6] | h %parv[4] | return
+  :securehalfs | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal securehalfs on/off } | hadd %parv[4] securehalfs $iif(%parv[6] == on,1,0) | r Valor securehalfs fijado a12 %parv[6] | h %parv[4] | return
+  :debug | set %parv[6] $upper(%parv[6]) | if (!$regex(%parv[6],^(ON|OFF)$)) { e 2 SET #canal debug on/off } | hadd %parv[4] debug $iif(%parv[6] == on,1,0) | r Valor debug fijado a12 %parv[6] | h %parv[4] | return
+  :%parv[5] | e 2 Opción incorrecta.
+}
+alias mc.akick {
+  if (!%parv[5]) { e 1 AKICK #canal add|del|list }
+  if (!$hget(%parv[4])) { e 6 }
+  if (!$_.level(%parv[0],%parv[4],akick)) { e 5 }
+  if (%parv[5] == add) {
+    if (!%parv[6]) { e 1 AKICK #canal add nick|mascara [motivo] }
+    if ($hfind(%parv[4],!*,0,w) == $_.conf($script,maxakick)) { e 0 No se aceptan más entradas. }
+    hadd %parv[4] ! $+ $_.mask(%parv[6]) $+($iif(%parv[7],$gettok(%parc,8-,32),No eres bienvenid@.),$chr(230),%parv[0])
+    r Entrada12 %parv[6] añadida a la lista akick de12 %parv[4]
+    if ($tget(chans,%parv[4],total,%parv[6])) { _kick %parv[4] %parv[6] $iif(%parv[7],$gettok(%parc,8-,32),No eres bienvenid@.) }
+  }
+  else if (%parv[5] == del) {
+    if (!%parv[6]) { e 1 AKICK #canal del nick|mascara }
+    if (!$hget(%parv[4],! $+ $_.mask(%parv[6]))) { e 0 Esta máscara no existe. }
+    hdel %parv[4] ! $+ $_.mask(%parv[6]) | r Entrada12 %parv[6] quitada de la lista de akick de12 %parv[4]
+  }
+  else if (%parv[5] == list) {
+    r ***Lista akick de12 %parv[4] *** | var %i = 1 | while ($hfind(%parv[4],!*,%i,w)) { r Máscara:12 $right($ifmatch,-1) autor:12 $gettok($hget(%parv[4],$ifmatch),2,230) $+ : $gettok($hget(%parv[4],$ifmatch),1,230) | inc %i }
+  }
+}
+alias mc.oficial {
+  vc 7
+  if (!%parv[5]) { e 2 OFICIAL <add|del> <#canal> | goto bye }
+  if (!$hget(%parv[5])) { e 6 | goto bye }
+  if (%parv[4] == add) {
+    if ($hget(%parv[5],privi)) { e 0 El canal ya es oficial. | goto bye }  
+    hadd %parv[5] privi oficial | r El canal12 %parv[5] 1es ahora un canal OFICIAL. | do $+(12,%parv[0]) 1hace de12 %parv[5] 1un canal OFICIAL.
+  }
+  if (%parv[4] == del) {
+    if (!$hget(%parv[5])) { e 6 | goto bye } 
+    if (!$hget(%parv[5],privi)) { e 0 El canal no es oficial. | goto bye } 
+    hdel %parv[5] privi | r El canal12 %parv[5] 1ha dejado de ser un canal OFICIAL. | do $+(12,%parv[5]) 1deja de ser un canal oficial. Acción realizada por12 $+(12,%parv[0],1.)  
+  }
+  :bye 
+}
+
+alias mc.levels {
+  if (!%parv[4]) { e 1 LEVELS #canal }
+  if (!$hget(%parv[4])) { e 6 }
+  r *** Niveles de acceso a12 %parv[4] ***
+  r Fundador:12 $_.conf($script,maxreg)
+  r Fijar opciones:12 $hget(%parv[4],set)
+  r Editar la lista de accesos:12 $hget(%parv[4],acc-edit)
+  r Acceder a la lista de accesos:12 $hget(%parv[4],acc-list)
+  r Autoadmin:12 $hget(%parv[4],autoadmin)
+  r Autoop:12 $hget(%parv[4],autoop)
+  r Autohalf:12 $hget(%parv[4],autohalf)
+  r Autovoice:12 $hget(%parv[4],autovoice)
+  r Admin, deadmin:12 $hget(%parv[4],admin)
+  r Op, deop, half, dehalf, voice, devoice, kick:12 $hget(%parv[4],opdeop)
+  r Ban, unban:12 $hget(%parv[4],banunban)
+  r Clear:12 $hget(%parv[4],clear)
+  r Akick:12 $hget(%parv[4],akick)
+  r Invite:12 $hget(%parv[4],invite)
+  r Join:12 $hget(%parv[4],join)
+  r Revenge:12 $hget(%parv[4],revenge)
+  r Escribir y leer memos:12 $hget(%parv[4],memos)
+  r *** Fin de lista ***
+}
+alias mc.access {
+  if (!%parv[5]) { e 1 ACCESS #canal add|del|list parámetros }
+  if (!$hget(%parv[4])) { e 6 }
+  if (%parv[5] == add) {
+    if (!%parv[7]) { e 1 ACCESS #canal add nick nivel }
+    if (!$hget(%parv[6])) { e 3 }
+    if (!$_.level(%parv[0],%parv[4],acc-edit)) { e 5 }
+    if (%parv[6] == $hget(%parv[4],founder)) { e 0 El founder no puede modificarse su nivel }
+    if ($_.level(%parv[0],%parv[4]) <= $_.level(%parv[6],%parv[4]) && $_.level(%parv[0],%parv[4]) != $_.conf($script,maxreg)) { e 0 No puedes modificar el acceso de nicks con igual o mayor nivel al tuyo. }
+    if (%parv[7] >= $_.level(%parv[0],%parv[4])) { e 0 No puedes especificar un nivel igual o superior al tuyo. }
+    if (%parv[7] !isnum || %parv[7] < -1 || %parv[7] > $_.conf($script,maxreg)) { e 0 El nivel solo puede ser un número entre -1 y $_.conf($script,maxreg) }
+    hadd %parv[4] + $+ %parv[6] %parv[7] 
+    hadd %parv[6] %parv[4] %parv[7] 
+    h %parv[6] 
+    h %parv[4]
+    r Se ha añadido a12 %parv[6] en12 %parv[4] con nivel12 %parv[7] 
+    if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] añade a %parv[6] con nivel %parv[7] }
+  }
+  if (%parv[5] == del) {
+    if (!%parv[6]) { e 1 ACCESS #canal del nick }
+    if (!$hget(%parv[6])) { e 3 }
+    if (!$_.level(%parv[0],%parv[4],acc-edit)) { e 5 }
+    if ($_.level(%parv[0],%parv[4]) <= $_.level(%parv[6],%parv[4]) && %parv[0] != %parv[6] && $_.level(%parv[0],%parv[4]) != $_.conf($script,maxreg)) { e 0 No puedes quitar el acceso de nicks con igual o mayor nivel al tuyo (a execepción de ti mismo). }
+    if (%parv[6] == $hget(%parv[4],founder)) { e 0 El founder no puede quitarse su nivel }
+    hdel %parv[4] + $+ %parv[6] | hdel %parv[6] %parv[4] | h %parv[4] | h %parv[6]
+    r Se ha borrado a12 %parv[6] de %parv[4]
+    if ($hget(%parv[4],debug)) { k %parv[2] $_.tok(NOTICE) %parv[4] : $+ %parv[0] quita a %parv[6] de %parv[4] }
+  }
+  if (%parv[5] == list) {
+    if (!$_.level(%parv[0],%parv[4],acc-list) && $_.level(%parv[0],%parv[4],acc-list) != 0) { e 5 }
+    r ***Lista de accesos de12 %parv[4] ***
+    var %i = 1 | while ($hfind(%parv[4],+*,%i,w)) { r Nick:12 $right($ifmatch,-1) nivel:12 $hget(%parv[4],$ifmatch) | inc %i }
+    r Total:12 $calc(%i - 1)
+} }
+alias mc.list {
+  if (!%parv[4]) { e 1 LIST patrón }
+  r ***Lista de canales registrados que responden al patrón12 %parv[4] $+ *** | var %i = 1, %j = 0 | while ($findfile(canales,%parv[4],%i) && %i <= $_.conf($script,listflood)) { if ($hget($nopath($findfile(canales\,%parv[4],%i)),hide)) { inc %i | continue } | r Canal:12 $nopath($findfile(canales\,%parv[4],%i)) | inc %i | inc %j }
+  r Resultado:12 %j canales de12 $findfile(canales\,%parv[4],0)
+}
+alias mc.jb {
+  if (!%parv[4]) { e 1 JOIN #canal [bots] }
+  if (!$hget(%parv[4])) { e 6 }
+  if (!$_.level(%parv[0],%parv[4],join)) { e 5 }
+  var %i = 6 | while ($gettok(%parc,%i,32)) { if (!$hfind(+bots,$ifmatch).data) { e 0 $gettok(%parc,%i,32) no es un bot de servicios. } | inc %i }
+  var %i = $hget(+bots,0).item | while (%i) { if ($hget(+residente,$hget(+bots,%i).item)) { dec %i | continue } | k $hget(+bots,%i).data $_.tok(PART) %parv[4] :Cambiando bots del canal. | dec %i }
+  hdel %parv[4] bjoins
+  var %i = 6 | while ($gettok(%parc,%i,32)) { hadd %parv[4] bjoins $addtok($hget(%parv[4],bjoins),$hfind(+bots,$ifmatch).data,32) |  k $ifmatch $_.tok(JOIN) %parv[4] | if ($_conf(bots,autobop) && !$_.conf($_.bot($gettok(%parc,%i,32)).path,noop)) { k $hget(+bots,chanserv) $_.tok(MODE) %parv[4] h $gettok(%parc,%i,32) } | inc %i }
+  if (%parv[5]) { r Bots fijados para12 %parv[4] en12 $gettok(%parc,6-,32) }
+  else { hdel %parv[4] bjoins | r Bots del canal12 %parv[4] eliminados. }
+}
+alias mc.get { vc 5 | if (!%parv[4]) { e 1 GETPASS #canal } | if (!$hget(%parv[4])) { e 6  } | r La clave de12 %parv[4] es12 $hget(%parv[4],pass) }
+alias mc.send {
+  vc 5
+  if (!%parv[4]) { e 1 SENDPASS #canal }
+  if (!$hget(%parv[4])) { e 6 }
+  mail $hget($hget(%parv[4],founder),mail) $+(Recordatorio de la clave para el canal: %parv[4],$chr(1),La clave del canal %parv[4] es: $hget(%parv[4],pass),$crlf,$crlf,Gracias por utilizar los servicios de $_.net)
+  r Clave enviada al e-mail del founder de12 $+(%parv[4],1). El e-mail es:12 $+($hget($hget(%parv[4],founder),mail),1).
+}
+alias mc.susp {
+  vc 5 
+  if (!%parv[4]) { e 1 $upper(%parv[3]) #canal }
+  if (!$hget(%parv[4])) { e 6 }
+  if (!%parv[5] && %parv[3] == suspender) { e 2 SUSPENDER #canal motivo }
+  if (%parv[5]) { hadd %parv[4] suspend $gettok(%parc,6-,32) 
+  sus.c %parv[4] $gettok(%parc,6-,32) }
+  if (%parv[3] == liberar) { hdel %parv[4] suspend 
+    lib.c %parv[4]
+  }
+  h %parv[4] | r Canal12 %parv[4]  $+ $iif(%parv[3] == liberar,liberado,suspendido)
+}
+alias mc.forb {
+  vc 5
+  if (!%parv[4]) { e 1 $upper(%parv[3]) #canal [motivo] }
+  if (!%parv[5] && %parv[3] == forbid) { e 2 FORBID #canal motivo }
+  if (%parv[5]) { writeini conf\main.conf forbid %parv[4] $gettok(%parc,6-,32) 
+
+    for.c %parv[4] $gettok(%parc,6-,32)
+  }
+  if (%parv[3] == unforbid) { remini conf\main.conf forbid $_.32(%parv[4]).cod 
+    unfor.c %parv[4]
+  }
+  r Canal12 %parv[4]  $+ $iif(%parv[3] == unforbid,permitido,prohibido)
+}
+alias _.level {
+  var %l = $hget($2,+ $+ $1), %m = $_.conf($script,maxreg) | if (!%l) { %l = $iif($_.get($1).status,0,-1) }
+  if ($_.get($1).status > 3) { %l = %m }
+  if ($tget(chans,$2,q,$1)) { %l = %m }
+  if ($_.get($1).status == 3 && $1 == $hget($2,founder)) { %l = %m }
+  if ($_.get($1).status < 3) { %l = $iif($_.get($1).status,0,-1) }
+  if (%l < $hget($2,$3)) return 
+  return %l
+}
+alias _.mask {
+  if ($chr(46) !isin $1 && $chr(64) !isin $1) return $1 $+ !*@*
+  if ($chr(46) isin $1 && $chr(64) !isin $1) return *!*@ $+ $1
+  if ($chr(64) isin $1 && $chr(33) isin $1) return $1
+  if ($chr(64) isin $1 && $chr(33) !isin $1) return *! $+ $1
+}
+alias _mode { 
+  var %u = $_.mode($3-).u, %d = $_.mode($3-).d, %i = $len(%u) | while (%i) { if ($mid(%u,%i,1) !isincs $tget(chans,$2,modes,gen)) { var %s = %s $+ $ifmatch } | dec %i }
+  tadd chans $2 modes gen $+($_.removecs($tget(chans,$2,modes,gen),$_.mode($3-).d),%s)
+  if ($_.mode($3-,k,1).u) { tadd chans $2 modes clav $ifmatch }
+  if ($_.mode($3-,f,1).u) { tadd chans $2 modes flood $ifmatch }
+  if ($_.mode($3-,l,1).u) { tadd chans $2 modes lim $ifmatch } 
+  if ($_.mode($3-,L,1).u) { tadd chans $2 modes link } 
+  if (a isincs %u) { k.chan $4 +a $2 }
+  if (a isincs %d) { k.chan $4 -a $2 }
+  if (o isincs %u) { k.chan $4 +o $2 }
+  if (o isincs %d) { k.chan $4 -o $2 }
+  if (h isincs %u) { k.chan $4 +h $2 }
+  if (h isincs %d) { k.chan $4 -h $2 }
+  if (v isincs %u) { k.chan $4 +v $2 }
+  if (v isincs %d) { k.chan $4 -v $2 }
+  if (q isincs %u) { k.chan $4 +q $2 }
+  if (q isincs %d) { k.chan $4 -q $2 }
+  if (b isincs %u) { tadd chans $2 b $4 $ctime }
+  if (b isincs %d) { tdel chans $2 b $4 }
+  k $1 $_.tok(MODE) $2-
+}
+alias mc.nick {
+  var %i = 1 | while ($tget(nicks,%parv[0],total,%i)) {
+    var %c = $ifmatch
+    if ($tget(chans,%c,total,%parv[0])) { k.chan %parv[2] +total %c | tdel chans %c total %parv[0] }
+    if ($tget(chans,%c,a,%parv[0])) { k.chan %parv[2] +a %c | tdel chans %c a %parv[0] }   
+    if ($tget(chans,%c,o,%parv[0])) { k.chan %parv[2] +o %c | tdel chans %c o %parv[0] }
+    if ($tget(chans,%c,h,%parv[0])) { k.chan %parv[2] +h %c | tdel chans %c h %parv[0] }
+    if ($tget(chans,%c,v,%parv[0])) { k.chan %parv[2] +v %c | tdel chans %c v %parv[0] }
+    if ($tget(chans,%c,q,%parv[0])) { k.chan %parv[2] +q %c | tdel chans %c q %parv[0] }
+    inc %i
+  }
+  tdel nicks %parv[0]
+}
+alias mc.mode {
+  tadd chans $2 modes gen $+($_.removecs($tget(chans,$2,modes,gen),$_.mode($3-).d),$_.mode($3-).u) 
+  if ($hget($2,mlock)) {
+    var %o = 1 | while ($mid($3,%o,1)) {
+      if ($mid($3,%o,1) !isincs $+(r,$chr(43),$chr(45),$gettok($hget($2,modos),1,32))) { var %u = $+(%u,$mid($3,%o,1)) 
+      }
+    inc %o 1 }
+    _mode $readini($script,modulo,nick) $2 $chr(45) $+ %u
+    _mode $readini($script,modulo,nick) $2 $removecs($hget($2,modos),k)
+    if (k isincs $_.mode($3).u && k !isincs $hget($2,modos)) { _mode $readini($script,modulo,nick) $2 -k $_.mode($3-,k,1).u }
+    if (k isincs $_.mode($3).d && k isincs $hget($2,modos)) { _mode $readini($script,modulo,nick) $2 +k $_.mode($+($chr(43),$hget($2,modos)),k).u }
+    if (l isincs $3 && l isincs $hget($2,modos)) { _mode $readini($script,modulo,nick) $2 +l $_.mode($+($chr(43),$hget($2,modos)),l).u }
+  }
+  if ($hget($2,founder) && !$hget($2,mlock)) { mc.chg.mod $2 $3- }
+  if ($_conf(modes,chans)) { 
+    var %i = $len($_.mode($3).u) | while (%i) { if ($mid($_.mode($3).u,%i,1) isincs $_conf(modes,chans)) { var %s = %s $+ $ifmatch } | dec %i }
+    if (%s) { _mode $readini($script,modulo,nick) $2 - $+ %s | k $readini($script,modulo,nick) $_.tok(NOTICE) $1 :Los modos12 %s no están permitidos. }
+  }
+  var %i = 1 | while ($_.mode($3-,a,%i).u) { k.chan $ifmatch +a $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,o,%i).u) { k.chan $ifmatch +o $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,h,%i).u) { k.chan $ifmatch +h $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,v,%i).u) { k.chan $ifmatch +v $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,q,%i).u) { k.chan $ifmatch +q $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,b,%i).u) { 
+    var %b = $ifmatch
+    if ($ulist(%b) && $_conf(bots,antiban)) { _mode $_.serv $2 -b %b | inc %i | continue }
+    tadd chans $2 b %b $ctime | inc %i 
+  }
+  var %i = 1 | while ($_.mode($3-,a,%i).d) { k.chan $ifmatch -a $2 | inc %i }  
+  var %i = 1 | while ($_.mode($3-,o,%i).d) { 
+    var %o = $ifmatch
+    if ($hfind(+bots,%o).data && $_conf(bots,antideop)) { k $_.serv $_.tok(MODE) $2 o %o }
+    k.chan %o -o $2
+    inc %i
+  }
+  var %i = 1 | while ($_.mode($3-,h,%i).d) { k.chan $ifmatch -h $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,v,%i).d) { k.chan $ifmatch -v $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,q,%i).d) { k.chan $ifmatch -q $2 | inc %i }
+  var %i = 1 | while ($_.mode($3-,b,%i).d) { tdel chans $2 b $ifmatch | inc %i }
+  var %i = 1 | while ($_.mode($3-,q,%i).u) { if ($_.get($ifmatch).status < 3) { _mode $readini($script,modulo,nick) $2 -q $_.mode($3-,q,%i).u } | inc %i }
+  if ($hget($2,secureadmins)) {
+    var %i = 1, %m | while ($_.mode($3-,a,%i).u) { %m = $_.level($ifmatch,$2,autoadmin) | if (!%m && %m != 0) { _mode $readini($script,modulo,nick) $2 -a $_.mode($3-,a,%i).u } | inc %i }
+  }   
+  if ($hget($2,secureops)) {
+    var %i = 1, %m | while ($_.mode($3-,o,%i).u) { %m = $_.level($ifmatch,$2,autoop) | if (!%m && %m != 0) { _mode $readini($script,modulo,nick) $2 -o $_.mode($3-,o,%i).u } | inc %i }
+  }
+  if ($hget($2,securehalfs)) {
+    var %i = 1, %m | while ($_.mode($3-,h,%i).u) { %m = $_.level($ifmatch,$2,autohalf) | if (!%m && %m != 0) { _mode $readini($script,modulo,nick) $2 -h $_.mode($3-,h,%i).u } | inc %i }
+} }
+
+
+alias mc.chg.mod {
+   if ($_conf(modes,chans)) { 
+    var %i = $len($_.mode($2).u) | while (%i) { if ($mid($_.mode($2).u,%i,1) isincs $_conf(modes,chans)) { var %s = %s $+ $ifmatch } | dec %i }
+  }
+  var %m2 = $+($chr(43),$gettok($hget($1,modos),1,32),$2,$chr(32),$gettok($hget($1,modos),2-,32),$chr(32),$3-)
+  var %m5 = $gettok(%m2,1,32)    
+  var %len = 1
+  while ($mid($_.mode(%m5).u,%len,1)) {
+    if (($mid($_.mode(%m5).u,%len,1) !isincs $_.mode(%m5).d) && ($mid($_.mode(%m5).u,%len,1) !isincs orqvhaOA))  { set %m3 $+(%m3,$mid($_.mode(%m5).u,%len,1)) }
+    if ($mid($_.mode(%m5).u,%len,1) isincs OA) { var %u = %u $+ $mid($_.mode(%m5).u,%len,1) }
+    inc %len 1
+  }
+  _mode $readini($script,modulo,nick) $1 $chr(45) $+ %u
+  var %m = $+($chr(43),%m3)
+  unset %m3
+  var %len = 1
+  while ($mid($_.mode(%m).u,%len,1)) {
+    if ($mid($_.mode(%m).u,%len,1) isincs klLIfe) { set %param $+(%param,$chr(32),$_.mode(%m2,$mid($_.mode(%m).u,%len,1)).u) }
+    inc %len 1 
+  }
+  var %m4 = $_.mode(%m).u %param
+  var %len = 1
+  while ($mid(%m4,%len,1)) {
+    if ($mid(%m4,%len,1) isincs klLIe) { set %par $+($gettok(%par,1,32),$mid(%m4,%len,1)) $gettok(%par,2-,32) $_.mode(%m4,$mid(%m4,%len,1)).u }
+    inc %len 1
+  }
+  unset %param
+  var %len = 1
+  while ($mid(%par,%len,1)) { set %param $+(%param,$_.mode($+($chr(43),%m4),$mid(%par,%len,1)).u,$chr(32)) | inc %len 1 }
+
+  set %par $+(%par,$chr(32),%param)
+  unset %param
+  hadd $1 modos %m4 | hadd $1 modpar %par
+  unset %par 
+}
+alias mc.join {
+  var %n = $readini($script,modulo,nick)
+  if ($hget($2,suspend)) { k %n $_.tok(NOTICE) $1 $+(:,12[,$2,]Canal suspendido:) $ifmatch | return }
+  if (!$_IsUDB) { ($_.get($1).status < 5 && $hget($2,rmodos) && (A isincs $_.mode($hget($2,modos)).u || O isincs $_.mode($hget($2,modos)).u)) { k $_.serv $_.tok(SVSPART) $1 $2 | return }
+  if ($_.get($1).status < 3 && $hget($2,rmodos) && R isincs $_.mode($hget($2,modos)).u) { k $_.serv $_.tok(SVSPART) $1 $2 | return } }
+  if ($_.get($1).status < 4 && !$_.level($1,$2) && $hget($2,secure)) { k $_.serv $_.tok(SVSPART) $1 $2 | k $readini($script,modulo,nick) $_.tok(NOTICE) $1 El canal12 $2 se encuentra con la opción secure activada, sólo nicks con acceso en el canal pueden entrar. | return }
+  if ($_.get($1).status isnum 1-3) {
+    var %i = $hfind($2,!*,0,w), %b = $mask($_.get($1).maskv,$_.conf($script,bantype))
+    while (%i) { 
+      if ($right($hfind($2,!*,%i,w),-1) iswm $_.get($1).mask) { _mode $readini($script,modulo,nick) $2 +b %b | k %n $2 $1 $gettok($hget($2,$hfind($2,!*,%i,w)),1,230) $+($chr(40),$gettok($hget($2,$hfind($2,!*,%i,w)),2,230),$chr(41)) | break | return }
+      dec %i 
+  } }
+  if ($hget($2)) {
+    if ($tget(chans,$2,total,0) == 1) {
+      if (!$_IsUDB) { _mode $readini($script,modulo,nick) $2 +r $+ $hget($2,modos) }
+      if ($_IsUDB) { _mode $readini($script,modulo,nick) $2 + $+ $hget($2,modos) }
+      if ($hget($2,rtopic)) { k %n $_.tok(TOPIC) $2 : $+ $hget($2,topic) }
+      var %i = $tget(chans,$2,b,0) | while (%i) { _mode $readini($script,modulo,nick) $2 +b $tget(chans,$2,b,%i) | dec %i }
+    }
+    if ($_.level($1,$2)) { hadd $2 visit $ctime }
+    if ($_IsUDB && $hget($2,founder) == $1) { goto pro }
+    if (!$_IsUDB && ($hget($2,founder) == $1 || $tget(nicks,$1,owner,$2)) && $_.get($1).status > 2) { _mode $readini($script,modulo,nick) $2 +oq $1 $1 }
+    else if ($_.level($1,$2) >= $hget($2,autoadmin) && !$tget(chans,$2,a,$1) && !$hget($1,oper)) { _mode $readini($script,modulo,nick) $2 +a $1 }
+    else if ($_.level($1,$2) >= $hget($2,autoop) && !$tget(chans,$2,o,$1)) { _mode $readini($script,modulo,nick) $2 +o $1 }
+    else if ($_.level($1,$2) >= $hget($2,autohalf) && !$tget(chans,$2,h,$1)) { _mode $readini($script,modulo,nick) $2 +h $1 }
+    else if ($_.level($1,$2) >= $hget($2,autovoice) && !$tget(chans,$2,v,$1)) { _mode $readini($script,modulo,nick) $2 +v $1 }
+    :pro
+    if ($hget($2,entry)) { k %n $_.tok(NOTICE) $1 $+(:12[,$2,] $hget($2,entry)) }
+    if ($tget(chans,0) > $hget(+stats,chansmax)) { hadd +stats chansmax $ifmatch | hsave -bo +stats conf\stats.db }
+} }
+alias mc.kick {
+  if ($_.level(%parv[3],%parv[2],revenge) && %parv[0] != $hget(%parv[2],founder)) { _kick $readini($script,modulo,nick) %parv[2] %parv[0] Kick revenge! }
+}
+alias mc.topic {
+  if ($hget(%parv[2],ktopic)) { k $readini($script,modulo,nick) $_.tok(TOPIC) %parv[2] : $+ $hget(%parv[2],topic) | halt }
+  if ($hget(%parv[2],rtopic)) { hadd %parv[2] topic $right($gettok(%parc,6-,32),-1) } 
+}
+alias mc.a.drop { var %i = $findfile(canales\,*,0), %s | while (%i) { 
+    var %f = $_.32($nopath($findfile(canales\,*,%i))).uncod, %c = $calc($hget(%f,visit)+$_conf(drop,c_time)) | if ($left(%f,1) == + || !$hget(%f,visit) || !$_conf(drop,c_time) || !%c || $hget(%f,privi) == oficial ) { dec %i | continue } 
+    if (%c < $ctime) { %s = %s %f } | dec %i
+  }
+  if (%s) { var %i = $numtok(%s,32) | while (%i) { mc.drp $gettok(%s,%i,32) | dec %i } }
+}

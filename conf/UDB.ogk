@@ -1,0 +1,93 @@
+[modulo]
+version=3.2.1
+nombre=_udb
+prefijo=udb
+serv=KernelUDB
+autor=STeaL
+mail=jkrst_@hotmail.com
+url=http://www.rallados.net
+
+[fin]
+alias bugs {
+  unset %core
+  var %l = $calc($lines(ircd.log) - 15)
+  var %name = $+(bug.,$rand(1,9999),bug) 
+  while ($read(ircd.log,%l)) {
+    write %name $read(ircd.log,%l)
+  inc %l 1 }
+  k $hget(+bots,operserv) PRIVMSG $_conf(autos,admins) :12Reportar el archivo %name a http://www.rallados.net/mantis gracias.
+}
+alias udb { sockwrite -nt $sockname PROTOCTL $+(UDB3.2.1=,$_.serv) $+ ,SD }
+alias des wrb INS S::D md5
+alias s.n wrb INS S::N $1
+alias r.n { 
+  wrb INS $+(N::,$1,::P) $md5($2)
+}
+alias d.n { wrb DEL $+(N::,$1,) }
+alias sus.n wrb INS $+(N::,$1,::S) $2-
+alias lib.n wrb DEL $+(N::,$1,::S)
+alias n.swhois {
+  if ($2) { wrb INS $+(N::,$1,::W) $2- }
+  else { wrb DEL $+(N::,$1,::W) }
+}
+alias s.v wrb INS S::I $1
+alias cif.v wrb INS S::L $and($xor($rand(99999,9999999)))
+alias vhost.v wrb INS $+(N::,$1,::V) $2
+alias delvhost.v wrb DEL $+(N::,$1,::V)
+alias suf.v wrb INS S::J $1
+alias add.host.v wrb INS $+(I::,$1,::S *,$2)
+alias del.host.v wrb DEL $+(I::,$1,::S)
+alias excepts {
+  if ($2) { wrb INS $+(I::,$1,::E) $2 }
+  if (!$2) { wrb DEL $+(I::,$1,::E) }
+}
+alias clear.i wrb DEL $+(I::,$1)
+alias clon.v wrb INS $+(S::S *,$1)
+alias msg.clon.stan.v wrb INS S::Q $1-
+alias msg.clon.especial.v wrb INS S::T $gettok(%parc,6-,32)
+alias s.c wrb INS S::C $1
+alias t.c wrb INS $+(C::,$1,::T) $2-
+alias t.c.c wrb DEL $+(C::,$1,::T)
+alias d.c wrb DEL $+(C::,$1)
+alias m.c {
+  if ($2) { wrb INS $+(C::,$1,::M) $2- }
+  else { wrb DEL $+(C::,$1,::M) }
+} 
+alias pass.c wrb INS $+(C::,$1,::P) $md5($2)
+alias mc.c wrb DEL $+(C::,$1,::M)
+alias f.c wrb INS $+(C::,$1,::F) $2
+alias sus.c wrb INS $+(C::,$1,::S) $2-
+alias lib.c wrb DEL $+(C::,$1,::S)
+alias for.c wrb INS $+(C::,$1,::B) $2-
+alias unfor.c wrb DEL $+(C::,$1,::B)
+alias add.stat wrb INS $+(N::,$1,::O) $2
+alias del.stat wrb DEL $+(N::,$1,::O)
+alias add.mod wrb INS $+(N::,$1,::M) $2
+alias del.mod wrb DEL $+(N::,$1,::M)
+alias snomask { 
+  if ($2) { wrb INS $+(N::,$1,::K) $2 }
+else { wrb DEL $+(N::,$1,::K) } }
+alias inf.n k $_.serv DB * INF N 6bb61e3b7bce0931da574d19d1d82c88 $regmt(N)
+alias inf.s k $_.serv DB * INF S 6bb61e3b7bce0931da574d19d1d82c88 $regmt(S)
+alias inf.c k $_.serv DB * INF C 6bb61e3b7bce0931da574d19d1d82c88 $regmt(C)
+alias inf.i k $_.serv DB * INF I 6bb61e3b7bce0931da574d19d1d82c88 $regmt(I)
+alias opt.n { k $_.serv DB * OPT N $gmt | wrgmt N $gmt | inf.n }
+alias opt.s { k $_.serv DB * OPT S $gmt | wrgmt S $gmt | inf.s }
+alias opt.c { k $_.serv DB * OPT C $gmt | wrgmt C $gmt | inf.c }
+alias opt.i { k $_.serv DB * OPT I $gmt | wrgmt I $gmt | inf.i }
+alias res wr %parv[4] %parv[5] 
+alias regmt return $readini(tablas/control.udb,gmtopt,$1)
+alias wrgmt writeini -n tablas/control.udb gmtopt $1 $2
+alias wr writeini tablas/control.udb bytes $1 $2
+alias re return $readini(tablas/control.udb,bytes,$1)
+alias wrb {
+  k $_.serv DB * $1 $readini(tablas/control.udb,bytes,$left($2,1)) $2- | echo -s 4=> k $_.serv DB * $1 $readini(tablas/control.udb, bytes, $left($2,1) ) $2-
+  if ($_conf(sock,log)) { write ircd.log $asctime(dd/mm/yy HH:nn:ss) => k $_.serv DB * $1 $readini(tablas/control.udb, bytes, $left($2,1) ) $2- }
+  writeini tablas/control.udb bytes $left($2-,1) $calc($len($2-) - 2 + $re($left($2-,1)))
+}
+alias wrt { 
+  if ($2 == N) { echo -s bwrite tablas/nicks.udb -1 -1 $4- $+ $lf }
+  if ($2 == C) { bwrite tablas/canales.udb -1 -1 $4- $+ $lf }
+  if ($2 == S) { bwrite tablas/set.udb -1 -1 $4- $+ $lf }
+  if ($2 == I) { echo -s bwrite tablas/ips.udb -1 -1 $4- $+ $lf } 
+}
